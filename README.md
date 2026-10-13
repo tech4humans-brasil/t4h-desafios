@@ -1,39 +1,33 @@
-# TechLab CEU - Desafios Técnicos
+# Desafios Técnicos - Tech for Humans
 
-Este repositório contém os desafios técnicos para os candidatos do TechLab CEU. Aqui você encontrará os enunciados e materiais necessários para cada área de atuação.
+Este repositório reúne os desafios técnicos usados nas vagas e processos seletivos da Tech for Humans. Cada projeto tem sua própria pasta, com os enunciados, os materiais de apoio e um README próprio.
 
-## Estrutura do Projeto
+## Projetos
 
-O repositório está organizado em duas pastas principais, cada uma contendo os desafios específicos para diferentes áreas:
+| Projeto | Descrição | Áreas |
+| --- | --- | --- |
+| [TechLab CEU 2025](Techlab%20-%20CEU%202025/) | Desafios para os candidatos do TechLab CEU 2025 | DevOps, Low Code, WebApp |
 
-### 1. Agent (DevOps)
-Esta pasta contém os desafios relacionados à área de DevOps, incluindo:
-- `Desafio DevOps.pdf`: Enunciado do desafio técnico para DevOps
-- `Planilhas/`: Diretório com materiais de suporte para o desafio
+## Estrutura
 
-### 2. Low Code (Process Automation)
-Esta pasta contém os desafios relacionados à área de Automação de Processos, incluindo:
-- `Desafio Automação.pdf`: Enunciado do desafio de automação
-- `Desafio Técnico.pdf`: Enunciado do desafio técnico principal
-- `Tutorial Streamline.pdf`: Material de suporte com tutorial sobre a ferramenta Streamline
-
-### 3. Finanças (WebApp)
-Esta pasta contém os desafios relacionados ao WebApp, incluindo:
-- `Desafio WebApp.pdf`: Enunciado do desafio de WebApp
-- `Apresentação.pdf`: Apresentação feita no Workshop com as tecnologias usadas no desenvolvimento do WebApp
+```
+.
+├── README.md                  # este índice
+└── <Projeto>/
+    ├── README.md              # visão geral e instruções do projeto
+    └── <Área ou desafio>/     # enunciados e materiais de apoio
+```
 
 ## Como Utilizar
 
-1. Navegue até a pasta correspondente à sua área de atuação
-2. Leia atentamente o enunciado do desafio
-3. Consulte os materiais de suporte disponíveis
-4. Desenvolva sua solução seguindo as instruções fornecidas
+1. Escolha o projeto do qual você está participando na tabela acima
+2. Siga as instruções do README dentro da pasta do projeto
 
-## Observações Importantes
+## Adicionando um novo projeto
 
-- Certifique-se de ler todos os requisitos e instruções antes de começar
-- Mantenha-se dentro dos prazos estabelecidos
-- Em caso de dúvidas, consulte a documentação fornecida
-- Siga as melhores práticas de desenvolvimento para sua área
+Para quem mantém o repositório: abra a pasta no Claude Code e use as skills do repositório.
 
-Boa sorte no seu desafio!
+- `/novo-projeto-desafio`: cadastra um processo seletivo ou uma vaga nova
+- `/adicionar-desafio`: inclui uma área ou um material em um projeto existente
+
+As convenções de pastas, nomes, conteúdo permitido e PR estão em [`.claude/rules/`](.claude/rules/). Este repositório é **público**: nunca publique gabarito, dados pessoais reais, dados de clientes ou segredos.
