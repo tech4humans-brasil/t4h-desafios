@@ -1,0 +1,71 @@
+name: desafio-performance
+
+services:
+  banco:
+    image: postgres:16.4
+    shm_size: 256mb
+    environment:
+      POSTGRES_USER: loja
+      POSTGRES_DB: loja
+      # Banco local de estudo, acessível só pela sua máquina (127.0.0.1): dispensa senha.
+      POSTGRES_HOST_AUTH_METHOD: trust
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - dados-banco:/var/lib/postgresql/data
+      - ./banco:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "loja", "-d", "loja"]
+      interval: 5s
+      timeout: 3s
+      retries: 120
+      start_period: 600s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+  api:
+    build: ./api
+    environment:
+      PORT: 3000
+      DB_HOST: banco
+      DB_PORT: 5432
+      DB_USER: loja
+      DB_NAME: loja
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      banco:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  # Ferramentas: só rodam quando chamadas (scripts/medir.sh e scripts/verificar-contrato.sh).
+  carga:
+    image: grafana/k6:0.54.0
+    profiles: ["ferramentas"]
+    environment:
+      URL_BASE: http://api:3000
+    volumes:
+      - ./carga:/carga:ro
+      - ./resultados:/resultados
+
+  contrato:
+    image: node:20.18.0-alpine
+    profiles: ["ferramentas"]
+    working_dir: /contrato
+    environment:
+      URL_BASE: http://api:3000
+    volumes:
+      - ./contrato:/contrato
+    entrypoint: ["node", "verificar.js"]
+
+volumes:
+  dados-banco:
