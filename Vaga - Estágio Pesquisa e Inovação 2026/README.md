@@ -7,8 +7,6 @@ A aplicação é a API de uma loja fictícia, em Node.js (Express) com PostgreSQ
 ## Prazo e entrega
 
 - **Prazo:** 14 dias corridos a partir da largada
-- **Como entregar:** A definir
-- **Dúvidas:** A definir
 
 ## Estrutura
 
