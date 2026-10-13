@@ -6,6 +6,7 @@ Este repositório reúne os desafios técnicos usados nas vagas e processos sele
 
 | Projeto | Descrição | Áreas |
 | --- | --- | --- |
+| [Vaga Estágio Pesquisa e Inovação 2026](Vaga%20-%20Est%C3%A1gio%20Pesquisa%20e%20Inova%C3%A7%C3%A3o%202026/) | Desafio de seleção para o estágio em Pesquisa e Inovação: melhorar uma aplicação lenta com pesquisa e medição | Performance (API e PostgreSQL) |
 | [TechLab CEU 2025](Techlab%20-%20CEU%202025/) | Desafios para os candidatos do TechLab CEU 2025 | DevOps, Low Code, WebApp |
 
 ## Estrutura

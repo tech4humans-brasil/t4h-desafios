@@ -1,0 +1,14 @@
+{
+  "name": "loja-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API da loja usada no desafio de performance",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "4.21.1",
+    "pg": "8.13.1"
+  }
+}
