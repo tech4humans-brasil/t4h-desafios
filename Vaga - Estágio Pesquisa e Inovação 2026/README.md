@@ -1,20 +1,17 @@
 # Vaga Estágio Pesquisa e Inovação 2026 - Desafios Técnicos
 
-Desafio de seleção para a vaga de estágio em Pesquisa e Inovação da Tech for Humans. Você recebe uma aplicação lenta, pesquisa o estado da arte, melhora a aplicação com evidência e entrega um artigo e um vídeo explicando por que chegou nessa solução. O enunciado completo, com as entregas e os critérios de avaliação, está em [`Desafio Performance.pdf`](Desafio%20Performance.pdf).
+Desafio de seleção para a vaga de estágio em Pesquisa e Inovação da Tech for Humans. Você recebe uma aplicação lenta, pesquisa o estado da arte, melhora a aplicação com evidência e entrega um artigo, um repositório e um vídeo explicando por que chegou nessa solução. O enunciado completo, com as entregas e os critérios de avaliação, é enviado por e-mail na largada.
 
 A aplicação é a API de uma loja fictícia, em Node.js (Express) com PostgreSQL 16, rodando em containers. Ela funciona, mas fica lenta sob carga e gasta mais recursos do que deveria. Todos os dados são sintéticos e gerados na primeira subida: 100 mil clientes, 20 mil produtos, 500 mil pedidos e 1,5 milhão de itens de pedido.
 
 ## Prazo e entrega
 
 - **Prazo:** 14 dias corridos a partir da largada
-- **Como entregar:** A definir
-- **Dúvidas:** A definir
 
 ## Estrutura
 
 ```
 Vaga - Estágio Pesquisa e Inovação 2026/
-├── Desafio Performance.pdf    # enunciado
 ├── docker-compose.yml         # API, banco e as ferramentas de medição
 ├── api/                       # código da API (Express + pg) e Dockerfile
 ├── banco/                     # scripts que criam as tabelas e geram os dados
@@ -93,6 +90,7 @@ O script faz um aquecimento de 15 segundos, que não entra no resultado, e depoi
 | `recursos.txt` | CPU e memória, média e máximo, de cada container durante a carga |
 | `recursos.csv` | As amostras de CPU e memória usadas no `recursos.txt` |
 | `contexto.txt` | Parâmetros da medição, commit e limites dos containers |
+| `contrato.txt` | Saída do verificador de contrato, rodado logo depois da carga. A última linha diz se o contrato foi mantido |
 | `resumo-k6.json` | Todas as métricas do k6 |
 
 **3. Para cada mudança:**
@@ -151,6 +149,6 @@ Tudo o que você fizer direto no `psql` se perde quando o banco é apagado. Para
 
 - Leia o enunciado inteiro antes de começar
 - Mantenha-se dentro do prazo
-- Em caso de dúvidas, use o canal indicado em [Prazo e entrega](#prazo-e-entrega)
+- Em caso de dúvidas, use o canal combinado na largada
 
 Boa sorte no seu desafio!
