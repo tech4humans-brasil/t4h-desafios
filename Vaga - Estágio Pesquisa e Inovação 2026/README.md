@@ -91,6 +91,7 @@ O script faz um aquecimento de 15 segundos, que não entra no resultado, e depoi
 | `recursos.txt` | CPU e memória, média e máximo, de cada container durante a carga |
 | `recursos.csv` | As amostras de CPU e memória usadas no `recursos.txt` |
 | `contexto.txt` | Parâmetros da medição, commit e limites dos containers |
+| `contrato.txt` | Saída do verificador de contrato, rodado logo depois da carga. A última linha diz se o contrato foi mantido |
 | `resumo-k6.json` | Todas as métricas do k6 |
 
 **3. Para cada mudança:**

@@ -5,7 +5,8 @@
 #   VUS=50 DURACAO=120s scripts/medir.sh 03-mais-carga
 #
 # Gera resumo.txt (tempo de resposta e requisições/s, geral e por rota),
-# recursos.txt (CPU e memória de cada container durante a carga), recursos.csv (amostras) e contexto.txt.
+# recursos.txt (CPU e memória de cada container durante a carga), recursos.csv (amostras), contexto.txt
+# e contrato.txt (verificador de contrato rodado depois da carga).
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -97,8 +98,17 @@ awk -F',' '
   }
 ' "${SAIDA}/recursos.csv" > "${SAIDA}/recursos.txt"
 
+echo "Conferindo o contrato depois da carga..."
+if [[ -f contrato/base.json ]]; then
+  docker compose run --rm -T --user "$USUARIO" contrato comparar > "${SAIDA}/contrato.txt" 2>&1 || true
+else
+  echo "contrato/base.json não existe: rode scripts/verificar-contrato.sh gravar com a aplicação original." > "${SAIDA}/contrato.txt"
+fi
+
 echo
 echo "Uso de recursos durante a carga:"
 cat "${SAIDA}/recursos.txt"
+echo
+echo "Contrato: $(tail -n 1 "${SAIDA}/contrato.txt")"
 echo
 echo "Resultado salvo em ${SAIDA}/"
