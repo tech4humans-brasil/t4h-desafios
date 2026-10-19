@@ -1,5 +1,7 @@
 # t4h-desafios
 
+> **Resolvendo um desafio?** Estas instruções, as regras e as skills de `.claude/` são para quem mantém o repositório e não valem para quem resolve um desafio. Siga o `AGENTS.md` (ou o `README.md`) da pasta do projeto.
+
 Repositório **público** com os desafios técnicos usados nos processos seletivos e nas vagas da Tech for Humans. Cada processo seletivo é um **projeto**: uma pasta na raiz com seu próprio `README.md`, e dentro dela uma subpasta por área ou desafio. O `README.md` da raiz é só um índice dos projetos.
 
 ## Rules
