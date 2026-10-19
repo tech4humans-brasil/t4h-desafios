@@ -3,9 +3,10 @@
 #
 #   scripts/medir.sh <rotulo>              ex.: scripts/medir.sh 00-linha-de-base
 #   VUS=50 DURACAO=120s scripts/medir.sh 03-mais-carga
+#   Variáveis: VUS, DURACAO, AQUECIMENTO, SEMENTE e PORTA_API (porta da API na sua máquina).
 #
 # Gera resumo.txt (tempo de resposta e requisições/s, geral e por rota),
-# recursos.txt (CPU e memória de cada container durante a carga), recursos.csv (amostras), contexto.txt
+# recursos.txt (CPU e memória de cada serviço do compose durante a carga), recursos.csv (amostras), contexto.txt
 # e contrato.txt (verificador de contrato rodado depois da carga).
 
 set -euo pipefail
@@ -20,16 +21,28 @@ fi
 VUS="${VUS:-20}"
 DURACAO="${DURACAO:-60s}"
 AQUECIMENTO="${AQUECIMENTO:-15s}"
+SEMENTE="${SEMENTE:-42}"
+# Porta da API na sua máquina. A carga e o contrato falam com a API pela rede interna e não dependem dela.
+PORTA_API="${PORTA_API:-3000}"
 PASTA="$(date +%Y%m%d-%H%M%S)-${ROTULO}"
 SAIDA="resultados/${PASTA}"
 USUARIO="$(id -u):$(id -g)"
 
-if ! curl -fsS http://127.0.0.1:3000/saude >/dev/null 2>&1; then
-  echo "A API não respondeu em http://127.0.0.1:3000/saude. Suba tudo com: docker compose up -d --build" >&2
+if [[ ! "$SEMENTE" =~ ^[0-9]+$ ]]; then
+  echo "SEMENTE precisa ser um número inteiro (padrão 42)." >&2
+  exit 2
+fi
+
+if ! curl -fsS "http://127.0.0.1:${PORTA_API}/saude" >/dev/null 2>&1; then
+  echo "A API não respondeu em http://127.0.0.1:${PORTA_API}/saude. Suba tudo com: docker compose up -d --build" >&2
   exit 1
 fi
 
 mkdir -p "$SAIDA"
+
+# Todos os serviços do docker-compose.yml, menos as ferramentas (perfil "ferramentas").
+# Um serviço novo (ex.: cache) entra na coleta de CPU e memória sem mudar este script.
+SERVICOS="$(docker compose config --services | tr '\n' ' ')"
 
 {
   echo "rotulo: ${ROTULO}"
@@ -37,23 +50,30 @@ mkdir -p "$SAIDA"
   echo "vus: ${VUS}"
   echo "duracao: ${DURACAO}"
   echo "aquecimento: ${AQUECIMENTO}"
+  echo "semente: ${SEMENTE}"
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     echo "commit: $(git rev-parse --short HEAD)"
-    echo "arquivos alterados sem commit: $(git status --porcelain -- . | wc -l | tr -d ' ')"
+    echo "arquivos alterados sem commit: $(git status --porcelain -- . ':(exclude)resultados' | wc -l | tr -d ' ')"
   fi
   echo
   echo "limites dos containers:"
-  for servico in api banco; do
+  for servico in $SERVICOS; do
     id="$(docker compose ps -q "$servico")"
-    docker inspect --format "  ${servico}: cpus={{.HostConfig.NanoCpus}} (1e9 = 1 CPU) memoria={{.HostConfig.Memory}} bytes" "$id"
+    if [[ -z "$id" ]]; then
+      echo "  ${servico}: não está rodando"
+      continue
+    fi
+    docker inspect --format "  ${servico}: cpus={{.HostConfig.NanoCpus}} (1e9 = 1 CPU, 0 = sem limite) memoria={{.HostConfig.Memory}} bytes (0 = sem limite)" "$id"
   done
 } > "${SAIDA}/contexto.txt"
 
 echo "Aquecendo por ${AQUECIMENTO} (não entra na medição)..."
-docker compose run --rm --user "$USUARIO" -e VUS=5 -e DURACAO="$AQUECIMENTO" \
+# O aquecimento usa outra semente para não pedir de antemão as mesmas URLs da medição.
+docker compose run --rm --user "$USUARIO" -e VUS=5 -e DURACAO="$AQUECIMENTO" -e SEMENTE="$((SEMENTE + 1))" \
   carga run --quiet --no-summary /carga/teste-carga.js >/dev/null
 
-IDS="$(docker compose ps -q api banco | tr '\n' ' ')"
+# shellcheck disable=SC2086
+IDS="$(docker compose ps -q $SERVICOS | tr '\n' ' ')"
 echo "momento,container,cpu_percentual,memoria" > "${SAIDA}/recursos.csv"
 (
   while true; do
@@ -67,7 +87,7 @@ COLETOR=$!
 trap 'kill "$COLETOR" 2>/dev/null || true' EXIT
 
 echo "Medindo: ${VUS} usuários virtuais por ${DURACAO}..."
-docker compose run --rm --user "$USUARIO" -e VUS="$VUS" -e DURACAO="$DURACAO" -e ROTULO="$ROTULO" \
+docker compose run --rm --user "$USUARIO" -e VUS="$VUS" -e DURACAO="$DURACAO" -e SEMENTE="$SEMENTE" -e ROTULO="$ROTULO" \
   -e SAIDA="/resultados/${PASTA}" carga run --quiet /carga/teste-carga.js
 
 kill "$COLETOR" 2>/dev/null || true
