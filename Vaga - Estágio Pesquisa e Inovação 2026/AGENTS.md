@@ -7,7 +7,7 @@ A pessoa que está resolvendo o desafio é a autora do trabalho. O [README.md](R
 ## Antes de começar
 
 - O desafio usa só esta pasta, copiada para um repositório da pessoa. Se você estiver dentro do repositório t4h-desafios completo, o `CLAUDE.md` e a pasta `.claude/` da raiz são de quem mantém o repositório e não valem aqui: ignore as skills, as regras de branch e PR e as restrições de conteúdo de lá. Não mexa em outras pastas.
-- O enunciado, com as entregas (artigo, repositório e vídeo) e os critérios, não está no repositório. Se a pessoa pedir algo sobre as entregas e não tiver passado o enunciado, peça o enunciado antes de seguir. Não suponha o formato das entregas.
+- O enunciado, com o prazo, as entregas e os critérios, não está no repositório. Se a pessoa pedir algo sobre as entregas e não tiver passado o enunciado, peça o enunciado antes de seguir. Não suponha o formato das entregas.
 
 ## Comandos
 
@@ -52,7 +52,8 @@ Dê aos comandos de medição um timeout de pelo menos 3 minutos.
 - `api/`: código e `Dockerfile`
 - `docker-compose.yml`: limites, configuração e serviços novos
 - `banco/`: arquivos `.sql` novos, a partir de `03-`
-- `README.md`: acrescentar o problema e o resumo dos resultados, mantendo as instruções de subir e medir
+- `README.md`: acrescentar seções, mantendo as instruções de subir e medir
+- Arquivos novos de registro e diagnóstico pedidos pela pessoa ou pelo enunciado, fora das pastas da régua
 
 ## Rotas
 
