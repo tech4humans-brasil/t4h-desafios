@@ -1,13 +1,13 @@
 # Vaga Estágio Pesquisa e Inovação 2026 - Desafios Técnicos
 
-Desafio de seleção para a vaga de estágio em Pesquisa e Inovação da Tech for Humans. Você recebe uma aplicação lenta, pesquisa o estado da arte, melhora a aplicação com evidência e entrega um artigo, um repositório e um vídeo explicando por que chegou nessa solução. O enunciado completo, com as entregas e os critérios de avaliação, é enviado na largada. Este README cobre só como rodar e medir a aplicação.
+Aplicação do desafio técnico da vaga de estágio em Pesquisa e Inovação da Tech for Humans. O enunciado, com a missão, as entregas e os critérios de avaliação, é enviado na largada. Este README cobre só como instalar, rodar e medir a aplicação, e é a referência de todos os comandos.
 
 A aplicação é a API de uma loja fictícia, em Node.js (Express) com PostgreSQL 16, rodando em containers. Ela funciona, mas fica lenta sob carga e gasta mais recursos do que deveria. Todos os dados são sintéticos e gerados na primeira subida: 100 mil clientes, 20 mil produtos, 500 mil pedidos e 1,5 milhão de itens de pedido.
 
 ## Prazo e entrega
 
-- **Prazo:** 14 dias corridos a partir da largada
-- **Entrega:** artigo, repositório e vídeo, enviados pelo formulário indicado no enunciado
+- **Prazo e entregas:** estão no enunciado enviado na largada
+- **Dúvidas:** no canal combinado na largada
 
 ## Estrutura
 
@@ -103,9 +103,9 @@ No Windows, rode isto dentro do Ubuntu e deixe os arquivos na sua pasta pessoal 
 ```bash
 cd ~
 git clone https://github.com/tech4humans-brasil/t4h-desafios.git
-mkdir meu-desafio-performance
-cp -R "t4h-desafios/Vaga - Estágio Pesquisa e Inovação 2026/." meu-desafio-performance/
-cd meu-desafio-performance
+mkdir meu-desafio
+cp -R "t4h-desafios/Vaga - Estágio Pesquisa e Inovação 2026/." meu-desafio/
+cd meu-desafio
 
 git init -b main
 git add .
@@ -113,7 +113,7 @@ git commit -m "chore: estado original do desafio"
 ls        # deve mostrar AGENTS.md, CLAUDE.md, README.md, api, banco, carga, contrato, docker-compose.yml, resultados, scripts
 ```
 
-A partir daqui, todos os comandos rodam dentro de `meu-desafio-performance` (o nome é livre). A pasta `t4h-desafios` pode ser apagada.
+A partir daqui, todos os comandos rodam dentro de `meu-desafio`. A pasta `t4h-desafios` pode ser apagada.
 
 Para publicar no GitHub, crie um repositório público vazio (sem README) e siga [Adicionar código local ao GitHub](https://docs.github.com/pt/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github). Os comandos são estes, trocando `SEU-USUARIO` e `SEU-REPO`:
 
@@ -188,9 +188,13 @@ git add contrato/base.json
 git commit -m "chore: grava contrato da aplicação original"
 
 scripts/medir.sh 00-linha-de-base
+scripts/medir.sh 00-linha-de-base
+scripts/medir.sh 00-linha-de-base
+git add resultados
+git commit -m "chore: medições da linha de base"
 ```
 
-O primeiro comando salva as respostas da aplicação original para comparar depois. O segundo mede o desempenho dela e termina em cerca de 1 min 30 s, mostrando onde salvou o resultado. Leia o `resumo.txt` dessa pasta com `cat resultados/<pasta>/resumo.txt`. O que cada arquivo significa e como seguir a partir daí está em [Como medir](#como-medir).
+O primeiro comando salva as respostas da aplicação original para comparar depois. Cada `medir.sh` mede o desempenho dela, leva cerca de 1 min 30 s e mostra onde salvou o resultado: uma pasta nova em `resultados/` por execução. As três execuções são o seu **antes**. Leia os números com `cat resultados/*-00-linha-de-base/resumo.txt`. O que cada arquivo significa e como seguir a partir daí está em [Como medir](#como-medir).
 
 ### 8. Parar e voltar depois
 
@@ -268,13 +272,15 @@ scripts/verificar-contrato.sh gravar
 
 Ele chama 42 casos de teste e salva as respostas da aplicação original em `contrato/base.json`. Faça commit desse arquivo antes de qualquer mudança.
 
-**2. Meça a linha de base:**
+**2. Meça a linha de base, três vezes:**
 
 ```bash
-scripts/medir.sh 00-linha-de-base
+scripts/medir.sh 00-linha-de-base     # repita mais duas vezes, com o mesmo rótulo
 ```
 
-O script faz um aquecimento de 15 segundos, que não entra no resultado, e depois roda 20 usuários virtuais por 60 segundos, cada um fazendo requisições em sequência, sem pausa. Enquanto isso, coleta o uso de CPU e memória dos containers. Cada medição leva cerca de 1 min 30 s. O resultado vai para `resultados/<data>-<rotulo>/`:
+O rótulo dá nome à medição: um número e o que mudou, só com letras, números, ponto, hífen ou sublinhado. Exemplos: `00-linha-de-base`, `01-<o-que-mudou>`.
+
+O script confere se a API está no ar, faz um aquecimento de 15 segundos, que não entra no resultado, e depois roda 20 usuários virtuais por 60 segundos, cada um fazendo requisições em sequência, sem pausa. Enquanto isso, coleta o uso de CPU e memória dos containers. No fim, roda o verificador de contrato e mostra um resumo na tela. Cada medição leva cerca de 1 min 30 s e cria uma pasta nova `resultados/<data>-<hora>-<rotulo>/`, por exemplo `resultados/20261105-143012-00-linha-de-base/`. Nada é sobrescrito: três execuções com o mesmo rótulo geram três pastas.
 
 | Arquivo | Conteúdo |
 | --- | --- |
@@ -285,7 +291,7 @@ O script faz um aquecimento de 15 segundos, que não entra no resultado, e depoi
 | `contrato.txt` | Saída do verificador de contrato, rodado logo depois da carga. A última linha diz se o contrato foi mantido |
 | `resumo-k6.json` | Todas as métricas do k6 |
 
-Commite a linha de base antes da primeira mudança.
+Não edite esses arquivos. Commite as pastas da linha de base antes da primeira mudança.
 
 **3. Para cada mudança:**
 
@@ -317,6 +323,29 @@ Exemplo: `VUS=50 DURACAO=120s scripts/medir.sh 05-carga-maior`
 
 Na linha de base, algumas rotas são tão lentas que têm poucas requisições em 60 segundos. Nelas, os números por rota oscilam muito: use o resultado geral, ou aumente `DURACAO` em todas as medições.
 
+**Encontrar as medições depois:**
+
+```bash
+ls resultados/                                 # todas as medições, por ordem de data
+ls -d resultados/*-00-linha-de-base            # as execuções de um rótulo
+cat resultados/*-00-linha-de-base/resumo.txt   # os números de todas elas
+cat resultados/<pasta>/contexto.txt            # o commit e os parâmetros da medição
+```
+
+O `contexto.txt` registra o commit medido, então dá para saber qual versão do código gerou cada número.
+
+**Medir o antes de novo:** se você trocar de máquina ou mudar os parâmetros da carga, as medições antigas deixam de ser comparáveis. Volte ao commit da linha de base (está no `contexto.txt` dela), recrie o banco e meça de novo:
+
+```bash
+git switch --detach <commit-da-linha-de-base>
+docker compose down -v && docker compose up -d --build
+scripts/medir.sh 00-linha-de-base     # três vezes
+git switch main
+docker compose down -v && docker compose up -d --build
+```
+
+As pastas novas em `resultados/` continuam lá quando você volta para a `main`. Depois, meça de novo também as mudanças que for comparar com esse antes.
+
 ## Acessar o banco
 
 ```bash
@@ -346,12 +375,11 @@ docker compose up -d --build
 
 Tudo o que você fizer direto no `psql` se perde quando o banco é apagado. Para que outra pessoa consiga repetir o seu experimento, registre essas mudanças em um arquivo `.sql` dentro de `banco/`. Os arquivos dessa pasta rodam em ordem alfabética, só quando o banco é criado do zero.
 
-## Entregar o experimento
+## Guardar o experimento no repositório
 
-1. Copie só esta pasta para a raiz de um repositório público seu, como no [passo 4](#4-criar-a-sua-cópia-do-desafio). O resto do t4h-desafios é de outros processos seletivos e não faz parte do teste.
+1. Trabalhe numa cópia só desta pasta, num repositório seu, como no [passo 4](#4-criar-a-sua-cópia-do-desafio). O resto do t4h-desafios é de outros processos seletivos.
 2. Faça commit das suas mudanças, do `contrato/base.json` e das pastas de `resultados/`, sem editar os arquivos gerados. Faça um commit por mudança, seguido do commit com os resultados dela.
-3. Acrescente a este README uma seção com o problema e o resumo dos seus resultados. Mantenha as instruções de subir e medir, para que outra pessoa consiga repetir.
-4. Coloque o link do repositório no artigo.
+3. Se mexer neste README, mantenha as instruções de subir e medir, para que outra pessoa consiga repetir o experimento.
 
 ## Usar um agente de IA
 
