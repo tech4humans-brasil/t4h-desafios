@@ -68,6 +68,14 @@
   .filtros button { border: 1px solid var(--borda); background: var(--cartao); color: var(--texto); border-radius: 99px; padding: 2px 10px; font: inherit; font-size: 12px; cursor: pointer; }
   .filtros button.ativo { background: var(--texto); color: var(--fundo); }
   .vazio { color: var(--suave); padding: 12px; text-align: center; }
+  .botao { border: 1px solid var(--borda); background: var(--cartao); color: var(--texto); border-radius: 6px; padding: 2px 10px; font: inherit; font-size: 12px; cursor: pointer; text-transform: none; letter-spacing: 0; }
+  #form-evento { display: none; padding: 8px; border-bottom: 1px solid var(--borda); gap: 6px; flex-direction: column; }
+  #form-evento.aberto { display: flex; }
+  #form-evento input, #form-evento textarea { font: inherit; padding: 4px 6px; border: 1px solid var(--borda); border-radius: 6px; background: var(--fundo); color: var(--texto); }
+  .selo { font-size: 10.5px; font-weight: 700; padding: 0 6px; border-radius: 99px; background: var(--conversa-fundo); color: var(--conversa); }
+  .agentes { padding: 8px; border-bottom: 1px solid var(--borda); display: flex; flex-direction: column; gap: 4px; }
+  .agente-linha { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+  a { color: var(--info); }
 </style>
 </head>
 <body>
@@ -77,10 +85,18 @@
   <div class="barra"><div id="progresso"></div></div>
   <span class="pilula" id="situacao">Aguardando o primeiro agente</span>
   <span id="contadores" class="hora"></span>
+  <a href="/legado" target="_blank">Sistemas legados (só tela)</a>
 </header>
 <main>
   <section>
-    <h2>Caixa de entrada <span id="total-caixa"></span></h2>
+    <h2>Caixa de entrada <span><span id="total-caixa"></span> <button class="botao" id="abrir-form">+ Novo evento</button></span></h2>
+    <form id="form-evento">
+      <input name="de" placeholder="De (e-mail), opcional">
+      <input name="nome" placeholder="Nome, opcional">
+      <input name="assunto" placeholder="Assunto" required>
+      <textarea name="corpo" rows="3" placeholder="Mensagem" required></textarea>
+      <button class="botao" type="submit">Enviar para o time de agentes</button>
+    </form>
     <div class="lista" id="caixa"><div class="vazio">Nenhum pedido ainda.</div></div>
   </section>
   <section>
@@ -90,6 +106,7 @@
   </section>
   <section>
     <h2>O mundo</h2>
+    <div class="agentes" id="agentes"><div class="hora">Nenhum agente chamou ainda.</div></div>
     <div class="grade" id="indicadores"></div>
     <div class="lista" id="alertas"><div class="vazio">Nada aconteceu ainda.</div></div>
   </section>
@@ -105,7 +122,7 @@ document.addEventListener("toggle", (e) => {
   if (el.classList && el.classList.contains("pedido")) el.open ? abertos.add(el.dataset.id) : abertos.delete(el.dataset.id);
 }, true);
 const agentesVistos = new Set();
-const FEITOS = ["respondido", "chamado aberto", "duplicado", "encaminhado", "incidente aberto", "escalado"];
+const NAO_FEITOS = ["novo", "lido"];
 
 function renderFiltros() {
   const botoes = [`<button class="${filtro ? "" : "ativo"}" data-a="">todos</button>`]
@@ -129,12 +146,13 @@ function cartaoEvento(ev) {
     el.innerHTML = `<div class="linha"><span class="hora">${hora(ev.agora)}</span><span class="agente">${esc(ev.de)} → ${esc(ev.para)}</span></div><div>${esc(ev.mensagem)}</div>`;
     agentesVistos.add(ev.de);
   } else if (ev.tipo === "chamada") {
-    if (ev.ferramenta === "proximo_pedido" && ev.resultado === "ok" && !ev.resposta.pedido) return null;
+    if (ev.ferramenta === "proximo_evento" && ev.resultado === "ok" && !ev.resposta.evento) return null;
     el.className = "evento " + (ev.resultado === "ok" ? "ok" : "erro");
     el.dataset.agente = ev.agente;
     const codigo = ev.resultado === "ok" ? "" : `<span class="codigo">${esc(ev.codigo)}${ev.falha ? " · falha simulada" : ""}</span>`;
     const lento = ev.falha === "lento" ? `<span class="hora">lento · ${Math.round(ev.duracao_ms / 1000)} s</span>` : "";
-    el.innerHTML = `<div class="linha"><span class="hora">${hora(ev.agora)}</span><span class="agente">${esc(ev.agente || "sem agente")}</span><span class="ferramenta">${esc(ev.ferramenta)}</span>${codigo}${lento}</div>`
+    const tela = ev.via === "tela" ? '<span class="selo">pela tela</span>' : "";
+    el.innerHTML = `<div class="linha"><span class="hora">${hora(ev.agora)}</span><span class="agente">${esc(ev.agente || "sem agente")}</span><span class="ferramenta">${esc(ev.ferramenta)}</span>${tela}${codigo}${lento}</div>`
       + (ev.motivo ? `<div class="motivo">${esc(ev.motivo)}</div>` : "")
       + `<details><summary>argumentos e resposta</summary><pre>${esc(JSON.stringify(ev.argumentos, null, 2))}</pre><pre>${esc(JSON.stringify(ev.resposta, null, 2))}</pre></details>`;
     if (ev.agente) agentesVistos.add(ev.agente);
@@ -177,7 +195,12 @@ function renderEstado(s) {
   const sit = $("situacao");
   sit.className = "pilula " + (s.encerrado ? "fim" : s.rodando ? "rodando" : "");
   sit.textContent = s.encerrado ? "Cenário encerrado" : s.rodando ? "Rodando" : "Aguardando o primeiro agente";
-  const agentes = Object.keys(s.agentes).length;
+  const nomes = Object.keys(s.agentes);
+  const agentes = nomes.length;
+  $("agentes").innerHTML = agentes ? '<div class="hora">Quem está chamando</div>' + nomes.map((n) => {
+    const a = s.agentes[n];
+    return `<div class="agente-linha"><span class="agente">${esc(n)}</span><span class="hora">${a.chamadas} chamadas · ${a.erros} erros · última: ${esc(a.ultima)}</span></div>`;
+  }).join("") : '<div class="hora">Nenhum agente chamou ainda.</div>';
   $("contadores").textContent = `${s.chamadas} chamadas · ${s.erros} com erro · ${agentes} agente(s)`;
   $("total-chamadas").textContent = s.chamadas;
   $("indicadores").innerHTML = s.indicadores.map((i) =>
@@ -185,9 +208,10 @@ function renderEstado(s) {
   const caixa = s.caixa.slice().reverse();
   $("total-caixa").textContent = s.caixa.length;
   $("caixa").innerHTML = caixa.length ? caixa.map((p) => {
-    const classe = p.status === "novo" ? "novo" : FEITOS.includes(p.status) ? "feito" : "";
+    const classe = p.status === "novo" ? "novo" : NAO_FEITOS.includes(p.status) ? "" : "feito";
+    const origem = p.origem === "painel" ? ' <span class="selo">painel</span>' : p.origem === "mundo" ? ' <span class="selo">resposta</span>' : "";
     const aberto = abertos.has(p.id) ? " open" : "";
-    return `<details class="pedido" data-id="${esc(p.id)}"${aberto}><summary style="list-style:none;cursor:pointer"><div class="topo"><span>${esc(p.id)} · ${hora(p.chegou_em)}</span><span class="status ${classe}">${esc(p.status)}</span></div>`
+    return `<details class="pedido" data-id="${esc(p.id)}"${aberto}><summary style="list-style:none;cursor:pointer"><div class="topo"><span>${esc(p.id)} · ${hora(p.chegou_em)}${origem}</span><span class="status ${classe}">${esc(p.status)}</span></div>`
       + `<div class="assunto">${esc(p.assunto)}</div><div class="topo"><span>${esc(p.nome || p.de)}</span><span>${p.acoes} ação(ões)</span></div></summary>`
       + `<pre>${esc(p.de)}\n\n${esc(p.corpo)}</pre></details>`;
   }).join("") : '<div class="vazio">Nenhum pedido ainda.</div>';
@@ -212,6 +236,13 @@ async function iniciar() {
   };
   setInterval(atualizar, 1000);
 }
+$("abrir-form").addEventListener("click", () => $("form-evento").classList.toggle("aberto"));
+$("form-evento").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const dados = Object.fromEntries(new FormData(e.target));
+  const r = await fetch("/api/evento", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(dados)});
+  if (r.ok) { e.target.reset(); e.target.classList.remove("aberto"); atualizar(); }
+});
 iniciar();
 </script>
 </body>

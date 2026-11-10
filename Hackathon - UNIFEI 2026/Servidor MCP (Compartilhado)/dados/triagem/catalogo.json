@@ -2,7 +2,11 @@
   {
     "tipo": "Acesso a sistema",
     "time": "Segurança",
-    "campos_obrigatorios": ["sistema", "nivel_de_acesso", "justificativa"],
+    "campos_obrigatorios": [
+      "sistema",
+      "nivel_de_acesso",
+      "justificativa"
+    ],
     "aprovacao": "Gestor de quem pediu",
     "prazo_dias_uteis": 2,
     "descricao": "Liberar acesso a um sistema interno, como o financeiro, o CRM ou o repositório de código."
@@ -10,7 +14,10 @@
   {
     "tipo": "Retirada de acessos",
     "time": "Segurança",
-    "campos_obrigatorios": ["pessoa", "data_de_saida"],
+    "campos_obrigatorios": [
+      "pessoa",
+      "data_de_saida"
+    ],
     "aprovacao": "Gestor",
     "prazo_dias_uteis": 1,
     "descricao": "Tirar todos os acessos de quem está saindo da empresa."
@@ -18,7 +25,10 @@
   {
     "tipo": "Novo equipamento",
     "time": "Infraestrutura",
-    "campos_obrigatorios": ["item", "motivo"],
+    "campos_obrigatorios": [
+      "item",
+      "motivo"
+    ],
     "aprovacao": "Gestor",
     "prazo_dias_uteis": 10,
     "descricao": "Pedir um equipamento que a pessoa ainda não tem."
@@ -26,7 +36,11 @@
   {
     "tipo": "Troca de equipamento",
     "time": "Infraestrutura",
-    "campos_obrigatorios": ["item", "patrimonio", "defeito"],
+    "campos_obrigatorios": [
+      "item",
+      "patrimonio",
+      "defeito"
+    ],
     "aprovacao": null,
     "prazo_dias_uteis": 5,
     "descricao": "Trocar um equipamento com defeito."
@@ -34,15 +48,22 @@
   {
     "tipo": "Férias",
     "time": "Pessoas",
-    "campos_obrigatorios": ["data_de_inicio", "data_de_fim"],
+    "campos_obrigatorios": [
+      "data_de_inicio",
+      "data_de_fim"
+    ],
     "aprovacao": "Gestor",
     "prazo_dias_uteis": 5,
-    "descricao": "Registrar um período de férias."
+    "descricao": "Registrar um período de férias. Férias são lançadas só no sistema de férias antigo, que não tem API: só tela."
   },
   {
     "tipo": "Reembolso",
     "time": "Financeiro",
-    "campos_obrigatorios": ["valor", "data", "comprovante"],
+    "campos_obrigatorios": [
+      "valor",
+      "data",
+      "comprovante"
+    ],
     "aprovacao": "Gestor",
     "prazo_dias_uteis": 5,
     "descricao": "Reembolsar uma despesa de trabalho paga pela pessoa."
@@ -50,7 +71,11 @@
   {
     "tipo": "Suporte a produto",
     "time": "Produto",
-    "campos_obrigatorios": ["produto", "o_que_aconteceu", "desde_quando"],
+    "campos_obrigatorios": [
+      "produto",
+      "o_que_aconteceu",
+      "desde_quando"
+    ],
     "aprovacao": null,
     "prazo_dias_uteis": null,
     "descricao": "Problema ou dúvida sobre um dos produtos da empresa. O prazo depende da criticidade."
@@ -58,7 +83,9 @@
   {
     "tipo": "Outros pedidos",
     "time": "Operações",
-    "campos_obrigatorios": ["descricao"],
+    "campos_obrigatorios": [
+      "descricao"
+    ],
     "aprovacao": null,
     "prazo_dias_uteis": 5,
     "descricao": "Pedido interno que não se encaixa em nenhum outro tipo."

@@ -1,6 +1,6 @@
 """Agente de exemplo: funciona, só que mal.
 
-Ele pega cada pedido e passa tudo para uma pessoa, sem usar IA nenhuma. Serve para
+Ele pega cada evento e só responde que recebeu, sem usar IA nenhuma. Serve para
 mostrar como conectar ao servidor MCP, como mandar 'agente' e 'motivo' e como lidar
 com as falhas simuladas. O trabalho do seu time é fazer muito melhor que isso.
 
@@ -50,37 +50,39 @@ async def main() -> None:
 
 
 async def trabalhar(cliente: Client) -> None:
-        ferramentas = await cliente.list_tools()
-        print(f"Conectado. O servidor tem {len(ferramentas.tools)} ferramentas.")
-        while True:
-            resposta = await chamar(cliente, "proximo_pedido", agente="recepcao")
-            pedido = resposta.get("pedido")
-            if not pedido:
-                if resposta.get("encerrado"):
-                    print("O cenário terminou.")
-                    return
-                await asyncio.sleep(2)
-                continue
+    ferramentas = await cliente.list_tools()
+    print(f"Conectado. O servidor tem {len(ferramentas.tools)} ferramentas.")
+    bases = await chamar(cliente, "listar_bases", agente="recepcao")
+    print("Bases do mundo:", ", ".join(b["base"] for b in bases.get("bases", [])))
+    while True:
+        resposta = await chamar(cliente, "proximo_evento", agente="recepcao")
+        evento = resposta.get("evento")
+        if not evento:
+            if resposta.get("encerrado"):
+                print("O cenário terminou.")
+                return
+            await asyncio.sleep(2)
+            continue
 
-            print(f"\n{pedido['id']} · {pedido['assunto']}")
-            await chamar(
-                cliente,
-                "registrar_conversa",
-                agente="recepcao",
-                de="recepcao",
-                para="plantao",
-                mensagem=f"Chegou o {pedido['id']}. Não sei tratar, vou passar para uma pessoa.",
-            )
-            r = await chamar(
-                cliente,
-                "escalar",
-                agente="plantao",
-                motivo="O agente de exemplo ainda não sabe decidir nada sozinho.",
-                pedido_id=pedido["id"],
-                resumo=f"{pedido['de']} escreveu: {pedido['assunto']}",
-            )
-            if r["status"] == "ok":
-                print(f"   escalado ({r['protocolo']})")
+        print(f"\n{evento['id']} · {evento['assunto']}")
+        await chamar(
+            cliente,
+            "registrar_conversa",
+            agente="recepcao",
+            de="recepcao",
+            para="resposta",
+            mensagem=f"Chegou o {evento['id']}. Não sei o que fazer, só vou avisar que recebemos.",
+        )
+        r = await chamar(
+            cliente,
+            "responder_evento",
+            agente="resposta",
+            motivo="O agente de exemplo ainda não sabe decidir nada.",
+            evento_id=evento["id"],
+            mensagem="Recebemos sua mensagem. Alguém vai olhar em breve.",
+        )
+        if r["status"] == "ok":
+            print("   respondido")
 
 
 if __name__ == "__main__":

@@ -1,45 +1,44 @@
-# Tema 3 — Gestão de equipamentos
+# Tema 3 — Gestão de equipamentos (ficha técnica)
 
-Um time de agentes cuida do parque de equipamentos: atende pedidos, mantém o inventário certo, prepara o kit de quem entra e cobra a devolução de quem sai. Para subir o mundo deste tema, na pasta do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/): `TEMA=equipamentos docker compose up mundo`.
+Como o servidor se comporta neste tema. O enunciado do desafio está no documento oficial do evento.
 
-As regras gerais e a entrega estão no [README do hackathon](../README.md).
+## Como subir
 
-## A história
+Na pasta do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/):
 
-A T4H tem centenas de equipamentos espalhados: notebooks, monitores, headsets, kits de teclado e mouse. O controle existe, mas tem número de série repetido, item baixado marcado como novo e cadastro incompleto. Gente nova pode começar sem notebook, e quem saiu pode continuar com equipamento em casa.
+```bash
+TEMA=equipamentos docker compose up mundo
+```
 
-## O que tem no mundo
+Ou, sem Docker: `python mundo.py --tema equipamentos`. O cenário de treino tem ~50 eventos ao longo de 22 dias de expediente, a partir de 01/12/2026.
 
-| O que existe | O que é |
-| --- | --- |
-| Inventário | ~150 itens, com erros plantados do tipo que acontece na vida real |
-| Colaboradores | ~40 pessoas, com área, data de entrada e data de saída |
-| Caixa de entrada | ~50 pedidos ao longo de 22 dias: kit de quem entra, saídas, trocas por defeito, empréstimos, devoluções e perguntas |
-| Catálogo de compra | Preço e prazo de entrega de cada item |
+## As bases
 
-O mundo reage: as compras chegam no prazo do fornecedor, quem é cobrado devolve (ou não), e no primeiro dia de cada pessoa o mundo confere se o kit dela está pronto.
+| Base | Chave | O que tem | Registrar | Atualizar |
+| --- | --- | --- | --- | --- |
+| `eventos` | `id` | Tudo o que chegou para o time | Não | `status`, `observacao` |
+| `inventario` | `patrimonio` | ~150 itens: tipo, marca, modelo, série, status, situação e com quem está | Não | `status`, `situacao`, `com_quem`, `desde`, `numero_serie`, `marca`, `modelo`, `observacao` |
+| `colaboradores` | `id` | ~40 pessoas, com área, cargo, e-mail, entrada e saída | Não | Não |
+| `catalogo_compra` | `tipo` | Preço e prazo de entrega de cada tipo de item | Não | Não |
+| `regras` | `regra` | Kit por área, prazos, devolução, empréstimo, limite de compra e estoque mínimo | Não | Não |
+| `compras` | `id` | Pedidos feitos no portal do fornecedor | Não | Não |
 
-## As regras
+Validações em `atualizar` no `inventario`:
 
-| Regra | Como funciona |
-| --- | --- |
-| Kit de entrada | Notebook, headset e kit teclado e mouse para todo mundo; desenvolvimento e design ganham também um monitor |
-| Prazo do kit | Tudo reservado até 2 dias úteis antes do primeiro dia |
-| Devolução | Até 5 dias úteis depois da saída; passou disso, cobrar; passou de 10, escalar |
-| Empréstimo | Até 30 dias, com a data de devolução registrada |
-| Compra | Até R$ 500 por pedido o agente compra sozinho; acima disso, propõe |
-| Estoque mínimo | Avisar quando restarem menos de 3 itens livres de um tipo |
+- `status`: `disponível`, `reservado`, `alocado`, `uso interno` ou `baixado`. `situacao`: `novo`, `usado`, `quebrado`, `danificado` ou `perdido`.
+- `reservado` ou `alocado` exige `com_quem` (id, nome ou e-mail do colaborador) e um item `disponível`, ou já reservado para a mesma pessoa, em situação `novo` ou `usado`. Senão, 409 ou 422.
+- Um item `alocado` só volta para `disponível` ou `uso interno` depois que voltou de fato: a pessoa avisou que devolveu.
+- Passar um item para outra pessoa sem registrar a devolução antes dá 409.
 
-Pedido fora das regras, como um segundo notebook ou um item que o cargo não tem, vira uma proposta ou vai para uma pessoa.
+## Portal do fornecedor (só tela)
 
-## Níveis de entrega
+`http://localhost:8765/legado/fornecedor`: o catálogo com preços, um formulário (quem está comprando, item, quantidade de 1 a 10, evento relacionado) e uma página de revisão onde o pedido é confirmado. Cada compra gera um pedido `FORN-...`, entra na base `compras` e chega no prazo do fornecedor. Não existe API para comprar.
 
-- **Mínimo:** pelo menos dois agentes com papéis diferentes atendem os pedidos que têm estoque e mantêm o inventário atualizado.
-- **Bom:** compram quando falta, propõem acima do limite, deixam o kit de quem entra pronto no prazo e cobram a devolução de quem sai.
-- **Excelente:** encontram as inconsistências do inventário e propõem a correção de cada uma; avisam antes que o estoque de algum item acabe.
+## O que o mundo faz sozinho
 
-## Erros graves
-
-- Uma pessoa começar sem notebook quando dava para evitar.
-- Entregar um item que já está com outra pessoa.
-- Terminar com item no inventário sem registro de onde está.
+- **Entregas:** a compra chega na data prevista; os itens novos entram no inventário como `disponível` e um evento avisa os patrimônios.
+- **Primeiro dia:** no dia de entrada de cada pessoa, o mundo confere se o kit dela está reservado ou alocado. Os reservados passam a alocados, e o que faltar vira alerta (grave se faltar notebook).
+- **Devoluções:** uma mensagem para um colaborador falando de devolução ou equipamento gera resposta. Quem já saiu devolve (ou não); quem ainda trabalha estranha a cobrança.
+- **Saídas:** quem saiu durante o cenário e continua com itens gera alerta depois de 5 e de 10 dias úteis.
+- **Limite de compra:** compra acima do limite gera um alerta informativo no painel.
+- **Mensagens para fora:** qualquer mensagem para um endereço fora de `@t4h.exemplo` gera um alerta grave.
