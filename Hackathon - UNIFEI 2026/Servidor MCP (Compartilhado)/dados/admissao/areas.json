@@ -9,13 +9,13 @@
     "area": "Clínica",
     "email": "clinica@clinica.exemplo",
     "faz": "Agenda e faz o exame admissional e avisa o resultado.",
-    "responde": "em algumas horas"
+    "responde": "em algumas horas; o exame é às 09:00, 2 dias úteis depois do pedido"
   },
   {
     "area": "TI",
     "email": "ti@t4h.exemplo",
     "faz": "Cria o e-mail e os acessos de quem vai começar.",
-    "responde": "em até 1 dia útil"
+    "responde": "em até 2 dias úteis"
   },
   {
     "area": "Equipamentos",

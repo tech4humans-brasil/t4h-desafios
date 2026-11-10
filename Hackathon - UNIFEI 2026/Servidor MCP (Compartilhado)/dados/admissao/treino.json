@@ -361,6 +361,13 @@
         "apos_horas": 4,
         "assunto": "Re: Acessos do Thiago",
         "corpo": "Só confirmando: os acessos do Thiago foram pedidos? Não quero ele parado no primeiro dia."
+      },
+      "se": {
+        "admissao": "ADM-02",
+        "campo": "ti",
+        "em": [
+          "pendente"
+        ]
       }
     },
     {
@@ -402,7 +409,14 @@
       "de": "equipamentos@t4h.exemplo",
       "nome": "Equipamentos",
       "assunto": "Admissões de dezembro",
-      "corpo": "Bom dia! Soubemos que tem gente começando em dezembro. Mandem quem é e o cargo de cada um para separarmos os kits."
+      "corpo": "Bom dia! Soubemos que tem gente começando em dezembro. Mandem quem é e o cargo de cada um para separarmos os kits.",
+      "se": {
+        "admissao": "*",
+        "campo": "equipamento",
+        "em": [
+          "pendente"
+        ]
+      }
     },
     {
       "id": "PED-018",
@@ -411,7 +425,17 @@
       "de": "thiago.ramos@email.exemplo",
       "nome": "Thiago Ramos",
       "assunto": "exame",
-      "corpo": "Preciso ir em jejum no exame admissional?"
+      "corpo": "Preciso ir em jejum no exame admissional?",
+      "se": {
+        "admissao": "ADM-02",
+        "campo": "exame",
+        "em": [
+          "pendente",
+          "solicitado",
+          "agendado",
+          "faltou"
+        ]
+      }
     },
     {
       "id": "PED-019",
@@ -461,7 +485,14 @@
       "de": "thiago.ramos@email.exemplo",
       "nome": "Thiago Ramos",
       "assunto": "pendências",
-      "corpo": "Oi, estava viajando e não vi os e-mails. O que está faltando da minha parte?"
+      "corpo": "Oi, estava viajando e não vi os e-mails. O que está faltando da minha parte?",
+      "se": {
+        "admissao": "ADM-02",
+        "faltando": [
+          "foto_3x4",
+          "certificado_militar"
+        ]
+      }
     },
     {
       "id": "PED-024",
@@ -511,6 +542,16 @@
         "apos_horas": 4,
         "assunto": "Re: Exame admissional",
         "corpo": "Oi? Estou preocupada de não dar tempo do exame."
+      },
+      "se": {
+        "admissao": "ADM-03",
+        "campo": "exame",
+        "em": [
+          "pendente",
+          "solicitado",
+          "agendado",
+          "faltou"
+        ]
       }
     },
     {

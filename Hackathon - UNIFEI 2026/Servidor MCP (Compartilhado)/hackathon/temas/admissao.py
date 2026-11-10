@@ -50,6 +50,11 @@ def fala_de(texto_sem_acento: str, *raizes: str) -> bool:
     return False
 
 
+PEDIDO = ("envi", "mand", "falt", "precis", "reenvi", "encaminh", "anex", "pendent", "solicit", "pedimos", "pedir", "pode me")
+PEDIDO_AREA = {
+    "ti": ("acess", "cri", "e-mail", "email", "conta", "login", "vpn", "senha", "permiss", "usuario", "liber"),
+    "equipamento": ("kit", "notebook", "equip", "separ", "monitor", "headset", "teclado", "mouse", "computador", "maquina"),
+}
 INTERVALO_COBRANCA = 60  # minutos simulados: duas cobranças seguidas só contam como duas se tiver esse intervalo
 
 
@@ -140,6 +145,7 @@ class Admissao(TemaBase):
         self.mundo.agendar_em_horas(horas, chegar)
 
     def receber_docs(self, aid: str, lista: list[dict], evento_id: str) -> None:
+        primeiro_envio = not any(d["admissao"] == aid for d in self.docs)
         for d in lista:
             self.docs.append({
                 "id": self.mundo.novo_id("DOC", 1, 3), "admissao": aid, "tipo": d["tipo"], "arquivo": d["arquivo"],
@@ -147,6 +153,16 @@ class Admissao(TemaBase):
                 "motivo": "", "conferido_por": "", "aprovado_por": "", "observacao": "",
                 "_valido": d.get("valido", True), "_problema": d.get("problema", ""),
             })
+        a = self.adm[aid]
+        if primeiro_envio and a.get("_antecipados"):
+            c = self.contratados[aid]
+            tipos = {d["tipo"] for d in lista}
+            for arquivo, (spec, re_assunto, ev) in list(a["_antecipados"].items()):
+                if spec["tipo"] not in tipos:  # o que veio no primeiro envio não é reenviado
+                    a["_enviados"].add(arquivo)
+                    regra = next(x for x in self.exigidos if x["tipo"] == spec["tipo"])
+                    self.depois(self.mundo.sorteio.uniform(1, 3), c["email"], c["nome"].split()[0], re_assunto, f"Segue também: {regra['nome']}.", ev, documentos=[spec])
+            a["_antecipados"] = {}
 
     def checar_vazamento(self, para: str, texto: str) -> None:
         t = sem_acento(texto)
@@ -165,6 +181,20 @@ class Admissao(TemaBase):
                 self.mundo.alerta("grave", f"Dado pessoal de {c['nome']} enviado para {para}, que não deveria receber.")
 
     # ---------- reações do mundo ----------
+    def deve_chegar(self, p: dict) -> bool:
+        """Eventos do cenário com 'se' só chegam se a admissão ainda estiver naquele pé."""
+        se = p.get("se")
+        if not se:
+            return True
+        if se["admissao"] == "*":  # basta uma admissão estar naquele pé
+            return any(self.deve_chegar(dict(p, se=dict(se, admissao=x))) for x in self.adm)
+        a = self.adm.get(se["admissao"])
+        if not a:
+            return True
+        if "faltando" in se:
+            return any(t in self.faltando(a["id"]) for t in se["faltando"])
+        return self.publico_adm(a).get(se["campo"]) in se["em"]
+
     def ao_receber(self, item: dict) -> None:
         original = item["_original"]
         c = self.por_email(item["de"])
@@ -182,24 +212,27 @@ class Admissao(TemaBase):
         self.mundo.alerta("atencao", f"{item['id']} ficou sem ação e {item['nome'] or item['de']} cobrou.")
 
     def ao_responder(self, item: dict, mensagem: str, aguardar: bool) -> bool:
-        destino = self.entregar(item["de"], item["assunto"], mensagem, item["id"], aguardar)
-        return destino["vai_responder"]
+        # Na resposta a um evento, só vale o que o agente escreveu: o assunto herdado não conta como pedido.
+        destino = self.entregar(item["de"], item["assunto"], mensagem, item["id"], aguardar, analisar_assunto=False)
+        return destino.get("vai_responder", True)
 
     def ao_mensagem(self, registro: dict) -> dict:
         return self.entregar(registro["para"], registro["assunto"], registro["mensagem"], registro.get("evento_id"), "?" in registro["mensagem"])
 
-    def entregar(self, para: str, assunto: str, mensagem: str, evento_id: str | None, aguardar: bool) -> dict:
+    def entregar(self, para: str, assunto: str, mensagem: str, evento_id: str | None, aguardar: bool, analisar_assunto: bool = True) -> dict:
         para = para.strip().lower()
-        destino = self._entregar(para, assunto, f"{assunto} {mensagem}", evento_id, aguardar)
-        self.checar_vazamento(para, f"{assunto} {mensagem}")  # só depois de entregue: 404 não vaza nada
+        texto = f"{assunto} {mensagem}" if analisar_assunto else mensagem
+        destino = self._entregar(para, assunto, texto, evento_id, aguardar)
+        self.checar_vazamento(para, texto)  # só depois de entregue: 404 não vaza nada
         return destino
 
     def _entregar(self, para: str, assunto: str, texto: str, evento_id: str | None, aguardar: bool) -> dict:
         re_assunto = "RE: " + (assunto or "admissão")
         c = self.por_email(para)
         if c:
-            vai = self._contratado_responde(c, texto, evento_id, aguardar, re_assunto)
-            return {"entregue_para": f"{c['nome']} ({c['id']})", "vai_responder": vai}
+            self._contratado_responde(c, texto, evento_id, aguardar, re_assunto)
+            # Não dizemos se a pessoa vai responder: como na vida real, o time só sabe quando a resposta chega.
+            return {"entregue_para": f"{c['nome']} ({c['id']})", "aviso": "Se a pessoa responder, a resposta chega depois como evento novo."}
         if para == TI:
             return self._area_aciona(para, "TI", "ti", texto, evento_id, re_assunto, (2, 14), "Acessos criados para {nome}: e-mail {email} e acessos básicos. Acessos específicos o gestor pede.", "pronto")
         if para == EQUIP:
@@ -207,6 +240,8 @@ class Admissao(TemaBase):
         if para == CLINICA:
             return self._clinica(texto, evento_id, re_assunto)
         if para == CONTAB:
+            if not fala_de(sem_acento(texto), *PEDIDO, "dado", "regist", "cadastr", "admiss", "cpf", "pis", "ficha"):
+                return {"entregue_para": "Contabilidade", "vai_responder": False}  # agradecimento ou conversa
             self.depois(self.mundo.sorteio.uniform(1, 3), CONTAB, "Contabilidade", re_assunto,
                         f"Olá! Os dados de admissão só são recebidos pelo portal da contabilidade: {self.mundo.url('/legado/contabilidade')}.", evento_id)
             return {"entregue_para": "Contabilidade", "vai_responder": True}
@@ -230,6 +265,8 @@ class Admissao(TemaBase):
         raise ErroFerramenta(404, f"Ninguém no mundo com o endereço '{para}'. Veja os e-mails nas bases areas e contratados.")
 
     def _area_aciona(self, para, nome_area, campo, texto, evento_id, re_assunto, horas, modelo, pronto) -> dict:
+        if not fala_de(sem_acento(texto), *PEDIDO_AREA[campo]):  # agradecimento ou conversa: entregue, sem resposta
+            return {"entregue_para": nome_area, "vai_responder": False, "acionados": []}
         alvo = self.citados(texto)
         if not alvo:
             self.depois(self.mundo.sorteio.uniform(1, 3), para, nome_area, re_assunto, "Para quem é? Mandem o nome de cada pessoa, o cargo e a data de início.", evento_id)
@@ -255,9 +292,8 @@ class Admissao(TemaBase):
 
     def _clinica(self, texto, evento_id, re_assunto) -> dict:
         alvo = self.citados(texto)
-        if alvo and not fala_de(sem_acento(texto), "exame", "agend", "remarc", "marc", "consulta", "admissional"):
-            self.depois(1, CLINICA, "Clínica", re_assunto, "Recebido. Se precisar de exame para alguém, é só pedir o agendamento.", evento_id)
-            return {"entregue_para": "Clínica", "vai_responder": True}
+        if not fala_de(sem_acento(texto), "exame", "agend", "remarc", "marc", "consulta", "admissional"):  # agradecimento ou conversa
+            return {"entregue_para": "Clínica", "vai_responder": False}
         if not alvo:
             self.depois(1, CLINICA, "Clínica", re_assunto, "Para quem é o exame? Precisamos do nome completo e do cargo.", evento_id)
             return {"entregue_para": "Clínica", "vai_responder": True}
@@ -334,14 +370,23 @@ class Admissao(TemaBase):
             else:
                 respostas.append("Recebi o contrato, vou ler com calma.")
         recebidos = {d["arquivo"] for d in self.docs} | a["_enviados"]
+        meus = [d for d in self.docs if d["admissao"] == c["id"]]
+        pede = fala_de(t, *PEDIDO)
         for spec in comp.get("envia_quando_pedido", []):
             regra = next(d for d in self.exigidos if d["tipo"] == spec["tipo"])
-            if spec["arquivo"] not in recebidos and fala_de(t, *[sem_acento(x) for x in regra["palavras"]]):
-                a["_enviados"].add(spec["arquivo"])
-                self.depois(self.mundo.sorteio.uniform(2, 6), c["email"], primeiro, re_assunto, f"Segue: {regra['nome']}.", evento_id, documentos=[spec])
-                vai = True
+            do_tipo = [d for d in meus if d["tipo"] == spec["tipo"]]
+            # Só manda depois do primeiro envio dela; se já mandou um desse tipo, só quando ele foi recusado.
+            momento = bool(meus) and (not do_tipo or any(d["status"] == "recusado" for d in do_tipo))
+            if pede and spec["arquivo"] not in recebidos and fala_de(t, *[sem_acento(x) for x in regra["palavras"]]):
+                if momento:
+                    a["_enviados"].add(spec["arquivo"])
+                    self.depois(self.mundo.sorteio.uniform(2, 6), c["email"], primeiro, re_assunto, f"Segue: {regra['nome']}.", evento_id, documentos=[spec])
+                    vai = True
+                elif not meus:  # pediram antes do primeiro envio: ela manda junto, logo depois dele
+                    a.setdefault("_antecipados", {})[spec["arquivo"]] = (spec, re_assunto, evento_id)
         for chave, resposta in comp.get("responde_sobre", {}).items():
-            if fala_de(t, chave):
+            if meus and fala_de(t, chave) and not a.get(f"_respondeu_{chave}"):
+                a[f"_respondeu_{chave}"] = True
                 respostas.append(resposta)
         if not respostas and not vai and aguardar:
             respostas.append("Certo, obrigado! Fico no aguardo.")
@@ -424,6 +469,8 @@ class Admissao(TemaBase):
                 if nova != antiga:
                     a["data_inicio"] = self.contratados[a["id"]]["data_inicio"] = nova
                     a["status"] = "em andamento"  # uma data nova reabre a admissão
+                    if a["contabilidade"] in ("enviado", "registrado"):
+                        a["contabilidade"] = "desatualizado"  # o registro foi feito com a data antiga: precisa reenviar
                     a["historico"].append(f"{self.mundo.agora()}: data de início de {br(antiga)} para {br(nova)}, OK de {aprovado}, registrado por {agente}")
                     self.prazos_avisados = {x for x in self.prazos_avisados if x[0] != a["id"]}
                     self.mundo.alerta("info", f"Data de início de {a['nome']} mudou de {br(antiga)} para {br(nova)}, com OK de {aprovado} (registrado por {agente}).")
@@ -541,12 +588,17 @@ class Admissao(TemaBase):
             self.mundo.registrar_tela("contabilidade", v["agente"], {k: x for k, x in v.items()}, envio, ok=True)
 
             def analisar():
+                vale = a["contabilidade"] == "enviado"  # se a data mudou no meio, o resultado não vale mais para a admissão
                 if divergentes:
-                    a["contabilidade"] = envio["situacao"] = "recusado"
+                    envio["situacao"] = "recusado"
+                    if vale:
+                        a["contabilidade"] = "recusado"
                     self.mundo.mensagem_do_mundo(CONTAB, "Contabilidade", f"Registro {envio['protocolo']} recusado",
                         f"Não conseguimos registrar {a['nome']}: {', '.join(divergentes)} não confere(m) com os documentos. Corrijam e enviem de novo pelo portal.")
                 else:
-                    a["contabilidade"] = envio["situacao"] = "registrado"
+                    envio["situacao"] = "registrado"
+                    if vale:
+                        a["contabilidade"] = "registrado"
                     self.mundo.mensagem_do_mundo(CONTAB, "Contabilidade", f"Registro {envio['protocolo']} concluído", f"Registro de {a['nome']} concluído.")
 
             self.mundo.agendar_em_horas(self.mundo.sorteio.uniform(4, 12), analisar)

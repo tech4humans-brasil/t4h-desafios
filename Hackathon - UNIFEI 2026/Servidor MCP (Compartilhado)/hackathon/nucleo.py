@@ -320,7 +320,8 @@ class Mundo:
         indice = bisect.bisect_left(self._chegadas, minuto)
         if indice < len(self._chegadas) and self._chegadas[indice] == minuto:
             self._chegadas.pop(indice)
-        self.receber_evento(p)
+        if self.tema.deve_chegar(p):
+            self.receber_evento(p)
 
     def receber_evento(self, p: dict, responde_a: str | None = None, evento_id: str | None = None, origem: str = "cenario") -> dict:
         eid = evento_id or p["id"]
@@ -589,7 +590,7 @@ class Mundo:
             self.marcar_acao(item["id"], "responder_evento", agente)
             vai_responder = self.tema.ao_responder(item, mensagem, aguardar)
             if aguardar and vai_responder:
-                aviso = "A pessoa vai responder; a resposta chega depois como evento novo."
+                aviso = "Se a pessoa responder, a resposta chega depois como evento novo."
             elif aguardar:
                 aviso = "Quem mandou este evento não costuma responder de volta."
             else:
@@ -706,7 +707,7 @@ class Mundo:
             Ferramenta("ler_evento", "Lê um evento inteiro, com o que já foi feito nele.", ler_evento, {"evento_id": texto("Id do evento")}, ["evento_id"], leitura=True),
             Ferramenta(
                 "responder_evento",
-                "Responde a quem mandou o evento e marca o evento como respondido.",
+                "Responde ao REMETENTE do evento (o campo 'de') e marca o evento como respondido. Para falar com outra pessoa, use enviar_mensagem.",
                 responder_evento,
                 {
                     "evento_id": texto("Id do evento"),
@@ -809,6 +810,10 @@ class TemaBase:
 
     def rotas_legado(self) -> list:
         return []
+
+    def deve_chegar(self, p: dict) -> bool:
+        """Um tema pode segurar um evento do cenário que já não faz sentido no estado atual."""
+        return True
 
     def ao_receber(self, item: dict) -> None: ...
 
