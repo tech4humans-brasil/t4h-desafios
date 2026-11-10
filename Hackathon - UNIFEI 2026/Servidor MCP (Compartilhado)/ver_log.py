@@ -27,36 +27,54 @@ def main() -> None:
     if args.log:
         caminho = pathlib.Path(args.log)
     else:
-        logs = sorted((AQUI / "logs").glob("*.jsonl"))
+        logs = sorted((AQUI / "logs").glob("*.jsonl"), key=lambda c: c.stat().st_mtime)
         if not logs:
             print("Ainda não há log. Suba o mundo com python mundo.py e conecte um agente.")
             return
         caminho = logs[-1]
 
-    eventos = [json.loads(l) for l in caminho.read_text(encoding="utf-8").splitlines() if l.strip()]
+    if not caminho.exists():
+        print(f"O arquivo {caminho} não existe.")
+        return
+    eventos, ruins = [], 0
+    for linha in caminho.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not linha.strip():
+            continue
+        try:
+            e = json.loads(linha)
+        except json.JSONDecodeError:
+            ruins += 1
+            continue
+        if isinstance(e, dict) and "tipo" in e:
+            eventos.append(e)
+    if ruins:
+        print(f"({ruins} linha(s) ilegíveis ignoradas)")
     chamadas = [e for e in eventos if e["tipo"] == "chamada"]
     if args.agente:
-        chamadas = [e for e in chamadas if e["agente"] == args.agente]
+        chamadas = [e for e in chamadas if e.get("agente") == args.agente]
     if args.erros:
-        chamadas = [e for e in chamadas if e["resultado"] == "erro"]
+        chamadas = [e for e in chamadas if e.get("resultado") == "erro"]
+    ids = {id(e) for e in chamadas}
 
     print(f"Log: {caminho.name}\n")
     for e in eventos:
-        if e["tipo"] == "chamada" and e in chamadas:
-            status = "OK" if e["resultado"] == "ok" else f"ERRO {e['codigo']}" + (" (simulada)" if e.get("falha") else "")
-            print(f"{e['agora']}  {e['agente'] or '-':<14} {e['ferramenta']:<22} {status}")
+        if e["tipo"] == "chamada" and id(e) in ids:
+            status = "OK" if e.get("resultado") == "ok" else f"ERRO {e.get('codigo')}" + (" (simulada)" if e.get("falha") else "")
+            via = " (tela)" if e.get("via") == "tela" else ""
+            print(f"{e.get('agora', '')}  {e.get('agente') or '-':<14} {e.get('ferramenta', ''):<22} {status}{via}")
             if e.get("motivo"):
                 print(f"{'':22}motivo: {e['motivo']}")
         elif e["tipo"] == "conversa" and not (args.agente or args.erros):
-            print(f"{e['agora']}  {e['de']} → {e['para']}: {e['mensagem']}")
+            print(f"{e.get('agora', '')}  {e.get('de')} → {e.get('para')}: {e.get('mensagem')}")
         elif e["tipo"] == "alerta" and not (args.agente or args.erros):
-            print(f"{e['agora']}  [{e['nivel'].upper()}] {e['mensagem']}")
+            print(f"{e.get('agora', '')}  [{str(e.get('nivel', '')).upper()}] {e.get('mensagem')}")
 
-    todas = [e for e in eventos if e["tipo"] == "chamada"]
-    print(f"\n{len(todas)} chamadas, {sum(e['resultado'] == 'erro' for e in todas)} com erro")
-    print("Por agente: " + ", ".join(f"{k or '-'} {v}" for k, v in Counter(e["agente"] for e in todas).most_common()))
-    print("Por ferramenta: " + ", ".join(f"{k} {v}" for k, v in Counter(e["ferramenta"] for e in todas).most_common()))
-    alertas = Counter(e["nivel"] for e in eventos if e["tipo"] == "alerta")
+    todas = chamadas
+    filtro = " (filtradas)" if args.agente or args.erros else ""
+    print(f"\n{len(todas)} chamadas{filtro}, {sum(e.get('resultado') == 'erro' for e in todas)} com erro")
+    print("Por agente: " + ", ".join(f"{k or '-'} {v}" for k, v in Counter(e.get("agente") for e in todas).most_common()))
+    print("Por ferramenta: " + ", ".join(f"{k} {v}" for k, v in Counter(e.get("ferramenta") for e in todas).most_common()))
+    alertas = Counter(e.get("nivel") for e in eventos if e["tipo"] == "alerta")
     print("Alertas: " + (", ".join(f"{k} {v}" for k, v in alertas.items()) or "nenhum"))
 
 

@@ -1,18 +1,21 @@
 """O mundo simulado: relógio, eventos, bases de dados, falhas, log e eventos do painel.
 
 As ferramentas são genéricas de propósito: eventos (o que chega para o time), mensagens
-(falar com qualquer pessoa ou time do mundo) e bases (consultar, registrar e atualizar).
+(falar com pessoas e times do mundo) e bases (consultar, registrar e atualizar).
 Memória, escalação e aprovação ficam com os times.
 """
 
 from __future__ import annotations
 
+import bisect
 import heapq
 import itertools
 import json
+import math
 import pathlib
 import random
 import time
+import traceback
 import unicodedata
 from collections import deque
 from dataclasses import dataclass, field
@@ -25,6 +28,8 @@ import mcp_types as types
 INICIO_DIA = 8 * 60  # o expediente simulado vai das 08:00 às 18:00
 MINUTOS_DIA = 10 * 60
 DIAS_SEMANA = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"]
+LIMITE_TEXTO = 2000
+LIMITE_AGENTE = 60
 
 # Falhas simuladas: (tipo, peso). "lento" responde certo, só que devagar.
 FALHAS = [("indisponivel", 4), ("lento", 3), ("timeout", 2), ("conflito", 2)]
@@ -33,6 +38,7 @@ MENSAGENS_FALHA = {
     "timeout": (504, "O sistema demorou demais para responder. A ação pode ou não ter sido feita: confira antes de repetir."),
     "conflito": (409, "Outra operação estava em andamento no mesmo registro. Consulte de novo e tente outra vez."),
 }
+VERDADEIROS = (True, 1, "1", "true", "True", "sim", "yes")
 
 
 def sem_acento(texto: Any) -> str:
@@ -52,6 +58,21 @@ def somar_dias_uteis(inicio: date, n: int) -> date:
     return d
 
 
+def limpar(valor: Any) -> Any:
+    """Troca NaN e Infinity por None, em qualquer profundidade, para o JSON nunca quebrar."""
+    if isinstance(valor, float) and not math.isfinite(valor):
+        return None
+    if isinstance(valor, dict):
+        return {str(k): limpar(v) for k, v in valor.items()}
+    if isinstance(valor, (list, tuple)):
+        return [limpar(v) for v in valor]
+    return valor
+
+
+def para_json(valor: Any) -> str:
+    return json.dumps(limpar(valor), ensure_ascii=False, default=str, allow_nan=False)
+
+
 class ErroFerramenta(Exception):
     """Erro de regra: o pedido do agente não pode ser atendido como veio."""
 
@@ -60,6 +81,31 @@ class ErroFerramenta(Exception):
         self.codigo = codigo
         self.mensagem = mensagem
         self.extra = extra
+
+
+def inteiro(valor: Any, nome: str, padrao: int, minimo: int, maximo: int) -> int:
+    if valor in (None, ""):
+        return padrao
+    if isinstance(valor, bool):
+        raise ErroFerramenta(422, f"'{nome}' precisa ser um número inteiro.")
+    try:
+        numero = int(valor)
+    except (TypeError, ValueError):
+        raise ErroFerramenta(422, f"'{nome}' precisa ser um número inteiro.") from None
+    if numero != valor and not isinstance(valor, str):
+        raise ErroFerramenta(422, f"'{nome}' precisa ser um número inteiro.")
+    return max(minimo, min(numero, maximo))
+
+
+def texto_limitado(valor: Any, nome: str, limite: int = LIMITE_TEXTO) -> str:
+    if valor is None:
+        return ""
+    if not isinstance(valor, (str, int, float)):
+        raise ErroFerramenta(422, f"'{nome}' precisa ser texto.")
+    texto = str(valor)
+    if len(texto) > limite:
+        raise ErroFerramenta(422, f"'{nome}' passa de {limite} caracteres.")
+    return texto
 
 
 class Relogio:
@@ -104,6 +150,9 @@ class Relogio:
         d = self.data(dia)
         return f"{DIAS_SEMANA[d.weekday()]} {d.strftime('%d/%m/%Y')} {total // 60:02d}:{total % 60:02d}"
 
+    def segundos_reais(self, minutos_simulados: float) -> float:
+        return minutos_simulados / MINUTOS_DIA * self.segundos_por_dia
+
     @staticmethod
     def minuto_de(dia: int, hora: str) -> float:
         h, m = (int(x) for x in hora.split(":"))
@@ -124,21 +173,30 @@ class Base:
     descricao: str
     registros: Callable[[], list[dict]]
     chave: str = "id"
+    campos: tuple[str, ...] = ()
     registrar: Callable[[dict, str], dict] | None = None
+    campos_registro: dict[str, str] = field(default_factory=dict)
+    exemplo_registro: dict | None = None
     atualizar: Callable[[dict, dict, str], dict] | None = None
     campos_atualizaveis: tuple[str, ...] = ()
 
     def resumo(self) -> dict:
         regs = self.registros()
-        return {
+        campos = list(self.campos) or (list(regs[0].keys()) if regs else [])
+        resumo = {
             "base": self.nome,
             "descricao": self.descricao,
             "total": len(regs),
             "chave": self.chave,
-            "campos": list(regs[0].keys()) if regs else [],
+            "campos": campos,
             "pode_registrar": self.registrar is not None,
             "pode_atualizar": list(self.campos_atualizaveis) if self.atualizar else [],
         }
+        if self.registrar:
+            resumo["campos_para_registrar"] = self.campos_registro
+            if self.exemplo_registro:
+                resumo["exemplo_registrar"] = self.exemplo_registro
+        return resumo
 
 
 @dataclass
@@ -148,11 +206,12 @@ class Ferramenta:
     funcao: Callable[[dict, str], Any]
     propriedades: dict = field(default_factory=dict)
     obrigatorios: list[str] = field(default_factory=list)
+    leitura: bool = False  # só consulta: não sofre conflito simulado e não muda nada num 504
     falha: bool = True  # sujeita a falhas simuladas
 
     def como_tool(self) -> types.Tool:
         props: dict[str, Any] = {
-            "agente": {"type": "string", "description": "Nome do agente do seu time que está chamando"},
+            "agente": {"type": "string", "description": "Nome do agente do seu time que está chamando (aparece no painel)"},
             "motivo": {"type": "string", "description": "Por que o agente está fazendo esta chamada (opcional, aparece no painel)"},
         }
         props.update(self.propriedades)
@@ -160,6 +219,7 @@ class Ferramenta:
             name=self.nome,
             description=self.descricao,
             inputSchema={"type": "object", "properties": props, "required": ["agente", *self.obrigatorios]},
+            annotations=types.ToolAnnotations(readOnlyHint=self.leitura),
         )
 
 
@@ -171,11 +231,15 @@ def objeto(s: str) -> dict:
     return {"type": "object", "description": s}
 
 
+def numero(s: str) -> dict:
+    return {"type": "integer", "description": s}
+
+
 class Mundo:
     def __init__(self, tema_cls: type, cenario: dict, dados: pathlib.Path, args: Any) -> None:
         self.sorteio = random.Random(args.seed)
         self.prob_erro = max(0.0, min(1.0, args.erros))
-        self.porta = args.porta
+        self.porta = getattr(args, "porta_publica", args.porta)
         self.cenario = cenario
         self.relogio = Relogio(date.fromisoformat(cenario["inicio"]), int(cenario["dias"]), args.segundos_por_dia)
         self.log = pathlib.Path(args.log)
@@ -183,6 +247,7 @@ class Mundo:
         self._agenda: list[tuple[float, int, Callable[[], None]]] = []
         self._seq = itertools.count()
         self._ids: dict[str, itertools.count] = {}
+        self._chegadas: list[float] = []  # minutos em que chegam os próximos eventos do cenário
         self.caixa: dict[str, dict] = {}
         self.mensagens: list[dict] = []
         self.alertas: list[dict] = []
@@ -201,7 +266,8 @@ class Mundo:
             for p in cenario["pedidos"]:
                 base = Relogio.minuto_de(int(p["dia"]), p["hora"])
                 chegada = max(0.0, base + self.sorteio.uniform(-15, 15))
-                self.agendar(chegada, lambda p=p: self.receber_evento(p))
+                self.agendar(chegada, lambda p=p, m=chegada: self._chegar_do_cenario(p, m))
+                bisect.insort(self._chegadas, chegada)
 
     # ---------- utilidades ----------
     def novo_id(self, prefixo: str, inicio: int = 1, largura: int = 2) -> str:
@@ -222,14 +288,18 @@ class Mundo:
 
     # ---------- emissão para o painel e o log ----------
     def emitir(self, tipo: str, **dados: Any) -> dict:
-        evento = {"tipo": tipo, "agora": self.agora(), "quando": datetime.now().isoformat(timespec="seconds"), **dados}
+        evento = limpar({"tipo": tipo, "agora": self.agora(), "quando": datetime.now().isoformat(timespec="seconds"), **dados})
         self.historico.append(evento)
         with self.log.open("a", encoding="utf-8") as arquivo:
-            arquivo.write(json.dumps(evento, ensure_ascii=False) + "\n")
+            arquivo.write(para_json(evento) + "\n")
         for fila in list(self.assinantes):
             try:
                 fila.send_nowait(evento)
-            except (anyio.WouldBlock, anyio.BrokenResourceError, anyio.ClosedResourceError):
+            except anyio.WouldBlock:
+                # Cliente lento: fecha a conexão; o navegador reconecta sozinho e recarrega o estado.
+                self.assinantes.discard(fila)
+                fila.close()
+            except (anyio.BrokenResourceError, anyio.ClosedResourceError):
                 self.assinantes.discard(fila)
         return evento
 
@@ -246,6 +316,12 @@ class Mundo:
         info["ferramentas"][ferramenta] = info["ferramentas"].get(ferramenta, 0) + 1
 
     # ---------- eventos (a caixa de entrada do time) ----------
+    def _chegar_do_cenario(self, p: dict, minuto: float) -> None:
+        indice = bisect.bisect_left(self._chegadas, minuto)
+        if indice < len(self._chegadas) and self._chegadas[indice] == minuto:
+            self._chegadas.pop(indice)
+        self.receber_evento(p)
+
     def receber_evento(self, p: dict, responde_a: str | None = None, evento_id: str | None = None, origem: str = "cenario") -> dict:
         eid = evento_id or p["id"]
         item = {
@@ -268,38 +344,53 @@ class Mundo:
         return item
 
     def mensagem_do_mundo(self, de: str, nome: str, assunto: str, corpo: str, responde_a: str | None = None) -> dict:
-        if responde_a:
+        if responde_a and responde_a in self.caixa:
             n = sum(1 for k in self.caixa if k.startswith(f"{responde_a}-R")) + 1
             eid = f"{responde_a}-R{n}"
         else:
+            responde_a = None
             eid = self.novo_id("MSG", 1, 3)
         return self.receber_evento({"de": de, "nome": nome, "assunto": assunto, "corpo": corpo}, responde_a, eid, origem="mundo")
 
     def evento_manual(self, de: str, nome: str, assunto: str, corpo: str) -> dict:
         return self.receber_evento({"de": de, "nome": nome, "assunto": assunto, "corpo": corpo}, None, self.novo_id("MAN", 1, 3), origem="painel")
 
-    def evento(self, evento_id: str) -> dict:
+    def evento(self, evento_id: Any) -> dict:
         item = self.caixa.get(str(evento_id))
         if not item:
-            raise ErroFerramenta(404, f"Evento {evento_id} não encontrado.")
+            raise ErroFerramenta(404, f"Evento {evento_id} não encontrado. Veja os ids com listar_eventos.")
         return item
+
+    def evento_opcional(self, evento_id: Any) -> dict | None:
+        if evento_id in (None, ""):
+            return None
+        return self.evento(evento_id)
 
     @staticmethod
     def publico(item: dict) -> dict:
         return {k: v for k, v in item.items() if not k.startswith("_") and k != "minuto"}
+
+    def proximo_em(self) -> dict | None:
+        if not self._chegadas:
+            return None
+        minuto = self._chegadas[0]
+        falta = max(0.0, minuto - self.relogio.minuto())
+        return {"hora_simulada": self.relogio.texto(minuto), "em_segundos_reais": round(self.relogio.segundos_reais(falta), 1)}
 
     def _base_eventos(self) -> Base:
         def atualizar(registro: dict, dados: dict, agente: str) -> dict:
             item = self.caixa[registro["id"]]
             for campo in ("status", "observacao"):
                 if campo in dados:
-                    item[campo] = str(dados[campo])[:200]
+                    item[campo] = texto_limitado(dados[campo], campo, 200 if campo == "status" else LIMITE_TEXTO)
             return self.publico(item)
 
         return Base(
             "eventos",
-            "Tudo o que chegou para o time. O time pode usar o status e a observação como quiser.",
+            "Tudo o que chegou para o time. O status começa em novo, vira lido quando um agente pega o evento e respondido quando alguém responde; "
+            "o time pode gravar o status e a observação que quiser.",
             lambda: [self.publico(i) for i in self.caixa.values()],
+            campos=("id", "de", "nome", "assunto", "corpo", "chegou_em", "status", "responde_a", "origem", "acoes", "observacao"),
             atualizar=atualizar,
             campos_atualizaveis=("status", "observacao"),
         )
@@ -313,17 +404,24 @@ class Mundo:
             agora = self.relogio.minuto()
             while self._agenda and self._agenda[0][0] <= agora:
                 _, _, funcao = heapq.heappop(self._agenda)
-                funcao()
-            self.tema.ao_avancar()
+                try:
+                    funcao()
+                except Exception:
+                    traceback.print_exc()
+            try:
+                self.tema.ao_avancar()
+            except Exception:
+                traceback.print_exc()
             if self.relogio.encerrado() and not self._fim_avisado:
                 self._fim_avisado = True
                 self.emitir("fim", mensagem="O cenário terminou.")
 
     # ---------- chamadas MCP ----------
-    def sortear_falha(self) -> str | None:
+    def sortear_falha(self, leitura: bool) -> str | None:
         if self.sorteio.random() >= self.prob_erro:
             return None
-        tipos, pesos = zip(*FALHAS)
+        falhas = [(t, p) for t, p in FALHAS if not (leitura and t == "conflito")]
+        tipos, pesos = zip(*falhas)
         return self.sorteio.choices(tipos, weights=pesos)[0]
 
     def marcar_acao(self, evento_id: Any, ferramenta: str, agente: str) -> None:
@@ -332,13 +430,20 @@ class Mundo:
             item["acoes"].append({"ferramenta": ferramenta, "agente": agente, "agora": self.agora()})
             item.setdefault("_primeira_acao", self.relogio.minuto())
 
+    async def _esperar_evento(self, segundos: float) -> None:
+        limite = time.monotonic() + segundos
+        while time.monotonic() < limite:
+            if any(i["status"] == "novo" for i in self.caixa.values()) or self.relogio.encerrado():
+                return
+            await anyio.sleep(0.25)
+
     async def chamar(self, nome: str, argumentos: dict | None) -> types.CallToolResult:
         if self.relogio.iniciar():
             self.emitir("inicio", mensagem="O primeiro agente se conectou. O relógio começou.")
         inicio = time.monotonic()
-        args = dict(argumentos or {})
-        agente = str(args.pop("agente", "") or "").strip()
-        motivo = str(args.pop("motivo", "") or "").strip()
+        args = limpar(dict(argumentos or {})) if isinstance(argumentos, dict) else {}
+        agente = str(args.pop("agente", "") or "").strip()[:LIMITE_AGENTE]
+        motivo = str(args.pop("motivo", "") or "").strip()[:LIMITE_TEXTO]
         ferramenta = self.ferramentas.get(nome)
         falha: str | None = None
         resultado: Any = None
@@ -352,13 +457,20 @@ class Mundo:
             faltando = [c for c in ferramenta.obrigatorios if args.get(c) in (None, "", [], {})]
             if faltando:
                 raise ErroFerramenta(400, "Faltam parâmetros: " + ", ".join(faltando))
+            if not ferramenta.leitura and self.relogio.encerrado():
+                raise ErroFerramenta(410, "O cenário terminou: o mundo não aceita mais ações. Reinicie o servidor para começar de novo.")
 
-            falha = self.sortear_falha() if ferramenta.falha else None
+            if nome == "proximo_evento":
+                espera = inteiro(args.get("esperar_segundos"), "esperar_segundos", 0, 0, 30)
+                if espera:
+                    await self._esperar_evento(espera)
+
+            falha = self.sortear_falha(ferramenta.leitura) if ferramenta.falha else None
             if falha == "lento":
                 await anyio.sleep(self.sorteio.uniform(2, 5))
             elif falha == "timeout":
                 await anyio.sleep(self.sorteio.uniform(5, 9))
-                if self.sorteio.random() < 0.5:
+                if not ferramenta.leitura and self.sorteio.random() < 0.5:
                     try:
                         ferramenta.funcao(args, agente)
                     except ErroFerramenta:
@@ -369,6 +481,9 @@ class Mundo:
             resultado = ferramenta.funcao(args, agente)
         except ErroFerramenta as e:
             erro = (e.codigo, e.mensagem, e.extra)
+        except Exception as e:  # nunca devolver erro fora do contrato
+            traceback.print_exc()
+            erro = (500, f"Erro interno do servidor ({type(e).__name__}). Tente de novo e, se repetir, avise a organização.", {})
 
         self.total_chamadas += 1
         self.total_erros += int(bool(erro))
@@ -393,7 +508,7 @@ class Mundo:
                 duracao_ms=int((time.monotonic() - inicio) * 1000),
             )
         return types.CallToolResult(
-            content=[types.TextContent(type="text", text=json.dumps(resposta, ensure_ascii=False))],
+            content=[types.TextContent(type="text", text=para_json(resposta))],
             isError=bool(erro),
         )
 
@@ -401,6 +516,7 @@ class Mundo:
         """Registra no log e no painel uma ação feita pela tela do sistema legado (computer use)."""
         if self.relogio.iniciar():
             self.emitir("inicio", mensagem="O primeiro agente se conectou. O relógio começou.")
+        agente = agente[:LIMITE_AGENTE]
         self.total_chamadas += 1
         self.total_erros += int(not ok)
         self.contar_agente(agente, f"tela/{sistema}", not ok)
@@ -418,7 +534,7 @@ class Mundo:
         )
 
     # ---------- ferramentas genéricas ----------
-    def base(self, nome: str) -> Base:
+    def base(self, nome: Any) -> Base:
         base = self.bases.get(str(nome))
         if not base:
             raise ErroFerramenta(404, f"A base '{nome}' não existe.", bases=list(self.bases))
@@ -437,47 +553,56 @@ class Mundo:
                     item["status"] = "lido"
                     item["lido_por"] = agente
                     return {"evento": self.publico(item)}
+            encerrado = self.relogio.encerrado()
             return {
                 "evento": None,
-                "mensagem": "Nenhum evento novo agora." if not self.relogio.encerrado() else "O cenário terminou.",
-                "encerrado": self.relogio.encerrado(),
+                "mensagem": "O cenário terminou." if encerrado else "Nenhum evento novo agora. Espere e pergunte de novo.",
+                "encerrado": encerrado,
+                "proximo_evento_do_cenario": None if encerrado else self.proximo_em(),
             }
 
         def listar_eventos(args, agente):
             status = args.get("status")
             itens = [i for i in self.caixa.values() if not status or i["status"] == status]
+            limite = inteiro(args.get("limite"), "limite", 50, 1, 200)
+            offset = inteiro(args.get("offset"), "offset", 0, 0, 10**6)
             campos = ("id", "de", "assunto", "status", "chegou_em", "responde_a", "origem")
-            return {"eventos": [{k: i.get(k) for k in campos} for i in itens][-60:]}
+            pagina = [{k: i.get(k) for k in campos} for i in itens[offset : offset + limite]]
+            return {"total": len(itens), "offset": offset, "eventos": pagina, "tem_mais": offset + limite < len(itens)}
 
         def ler_evento(args, agente):
             return {"evento": self.publico(self.evento(args["evento_id"]))}
 
         def responder_evento(args, agente):
             item = self.evento(args["evento_id"])
+            mensagem = texto_limitado(args["mensagem"], "mensagem")
+            aguardar = args.get("aguardar_resposta") in VERDADEIROS
             item["status"] = "respondido"
-            aguardar = bool(args.get("aguardar_resposta"))
             self.marcar_acao(item["id"], "responder_evento", agente)
-            self.tema.ao_responder(item, str(args["mensagem"]), aguardar)
-            extra = "Se a pessoa responder, a resposta chega como evento novo." if aguardar else ""
-            return {"mensagem": f"Resposta enviada para {item['de']}. {extra}".strip()}
+            vai_responder = self.tema.ao_responder(item, mensagem, aguardar)
+            if aguardar and vai_responder:
+                aviso = "A pessoa vai responder; a resposta chega depois como evento novo."
+            elif aguardar:
+                aviso = "Quem mandou este evento não costuma responder de volta."
+            else:
+                aviso = ""
+            return {"mensagem": f"Resposta enviada para {item['de']}. {aviso}".strip()}
 
         def enviar_mensagem(args, agente):
-            para = str(args["para"]).strip()
+            evento = self.evento_opcional(args.get("evento_id"))
             registro = {
                 "id": self.novo_id("ENV", 1, 3),
-                "para": para,
-                "assunto": str(args.get("assunto", "")),
-                "mensagem": str(args["mensagem"]),
+                "para": texto_limitado(args["para"], "para", 200).strip(),
+                "assunto": texto_limitado(args.get("assunto"), "assunto", 300),
+                "mensagem": texto_limitado(args["mensagem"], "mensagem"),
                 "agente": agente,
-                "evento_id": args.get("evento_id"),
+                "evento_id": evento["id"] if evento else None,
                 "enviada_em": self.agora(),
             }
             destino = self.tema.ao_mensagem(registro)
-            if destino is None:
-                raise ErroFerramenta(404, f"Ninguém no mundo com o endereço '{para}'. Consulte as bases de pessoas e times.")
             self.mensagens.append(registro)
             self.marcar_acao(registro["evento_id"], "enviar_mensagem", agente)
-            return {"mensagem_id": registro["id"], "entregue_para": destino}
+            return {"mensagem_id": registro["id"], **destino}
 
         def listar_bases(args, agente):
             return {"bases": [b.resumo() for b in self.bases.values()]}
@@ -487,16 +612,24 @@ class Mundo:
             filtro = args.get("filtro") or {}
             if not isinstance(filtro, dict):
                 raise ErroFerramenta(422, "'filtro' precisa ser um objeto {campo: valor}.")
-            busca = sem_acento(args.get("busca", ""))
-            limite = max(1, min(int(args.get("limite") or 20), 100))
+            busca = sem_acento(args.get("busca") or "")
+            limite = inteiro(args.get("limite"), "limite", 20, 1, 100)
+            offset = inteiro(args.get("offset"), "offset", 0, 0, 10**6)
             achados = []
             for r in base.registros():
                 if any(sem_acento(v) not in sem_acento(r.get(k, "")) for k, v in filtro.items()):
                     continue
-                if busca and not all(t in sem_acento(json.dumps(r, ensure_ascii=False)) for t in busca.split()):
+                if busca and not all(t in sem_acento(json.dumps(r, ensure_ascii=False, default=str)) for t in busca.split()):
                     continue
                 achados.append(r)
-            return {"base": base.nome, "total": len(achados), "registros": achados[:limite]}
+            pagina = achados[offset : offset + limite]
+            resposta = {"base": base.nome, "total": len(achados), "offset": offset, "registros": pagina, "tem_mais": offset + limite < len(achados)}
+            if resposta["tem_mais"]:
+                resposta["aviso"] = f"Mostrando {len(pagina)} de {len(achados)}. Use offset={offset + len(pagina)} para ver o resto."
+            desconhecidos = [k for k in filtro if base.campos and k not in base.campos]
+            if desconhecidos:
+                resposta["aviso_filtro"] = "Campos que não existem nesta base: " + ", ".join(desconhecidos)
+            return resposta
 
         def registrar(args, agente):
             base = self.base(args["base"])
@@ -505,11 +638,17 @@ class Mundo:
             dados = args.get("dados") or {}
             if not isinstance(dados, dict):
                 raise ErroFerramenta(422, "'dados' precisa ser um objeto.")
-            if args.get("evento_id"):
-                dados.setdefault("evento_id", args["evento_id"])
+            evento = self.evento_opcional(args.get("evento_id") or dados.get("evento_id"))
+            if evento:
+                dados = dict(dados, evento_id=evento["id"])
             novo = base.registrar(dados, agente)
-            self.marcar_acao(args.get("evento_id"), "registrar", agente)
-            return {"base": base.nome, "registro": novo}
+            usados = set(base.campos_registro) | {"evento_id"} | set(novo) | set(novo.get("campos") or {})
+            ignorados = [k for k in dados if base.campos_registro and k not in usados]
+            self.marcar_acao(evento["id"] if evento else None, "registrar", agente)
+            resposta = {"base": base.nome, "registro": novo}
+            if ignorados:
+                resposta["campos_ignorados"] = ignorados
+            return resposta
 
         def atualizar(args, agente):
             base = self.base(args["base"])
@@ -521,68 +660,110 @@ class Mundo:
             proibidos = [c for c in dados if c not in base.campos_atualizaveis]
             if proibidos:
                 raise ErroFerramenta(422, "Estes campos não podem ser alterados: " + ", ".join(proibidos), campos=list(base.campos_atualizaveis))
+            evento = self.evento_opcional(args.get("evento_id"))
             registro = self.registro(base, args["id"])
             novo = base.atualizar(registro, dados, agente)
-            self.marcar_acao(args.get("evento_id") or (args["id"] if base.nome == "eventos" else None), "atualizar", agente)
+            if base.nome != "eventos":  # mexer só no status do evento não conta como ação de atendimento
+                self.marcar_acao(evento["id"] if evento else None, "atualizar", agente)
             return {"base": base.nome, "registro": novo}
 
         def registrar_conversa(args, agente):
-            self.emitir("conversa", de=str(args["de"]), para=str(args["para"]), mensagem=str(args["mensagem"]))
-            return {"mensagem": "Conversa registrada."}
+            de = str(args.get("de") or agente)[:LIMITE_AGENTE]
+            self.emitir("conversa", de=de, para=str(args["para"])[:LIMITE_AGENTE], mensagem=texto_limitado(args["mensagem"], "mensagem"))
+            return {"mensagem": "Conversa registrada no painel e no log."}
 
-        ev = {"evento_id": texto("Id do evento relacionado (opcional)")}
+        ev = {"evento_id": texto("Id do evento relacionado (opcional). Ligar a ação ao evento conta como atendimento dele")}
+        paginacao = {
+            "limite": numero("Quantos registros devolver"),
+            "offset": numero("Quantos pular, para paginar (padrão 0)"),
+        }
         return [
-            Ferramenta("proximo_evento", "Pega o próximo evento novo da caixa de entrada do time e marca como lido.", proximo_evento),
-            Ferramenta("listar_eventos", "Lista os eventos da caixa de entrada, com filtro opcional por status.", listar_eventos, {"status": texto("Status (opcional)")}),
-            Ferramenta("ler_evento", "Lê um evento inteiro, com o que já foi feito nele.", ler_evento, {"evento_id": texto("Id do evento")}, ["evento_id"]),
+            Ferramenta(
+                "proximo_evento",
+                "Pega o próximo evento novo da caixa de entrada do time e marca como lido. Sem evento novo, devolve evento=null, "
+                "encerrado (true quando o cenário acabou) e quando chega o próximo evento do cenário. Use esperar_segundos (até 30) "
+                "para o servidor esperar um evento chegar antes de responder. O agente deve chamar em laço até encerrado=true.",
+                proximo_evento,
+                {"esperar_segundos": numero("Esperar até N segundos (0 a 30) por um evento novo")},
+                leitura=True,
+            ),
+            Ferramenta(
+                "listar_eventos",
+                "Lista os eventos da caixa de entrada, do mais antigo para o mais novo. Status do sistema: novo, lido, respondido; "
+                "o time pode gravar outros com atualizar na base eventos. Devolve total e tem_mais para paginar.",
+                listar_eventos,
+                {"status": texto("Filtra por status (opcional)"), **{k: dict(v, description=v["description"] + (" (padrão 50, máx. 200)" if k == "limite" else "")) for k, v in paginacao.items()}},
+                leitura=True,
+            ),
+            Ferramenta("ler_evento", "Lê um evento inteiro, com o que já foi feito nele.", ler_evento, {"evento_id": texto("Id do evento")}, ["evento_id"], leitura=True),
             Ferramenta(
                 "responder_evento",
-                "Responde a quem mandou o evento. Com aguardar_resposta=true, a pessoa pode responder de volta, e a resposta chega como evento novo.",
+                "Responde a quem mandou o evento e marca o evento como respondido.",
                 responder_evento,
-                {"evento_id": texto("Id do evento"), "mensagem": texto("Texto da resposta"), "aguardar_resposta": {"type": "boolean"}},
+                {
+                    "evento_id": texto("Id do evento"),
+                    "mensagem": texto("Texto da resposta"),
+                    "aguardar_resposta": {"type": "boolean", "description": "true se a resposta pede algo de volta (ex.: uma informação que falta); se a pessoa responder, chega um evento novo"},
+                },
                 ["evento_id", "mensagem"],
             ),
             Ferramenta(
                 "enviar_mensagem",
-                "Envia uma mensagem para qualquer pessoa ou time do mundo, pelo e-mail. Respostas chegam como eventos novos.",
+                "Envia uma mensagem, pelo e-mail, para alguém do mundo: um time, uma pessoa que mandou evento ou alguém das bases do tema. "
+                "Só responde quem o tema prevê (veja a resposta); as respostas chegam como eventos novos.",
                 enviar_mensagem,
-                {"para": texto("E-mail da pessoa ou do time"), "assunto": texto(""), "mensagem": texto("Texto"), **ev},
+                {"para": texto("E-mail da pessoa ou do time"), "assunto": texto("Assunto da mensagem"), "mensagem": texto("Texto"), **ev},
                 ["para", "mensagem"],
             ),
-            Ferramenta("listar_bases", "Lista as bases de dados do mundo: o que cada uma guarda, os campos e o que pode ser registrado ou alterado.", listar_bases),
+            Ferramenta(
+                "listar_bases",
+                "Lista as bases de dados do mundo: o que cada uma guarda, a chave, os campos, quais campos registrar e quais podem ser alterados.",
+                listar_bases,
+                leitura=True,
+            ),
             Ferramenta(
                 "consultar",
-                "Consulta qualquer base. 'filtro' compara campo a campo (contém, sem acento); 'busca' procura palavras em qualquer campo.",
+                "Consulta uma base. 'filtro' compara campo a campo (o valor só precisa estar contido, sem diferença de acento); "
+                "'busca' exige que todas as palavras apareçam em algum campo. Devolve total e tem_mais para paginar.",
                 consultar,
-                {"base": texto("Nome da base"), "filtro": objeto("{campo: valor}"), "busca": texto("Palavras (opcional)"), "limite": {"type": "integer"}},
+                {
+                    "base": texto("Nome da base (veja listar_bases)"),
+                    "filtro": objeto("{campo: valor}"),
+                    "busca": texto("Palavras (opcional)"),
+                    "limite": numero("Quantos registros devolver (padrão 20, máx. 100)"),
+                    "offset": paginacao["offset"],
+                },
                 ["base"],
+                leitura=True,
             ),
             Ferramenta(
                 "registrar",
-                "Cria um registro novo numa base que aceite. O mundo valida as regras do tema e recusa o que estiver errado.",
+                "Cria um registro novo numa base que aceite. Os campos esperados de cada base estão em listar_bases (campos_para_registrar). "
+                "O mundo valida as regras do tema e recusa o que estiver errado.",
                 registrar,
                 {"base": texto("Nome da base"), "dados": objeto("Campos do registro"), **ev},
                 ["base", "dados"],
             ),
             Ferramenta(
                 "atualizar",
-                "Altera campos de um registro existente. O mundo valida as regras do tema e recusa o que estiver errado.",
+                "Altera campos de um registro existente, achado pela chave da base (veja chave em listar_bases: id, patrimonio etc.). "
+                "O mundo valida as regras do tema e recusa o que estiver errado.",
                 atualizar,
                 {"base": texto("Nome da base"), "id": texto("Valor da chave do registro"), "dados": objeto("Campos a mudar"), **ev},
                 ["base", "id", "dados"],
             ),
             Ferramenta(
                 "registrar_conversa",
-                "Deixa no painel e no log uma conversa entre dois agentes do time.",
+                "Deixa no painel e no log uma conversa entre dois agentes do time. Não entrega nada a ninguém: o time decide como os agentes se falam de verdade.",
                 registrar_conversa,
-                {"de": texto("Agente que fala"), "para": texto("Agente que recebe"), "mensagem": texto("O que foi dito")},
-                ["de", "para", "mensagem"],
+                {"de": texto("Agente que fala (padrão: o próprio agente)"), "para": texto("Agente que recebe"), "mensagem": texto("O que foi dito")},
+                ["para", "mensagem"],
                 falha=False,
             ),
         ]
 
     def estado(self) -> dict:
-        return {
+        return limpar({
             "tema": self.tema.titulo,
             "cenario": self.cenario.get("nome", ""),
             "agora": self.agora(),
@@ -603,7 +784,7 @@ class Mundo:
             ],
             "alertas": self.alertas[-100:],
             "historico": list(self.historico)[-200:],
-        }
+        })
 
 
 class TemaBase:
@@ -623,10 +804,13 @@ class TemaBase:
 
     def ao_receber(self, item: dict) -> None: ...
 
-    def ao_responder(self, item: dict, mensagem: str, aguardar: bool) -> None: ...
+    def ao_responder(self, item: dict, mensagem: str, aguardar: bool) -> bool:
+        """Devolve True se quem mandou o evento vai responder de volta."""
+        return False
 
-    def ao_mensagem(self, registro: dict) -> str | None:
-        return None
+    def ao_mensagem(self, registro: dict) -> dict:
+        """Entrega a mensagem e devolve {"entregue_para": ..., "vai_responder": bool}; ErroFerramenta se o endereço não existe."""
+        raise ErroFerramenta(404, f"Ninguém no mundo com o endereço '{registro['para']}'.")
 
     def ao_avancar(self) -> None: ...
 

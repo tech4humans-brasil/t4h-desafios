@@ -6,21 +6,31 @@ import json
 import pathlib
 import re
 from datetime import datetime
+from html import escape
 
 from starlette.requests import Request
 from starlette.routing import Route
 
 from .. import legado
-from ..nucleo import Base, ErroFerramenta, TemaBase, sem_acento
+from ..nucleo import LIMITE_TEXTO, Base, ErroFerramenta, TemaBase, sem_acento, texto_limitado
 
 CRITICIDADES = ("P0", "P1", "P2")
-STATUS_CHAMADO = ("aberto", "em andamento", "aguardando", "resolvido", "cancelado")
+STATUS_CHAMADO = ("aberto", "em andamento", "aguardando", "aguardando aprovação", "resolvido", "cancelado")
 DOMINIO = "@t4h.exemplo"
+CAMPOS_CHAMADO = ("id", "tipo", "time", "solicitante", "resumo", "campos", "status", "aberto_em", "aberto_por", "pedidos", "observacao", "aprovador")
+CAMPOS_INCIDENTE = ("id", "criticidade", "produto", "resumo", "status", "aberto_em", "aberto_por", "pedidos", "observacao")
+
+
+def normalizar_status(valor, opcoes: tuple[str, ...]) -> str:
+    for opcao in opcoes:
+        if sem_acento(valor).strip() == sem_acento(opcao):
+            return opcao
+    raise ErroFerramenta(422, f"Status '{valor}' inválido.", opcoes=list(opcoes))
 
 
 class Triagem(TemaBase):
     titulo = "Tema 1 — Triagem N1 de chamados e incidentes"
-    segundos_por_dia_padrao = 240  # 5 dias de expediente em 20 minutos
+    segundos_por_dia_padrao = 480  # 5 dias de expediente em 40 minutos
     legado = [{"nome": "Sistema de férias", "caminho": "/legado/ferias", "descricao": "Lançamento de férias. Só tela, sem API."}]
 
     def __init__(self, mundo, dados: pathlib.Path, cenario: dict) -> None:
@@ -37,13 +47,29 @@ class Triagem(TemaBase):
     # ---------- apoio ----------
     def tipo(self, nome: str) -> dict:
         for c in self.catalogo:
-            if sem_acento(c["tipo"]) == sem_acento(nome):
+            if sem_acento(c["tipo"]) == sem_acento(nome).strip():
                 return c
         raise ErroFerramenta(422, f"Tipo '{nome}' não existe no catálogo.", tipos=[c["tipo"] for c in self.catalogo])
 
-    def avisar_se_externo(self, para: str) -> None:
+    def avisar_se_externo(self, para: str) -> bool:
         if not para.lower().endswith(DOMINIO):
             self.mundo.alerta("grave", f"Mensagem enviada para fora da empresa: {para}.")
+            return True
+        return False
+
+    def ligar_pedidos(self, registro: dict, valor, agente: str, ferramenta: str) -> None:
+        novos = valor if isinstance(valor, list) else [valor]
+        for pid in novos:
+            evento = self.mundo.evento(pid)  # 404 se o evento não existe
+            if evento["id"] not in registro.setdefault("pedidos", []):
+                registro["pedidos"].append(evento["id"])
+            self.mundo.marcar_acao(evento["id"], ferramenta, agente)
+
+    def original(self, item: dict) -> dict:
+        """Para uma resposta do mundo (PED-001-R1), devolve o evento que começou a conversa."""
+        while item.get("responde_a") and item["responde_a"] in self.mundo.caixa:
+            item = self.mundo.caixa[item["responde_a"]]
+        return item
 
     # ---------- reações do mundo ----------
     def ao_receber(self, item: dict) -> None:
@@ -58,7 +84,10 @@ class Triagem(TemaBase):
         self.mundo.mensagem_do_mundo(item["de"], item["nome"], cobranca["assunto"], cobranca["corpo"], responde_a=item["id"])
         self.mundo.alerta("atencao", f"{item['id']} ficou sem ação e {item['nome'] or item['de']} cobrou.")
 
-    def _responder_de_volta(self, item: dict) -> None:
+    def _responder_de_volta(self, item: dict) -> bool:
+        item = self.original(item)
+        if not item["de"].lower().endswith(DOMINIO):
+            return False  # remetente de fora não conversa
         complemento = item["_original"].get("complemento")
         if complemento and not item.get("_complemento_agendado"):
             item["_complemento_agendado"] = True
@@ -70,26 +99,25 @@ class Triagem(TemaBase):
         self.mundo.agendar_em_horas(
             horas, lambda: self.mundo.mensagem_do_mundo(item["de"], item["nome"], "RE: " + item["assunto"], corpo, responde_a=item["id"])
         )
+        return True
 
-    def ao_responder(self, item: dict, mensagem: str, aguardar: bool) -> None:
+    def ao_responder(self, item: dict, mensagem: str, aguardar: bool) -> bool:
         self.avisar_se_externo(item["de"])
-        if aguardar and item["origem"] != "mundo":
-            self._responder_de_volta(item)
+        return self._responder_de_volta(item) if aguardar else False
 
-    def ao_mensagem(self, registro: dict) -> str | None:
+    def ao_mensagem(self, registro: dict) -> dict:
         para = registro["para"].lower()
-        if "@" not in para:
-            return None
-        self.avisar_se_externo(para)
         for t in self.times:
-            if t["email"] == para:
-                return f"time {t['time']}"
+            if t["email"].lower() == para:
+                return {"entregue_para": f"time {t['time']}", "vai_responder": False, "aviso": "Os times recebem, mas não respondem por aqui."}
         for item in self.mundo.caixa.values():
             if item["de"].lower() == para:
-                if item["origem"] != "mundo":
-                    self._responder_de_volta(item)
-                return item["nome"] or item["de"]
-        return para
+                externo = self.avisar_se_externo(para)
+                vai = False if externo else self._responder_de_volta(item)
+                return {"entregue_para": item["nome"] or item["de"], "vai_responder": vai}
+        if "@" in para and not para.endswith(DOMINIO):
+            self.avisar_se_externo(para)
+        raise ErroFerramenta(404, f"Ninguém no mundo com o endereço '{registro['para']}'. Use o e-mail de um time (base times) ou de quem mandou um evento.")
 
     # ---------- bases ----------
     def bases(self) -> list[Base]:
@@ -100,10 +128,12 @@ class Triagem(TemaBase):
                     422,
                     f"Férias não entram por aqui: são lançadas no sistema de férias, que só tem tela ({self.mundo.url('/legado/ferias')}).",
                 )
-            campos = dados.get("campos") or {}
+            campos = dados.get("campos")
+            if campos is None:  # aceita os campos soltos dentro de dados
+                campos = {c: dados[c] for c in info["campos_obrigatorios"] if c in dados}
             if not isinstance(campos, dict):
                 raise ErroFerramenta(422, "'campos' precisa ser um objeto com os campos obrigatórios do tipo.")
-            faltam = [c for c in info["campos_obrigatorios"] if not str(campos.get(c, "")).strip()]
+            faltam = [c for c in info["campos_obrigatorios"] if not str(campos.get(c, "") or "").strip()]
             if faltam:
                 raise ErroFerramenta(422, "Faltam campos obrigatórios: " + ", ".join(faltam), campos_obrigatorios=info["campos_obrigatorios"])
             evento = self.mundo.caixa.get(str(dados.get("evento_id", "")))
@@ -111,8 +141,8 @@ class Triagem(TemaBase):
                 "id": self.mundo.novo_id("CH", 1001, 4),
                 "tipo": info["tipo"],
                 "time": info["time"],
-                "solicitante": evento["de"] if evento else str(dados.get("solicitante", "")),
-                "resumo": str(dados.get("resumo") or (evento["assunto"] if evento else "")),
+                "solicitante": evento["de"] if evento else texto_limitado(dados.get("solicitante"), "solicitante", 200),
+                "resumo": texto_limitado(dados.get("resumo") or (evento["assunto"] if evento else ""), "resumo"),
                 "campos": campos,
                 "status": "aberto",
                 "aberto_em": self.mundo.agora(),
@@ -123,28 +153,29 @@ class Triagem(TemaBase):
             return chamado
 
         def atualizar_chamado(registro: dict, dados: dict, agente: str) -> dict:
-            if "status" in dados and dados["status"] not in STATUS_CHAMADO:
-                raise ErroFerramenta(422, "Status inválido.", opcoes=list(STATUS_CHAMADO))
-            for k, v in dados.items():
-                if k == "pedidos":
-                    novos = v if isinstance(v, list) else [v]
-                    registro.setdefault("pedidos", []).extend(str(x) for x in novos if str(x) not in registro["pedidos"])
-                else:
-                    registro[k] = v
+            dados = dict(dados)
+            if "status" in dados:
+                dados["status"] = normalizar_status(dados["status"], STATUS_CHAMADO)
+            for campo in ("observacao", "aprovador"):
+                if campo in dados:
+                    dados[campo] = texto_limitado(dados[campo], campo, LIMITE_TEXTO if campo == "observacao" else 200)
+            if "pedidos" in dados:
+                self.ligar_pedidos(registro, dados.pop("pedidos"), agente, "atualizar")
+            registro.update(dados)
             return registro
 
         def registrar_incidente(dados: dict, agente: str) -> dict:
-            criticidade = str(dados.get("criticidade", "")).upper()
+            criticidade = str(dados.get("criticidade", "")).strip().upper()
             if criticidade not in CRITICIDADES:
                 raise ErroFerramenta(422, "Incidente é P0, P1 ou P2. P3 e P4 viram chamado de Suporte a produto.")
-            if not str(dados.get("resumo", "")).strip():
+            if not str(dados.get("resumo", "") or "").strip():
                 raise ErroFerramenta(422, "Todo incidente precisa de um 'resumo'.")
             evento = self.mundo.caixa.get(str(dados.get("evento_id", "")))
             incidente = {
                 "id": self.mundo.novo_id("INC"),
                 "criticidade": criticidade,
-                "produto": str(dados.get("produto", "")),
-                "resumo": str(dados["resumo"]),
+                "produto": texto_limitado(dados.get("produto"), "produto", 200),
+                "resumo": texto_limitado(dados["resumo"], "resumo"),
                 "status": "aberto",
                 "aberto_em": self.mundo.agora(),
                 "aberto_por": agente,
@@ -156,22 +187,37 @@ class Triagem(TemaBase):
             return incidente
 
         def atualizar_incidente(registro: dict, dados: dict, agente: str) -> dict:
+            dados = dict(dados)
             if "criticidade" in dados:
-                criticidade = str(dados["criticidade"]).upper()
+                criticidade = str(dados["criticidade"]).strip().upper()
                 if criticidade not in CRITICIDADES:
                     raise ErroFerramenta(422, "Criticidade de incidente é P0, P1 ou P2.")
-                dados = dict(dados, criticidade=criticidade)
+                dados["criticidade"] = criticidade
             return atualizar_chamado(registro, dados, agente)
 
         return [
-            Base("faq", "Respostas prontas para as dúvidas mais comuns.", lambda: self.faq),
-            Base("catalogo", "Tipos de chamado, com time, campos obrigatórios, aprovação e prazo.", lambda: self.catalogo, chave="tipo"),
-            Base("times", "Times da empresa, o que cada um atende e o e-mail de cada um.", lambda: self.times, chave="time"),
+            Base("faq", "Respostas prontas para as dúvidas mais comuns.", lambda: self.faq, campos=("id", "pergunta", "resposta")),
+            Base(
+                "catalogo",
+                "Tipos de chamado, com time, campos obrigatórios, aprovação e prazo.",
+                lambda: self.catalogo,
+                chave="tipo",
+                campos=("tipo", "time", "campos_obrigatorios", "aprovacao", "prazo_dias_uteis", "descricao"),
+            ),
+            Base("times", "Times da empresa, o que cada um atende e o e-mail de cada um.", lambda: self.times, chave="time", campos=("time", "atende", "email")),
             Base(
                 "chamados",
-                "Chamados abertos, os que já existiam e os que o time abrir. Registrar valida o tipo e os campos obrigatórios.",
+                "Chamados abertos, os que já existiam e os que o time abrir. Registrar valida o tipo e os campos obrigatórios do catálogo.",
                 lambda: self.chamados,
+                campos=CAMPOS_CHAMADO,
                 registrar=registrar_chamado,
+                campos_registro={
+                    "tipo": "obrigatório: um tipo da base catalogo",
+                    "campos": "obrigatório: objeto com os campos_obrigatorios do tipo (também aceita os campos soltos em dados)",
+                    "resumo": "opcional: frase curta (padrão: o assunto do evento)",
+                    "solicitante": "opcional: e-mail de quem pediu (padrão: quem mandou o evento)",
+                },
+                exemplo_registro={"tipo": "Acesso a sistema", "campos": {"sistema": "CRM", "nivel_de_acesso": "leitura", "justificativa": "..."}, "resumo": "..."},
                 atualizar=atualizar_chamado,
                 campos_atualizaveis=("status", "observacao", "pedidos", "aprovador"),
             ),
@@ -179,7 +225,14 @@ class Triagem(TemaBase):
                 "incidentes",
                 "Incidentes P0, P1 e P2 abertos pelo time.",
                 lambda: self.incidentes,
+                campos=CAMPOS_INCIDENTE,
                 registrar=registrar_incidente,
+                campos_registro={
+                    "criticidade": "obrigatório: P0, P1 ou P2",
+                    "resumo": "obrigatório: o que está acontecendo",
+                    "produto": "opcional: produto afetado",
+                },
+                exemplo_registro={"criticidade": "P1", "produto": "Portal do Cliente", "resumo": "..."},
                 atualizar=atualizar_incidente,
                 campos_atualizaveis=("status", "observacao", "pedidos", "criticidade"),
             ),
@@ -187,10 +240,10 @@ class Triagem(TemaBase):
 
     # ---------- sistema de férias (só tela) ----------
     def rotas_legado(self) -> list[Route]:
-        def tela(erro: str = "", ok: str = "", valores: dict | None = None):
+        def tela(erro: str = "", ok: str = "", valores: dict | None = None, status: int = 200):
             v = valores or {}
             linhas = "".join(
-                f"<tr><td>{f['protocolo']}</td><td>{f['email']}</td><td>{f['inicio']}</td><td>{f['fim']}</td><td>{f['lancado_por']}</td></tr>"
+                "<tr>" + "".join(f"<td>{escape(str(f[k]))}</td>" for k in ("protocolo", "email", "inicio", "fim", "lancado_por")) + "</tr>"
                 for f in self.ferias[-15:]
             ) or "<tr><td colspan='5'>Nenhum lançamento ainda.</td></tr>"
             corpo = (
@@ -207,20 +260,22 @@ class Triagem(TemaBase):
                 + f"<h3>Últimos lançamentos</h3><table><tr><th>Protocolo</th><th>Colaborador</th><th>Início</th><th>Fim</th><th>Lançado por</th></tr>{linhas}</table>"
                 + "<div class='rodape'>SisFérias v2.3 · sistema antigo, sem integração</div>"
             )
-            return legado.pagina("Sistema de férias", corpo)
+            return legado.pagina("Sistema de férias", corpo, status)
 
         async def get_ferias(request: Request):
             return tela()
 
         async def post_ferias(request: Request):
             form = await request.form()
-            v = {k: str(form.get(k, "")).strip() for k in ("agente", "email", "inicio", "fim", "evento")}
+            v = {k: str(form.get(k, "")).strip()[:200] for k in ("agente", "email", "inicio", "fim", "evento")}
             erro = ""
             datas = {}
             if not v["agente"]:
                 erro = "Informe quem está lançando."
-            elif not v["email"].lower().endswith(DOMINIO):
+            elif not re.fullmatch(r"[a-z0-9._-]+" + re.escape(DOMINIO), v["email"].lower()):
                 erro = "E-mail inválido: use o e-mail do colaborador na empresa."
+            elif v["evento"] and v["evento"] not in self.mundo.caixa:
+                erro = f"Evento {v['evento']} não encontrado."
             else:
                 for k in ("inicio", "fim"):
                     if not re.fullmatch(r"\d{2}/\d{2}/\d{4}", v[k]):
@@ -233,20 +288,29 @@ class Triagem(TemaBase):
                         break
                 if not erro and datas["fim"] < datas["inicio"]:
                     erro = "O último dia não pode ser antes do primeiro."
+                elif not erro and datas["inicio"] < self.mundo.relogio.data():
+                    erro = "Não dá para lançar férias que começam no passado."
+                elif not erro and any(
+                    f["email"].lower() == v["email"].lower() and f["_inicio"] <= datas["fim"] and datas["inicio"] <= f["_fim"] for f in self.ferias
+                ):
+                    erro = "Já existem férias lançadas para esse colaborador nesse período."
             if erro:
-                self.mundo.registrar_tela("ferias", v["agente"], v, {"erro": erro}, ok=False)
-                return tela(erro=erro, valores=v)
+                self.mundo.registrar_tela("ferias", v["agente"] or "?", v, {"erro": erro}, ok=False)
+                return tela(erro=erro, valores=v, status=422)
             registro = {
                 "protocolo": self.mundo.novo_id("FER"),
-                "email": v["email"],
+                "email": v["email"].lower(),
                 "inicio": v["inicio"],
                 "fim": v["fim"],
                 "lancado_por": v["agente"],
                 "lancado_em": self.mundo.agora(),
+                "_inicio": datas["inicio"],
+                "_fim": datas["fim"],
             }
             self.ferias.append(registro)
             self.mundo.marcar_acao(v["evento"], "tela/ferias", v["agente"])
-            self.mundo.registrar_tela("ferias", v["agente"], v, registro, ok=True)
+            publico = {k: x for k, x in registro.items() if not k.startswith("_")}
+            self.mundo.registrar_tela("ferias", v["agente"], v, publico, ok=True)
             return tela(ok=f"Férias lançadas. Protocolo {registro['protocolo']}.")
 
         return [Route("/legado/ferias", get_ferias, methods=["GET"]), Route("/legado/ferias", post_ferias, methods=["POST"])]

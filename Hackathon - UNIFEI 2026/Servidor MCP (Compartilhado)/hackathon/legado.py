@@ -23,20 +23,20 @@ button { font: inherit; padding: 3px 14px; margin-top: 12px; }
 """
 
 
-def pagina(titulo: str, corpo: str) -> HTMLResponse:
+def pagina(titulo: str, corpo: str, status: int = 200) -> HTMLResponse:
     html = (
         "<!doctype html><html lang='pt-BR'><head><meta charset='utf-8'>"
         f"<title>{escape(titulo)}</title><style>{ESTILO}</style></head><body>"
         f"<div class='janela'><div class='titulo'>{escape(titulo)}</div><div class='conteudo'>{corpo}</div></div>"
         "</body></html>"
     )
-    return HTMLResponse(html)
+    return HTMLResponse(html, status_code=status)
 
 
 def campo(nome: str, rotulo: str, valor: str = "", tipo: str = "text", extra: str = "") -> str:
     return (
-        f"<label for='{nome}'>{escape(rotulo)}</label>"
-        f"<input id='{nome}' name='{nome}' type='{tipo}' value='{escape(valor)}' {extra}>"
+        f"<label for='{escape(nome)}'>{escape(rotulo)}</label>"
+        f"<input id='{escape(nome)}' name='{escape(nome)}' type='{escape(tipo)}' value='{escape(valor)}' {extra}>"
     )
 
 
