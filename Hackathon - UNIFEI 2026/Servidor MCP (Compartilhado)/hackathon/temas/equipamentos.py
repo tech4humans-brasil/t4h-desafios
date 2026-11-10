@@ -34,7 +34,7 @@ def normalizar(valor, opcoes: tuple[str, ...], nome: str) -> str:
 
 class Equipamentos(TemaBase):
     titulo = "Tema 3 — Gestão de equipamentos"
-    segundos_por_dia_padrao = 120  # 22 dias de expediente em 44 minutos
+    segundos_por_dia_padrao = 55  # 22 dias de expediente em uns 20 minutos
     legado = [{"nome": "Portal do fornecedor", "caminho": "/legado/fornecedor", "descricao": "Compra de equipamentos. Só tela, sem API."}]
 
     def __init__(self, mundo, dados: pathlib.Path, cenario: dict) -> None:

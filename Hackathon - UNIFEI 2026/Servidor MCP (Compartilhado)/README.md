@@ -93,7 +93,7 @@ As reações do mundo não vêm na hora: chegam minutos depois, no relógio simu
 
 ## O relógio
 
-- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, 5 dias em 40 minutos no Tema 1, 10 dias em 40 minutos no Tema 2 e 22 dias em 44 minutos no Tema 3. `--segundos-por-dia` muda isso: mais alto dá mais tempo para o agente pensar.
+- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, uma rodada completa leva uns 20 minutos em todos os temas: 5 dias no Tema 1 (4 min por dia), 10 dias no Tema 2 (2 min por dia) e 22 dias no Tema 3 (55 s por dia). `--segundos-por-dia` (ou `SEGUNDOS_POR_DIA`) muda isso: mais alto dá mais tempo para o agente pensar, o que ajuda enquanto o time ainda está desenvolvendo. Com o relógio padrão, uma hora simulada passa em 10 a 24 segundos: um agente que demora minutos entre uma rodada e outra vai acumular eventos e receber cobranças.
 - O relógio começa na primeira chamada de qualquer agente, por MCP ou por uma tela.
 - Toda resposta traz a hora simulada em `agora`.
 - Quando o cenário acaba, as consultas continuam funcionando e as ações (`registrar`, `atualizar`, `responder_evento`, `enviar_mensagem`) passam a dar erro 410.

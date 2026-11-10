@@ -10,7 +10,7 @@ Na pasta do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/):
 TEMA=triagem docker compose up --build mundo
 ```
 
-Ou, sem Docker: `python mundo.py --tema triagem`. O cenário de treino tem ~60 eventos ao longo de 5 dias de expediente, a partir de 07/12/2026. Por padrão, um dia de expediente dura 8 minutos.
+Ou, sem Docker: `python mundo.py --tema triagem`. O cenário de treino tem ~60 eventos ao longo de 5 dias de expediente, a partir de 07/12/2026. Por padrão, um dia de expediente dura 4 minutos e o cenário inteiro, 20.
 
 ## As bases
 

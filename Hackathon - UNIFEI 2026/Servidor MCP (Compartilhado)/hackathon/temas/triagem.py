@@ -30,7 +30,7 @@ def normalizar_status(valor, opcoes: tuple[str, ...]) -> str:
 
 class Triagem(TemaBase):
     titulo = "Tema 1 — Triagem N1 de chamados e incidentes"
-    segundos_por_dia_padrao = 480  # 5 dias de expediente em 40 minutos
+    segundos_por_dia_padrao = 240  # 5 dias de expediente em 20 minutos
     legado = [{"nome": "Sistema de férias", "caminho": "/legado/ferias", "descricao": "Lançamento de férias. Só tela, sem API."}]
 
     def __init__(self, mundo, dados: pathlib.Path, cenario: dict) -> None:

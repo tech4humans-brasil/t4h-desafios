@@ -10,7 +10,7 @@ Na pasta do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/):
 TEMA=admissao docker compose up --build mundo
 ```
 
-Ou, sem Docker: `python mundo.py --tema admissao`. O cenário de treino tem 30 eventos ao longo de 10 dias de expediente, a partir de 30/11/2026, mais as respostas que o mundo manda. Por padrão, um dia de expediente dura 4 minutos.
+Ou, sem Docker: `python mundo.py --tema admissao`. O cenário de treino tem 30 eventos ao longo de 10 dias de expediente, a partir de 30/11/2026, mais as respostas que o mundo manda. Por padrão, um dia de expediente dura 2 minutos e o cenário inteiro, 20.
 
 ## As bases
 
