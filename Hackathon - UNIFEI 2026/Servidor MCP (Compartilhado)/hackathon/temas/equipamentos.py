@@ -5,6 +5,8 @@ from __future__ import annotations
 import csv
 import json
 import pathlib
+import re
+import secrets
 from datetime import date
 from html import escape
 
@@ -12,20 +14,27 @@ from starlette.requests import Request
 from starlette.routing import Route
 
 from .. import legado
-from ..nucleo import Base, ErroFerramenta, TemaBase, sem_acento, somar_dias_uteis
+from ..nucleo import LIMITE_TEXTO, Base, ErroFerramenta, TemaBase, sem_acento, somar_dias_uteis, texto_limitado
 
 USAVEIS = ("novo", "usado")
 SITUACOES = ("novo", "usado", "quebrado", "danificado", "perdido")
 STATUS = ("disponível", "reservado", "alocado", "uso interno", "baixado")
 CAMPOS_INVENTARIO = ("status", "situacao", "com_quem", "desde", "numero_serie", "marca", "modelo", "observacao")
-PALAVRAS_DEVOLUCAO = ("devolv", "deixei", "entreguei", "larguei", "trouxe")
-PALAVRAS_COBRANCA = ("devol", "equipamento", "notebook", "monitor", "headset", "kit", "eq-")
+SAIDA_SEM_VOLTA = ("perdido", "quebrado", "danificado")  # alocado só vira baixado nessas situações
 DOMINIO = "@t4h.exemplo"
+CAMPOS_ITEM = ("patrimonio", "tipo", "marca", "modelo", "numero_serie", "status", "situacao", "com_quem", "desde", "observacao")
+
+
+def normalizar(valor, opcoes: tuple[str, ...], nome: str) -> str:
+    for opcao in opcoes:
+        if sem_acento(valor).strip() == sem_acento(opcao):
+            return opcao
+    raise ErroFerramenta(422, f"{nome} '{valor}' inválido.", opcoes=list(opcoes))
 
 
 class Equipamentos(TemaBase):
     titulo = "Tema 3 — Gestão de equipamentos"
-    segundos_por_dia_padrao = 60  # 22 dias de expediente em 22 minutos
+    segundos_por_dia_padrao = 120  # 22 dias de expediente em 44 minutos
     legado = [{"nome": "Portal do fornecedor", "caminho": "/legado/fornecedor", "descricao": "Compra de equipamentos. Só tela, sem API."}]
 
     def __init__(self, mundo, dados: pathlib.Path, cenario: dict) -> None:
@@ -37,7 +46,9 @@ class Equipamentos(TemaBase):
         self.catalogo = json.loads((dados / "catalogo_compra.json").read_text(encoding="utf-8"))
         self.regras = json.loads((dados / "regras.json").read_text(encoding="utf-8"))
         self.compras: list[dict] = []
-        self.devolvidos: set[str] = set()
+        self.devolvidos: set[str] = set()  # patrimônios que já voltaram fisicamente
+        self.a_devolver: dict[tuple[str, str], int] = {}  # (colaborador, tipo) -> quantos voltaram sem patrimônio dito
+        self.tokens: dict[str, dict] = {}  # revisões do portal ainda não confirmadas
         self.dia_visto = 0
         self.entradas = {"completas": 0, "incompletas": 0}
         maior = max(int(p.split("-")[1]) for p in self.itens) if self.itens else 0
@@ -53,7 +64,7 @@ class Equipamentos(TemaBase):
             return achados[0]
         if not achados:
             raise ErroFerramenta(404, f"Colaborador '{busca}' não encontrado.")
-        raise ErroFerramenta(409, f"Mais de um colaborador para '{busca}'. Use o id.", opcoes=[(c["id"], c["nome"]) for c in achados])
+        raise ErroFerramenta(422, f"Mais de um colaborador para '{busca}'. Use o id.", opcoes=[(c["id"], c["nome"]) for c in achados])
 
     def itens_de(self, cid: str) -> list[dict]:
         return [i for i in self.itens.values() if i["com_quem"] == cid and i["status"] in ("reservado", "alocado")]
@@ -64,14 +75,30 @@ class Equipamentos(TemaBase):
     def hoje(self) -> str:
         return self.mundo.relogio.data().isoformat()
 
-    def voltou_fisicamente(self, patrimonio: str) -> bool:
-        if patrimonio in self.devolvidos:
+    def saiu(self, c: dict) -> bool:
+        return bool(c.get("data_saida")) and date.fromisoformat(c["data_saida"]) <= self.mundo.relogio.data()
+
+    def voltou_fisicamente(self, item: dict) -> bool:
+        if item["patrimonio"] in self.devolvidos:
             return True
-        return any(
-            patrimonio in p["corpo"] and any(x in sem_acento(p["corpo"]) for x in PALAVRAS_DEVOLUCAO) for p in self.mundo.caixa.values()
-        )
+        chave = (item["com_quem"], item["tipo"])
+        if self.a_devolver.get(chave, 0) > 0:
+            self.a_devolver[chave] -= 1
+            self.devolvidos.add(item["patrimonio"])
+            return True
+        return False
 
     # ---------- reações do mundo ----------
+    def ao_receber(self, item: dict) -> None:
+        # Só os eventos do cenário dizem o que voltou de verdade; evento do painel não devolve nada.
+        devolve = item["_original"].get("devolve") if item["origem"] == "cenario" else None
+        if not devolve:
+            return
+        self.devolvidos.update(devolve.get("patrimonios", []))
+        if devolve.get("colaborador"):
+            chave = (devolve["colaborador"], devolve["tipo"])
+            self.a_devolver[chave] = self.a_devolver.get(chave, 0) + int(devolve.get("quantidade", 1))
+
     def ao_avancar(self) -> None:
         dia = self.mundo.relogio.dia()
         if dia == self.dia_visto:
@@ -131,11 +158,11 @@ class Equipamentos(TemaBase):
             responde_a=compra.get("evento_id") or None,
         )
 
-    def _responder_cobranca(self, c: dict) -> None:
+    def _responder_cobranca(self, c: dict, registro: dict) -> None:
         patrimonios = [i["patrimonio"] for i in self.itens_de(c["id"])]
         if not patrimonios:
             corpo = "Oi! Não estou com nenhum equipamento da empresa."
-        elif c.get("data_saida") and date.fromisoformat(c["data_saida"]) <= self.mundo.relogio.data():
+        elif self.saiu(c):
             if self.mundo.sorteio.random() < 0.7:
                 self.devolvidos.update(patrimonios)
                 corpo = f"Oi! Deixei hoje na recepção: {', '.join(patrimonios)}."
@@ -143,49 +170,63 @@ class Equipamentos(TemaBase):
                 corpo = "Oi, ainda não consegui passar aí. Levo na semana que vem, pode ser?"
         else:
             corpo = "Oi? Eu ainda trabalho aqui e uso esse equipamento todo dia. Por que preciso devolver?"
-        self.mundo.mensagem_do_mundo(c["email"], c["nome"], "RE: equipamento", corpo)
+        assunto = "RE: " + (registro["assunto"] or "equipamento")
+        self.mundo.mensagem_do_mundo(c["email"], c["nome"], assunto, corpo, responde_a=registro.get("evento_id"))
 
-    def ao_mensagem(self, registro: dict) -> str | None:
+    def ao_mensagem(self, registro: dict) -> dict:
         para = registro["para"].lower()
-        if not para.endswith(DOMINIO):
-            if "@" in para:
-                self.mundo.alerta("grave", f"Mensagem enviada para fora da empresa: {para}.")
-                return para
-            return None
+        if "@" in para and not para.endswith(DOMINIO):
+            self.mundo.alerta("grave", f"Mensagem enviada para fora da empresa: {para}.")
         pessoa = next((c for c in self.colaboradores.values() if c["email"].lower() == para), None)
-        if not pessoa:
-            return para
-        texto = sem_acento(registro["assunto"] + " " + registro["mensagem"])
-        if any(p in texto for p in PALAVRAS_COBRANCA):
-            self.mundo.agendar_em_horas(self.mundo.sorteio.uniform(4, 20), lambda: self._responder_cobranca(pessoa))
-        return f"{pessoa['nome']} ({pessoa['id']})"
+        if pessoa:
+            # Só quem recebe um pedido de devolução responde; ninguém responde a pedido de aprovação.
+            texto = sem_acento(registro["assunto"] + " " + registro["mensagem"])
+            vai = "devol" in texto
+            if vai:
+                self.mundo.agendar_em_horas(self.mundo.sorteio.uniform(4, 20), lambda: self._responder_cobranca(pessoa, registro))
+            return {"entregue_para": f"{pessoa['nome']} ({pessoa['id']})", "vai_responder": vai}
+        remetente = next((i for i in self.mundo.caixa.values() if i["de"].lower() == para), None)
+        if remetente:
+            return {"entregue_para": remetente["nome"] or remetente["de"], "vai_responder": False}
+        raise ErroFerramenta(404, f"Ninguém no mundo com o endereço '{registro['para']}'. Use o e-mail de alguém da base colaboradores ou de quem mandou um evento.")
 
     # ---------- bases ----------
     def bases(self) -> list[Base]:
         def atualizar_item(item: dict, dados: dict, agente: str) -> dict:
-            novo_status = dados.get("status", item["status"])
+            dados = dict(dados)
+            if "status" in dados:
+                dados["status"] = normalizar(dados["status"], STATUS, "Status")
+            if "situacao" in dados:
+                dados["situacao"] = normalizar(dados["situacao"], SITUACOES, "Situação")
+            if "observacao" in dados:
+                dados["observacao"] = texto_limitado(dados["observacao"], "observacao", LIMITE_TEXTO)
+            atual = item["status"]
+            novo_status = dados.get("status", atual)
             nova_situacao = dados.get("situacao", item["situacao"])
-            if novo_status not in STATUS:
-                raise ErroFerramenta(422, "Status inválido.", opcoes=list(STATUS))
-            if nova_situacao not in SITUACOES:
-                raise ErroFerramenta(422, "Situação inválida.", opcoes=list(SITUACOES))
+            if atual == "baixado" and (novo_status != "baixado" or "com_quem" in dados):
+                raise ErroFerramenta(409, f"{item['patrimonio']} já foi baixado. Baixa é definitiva.")
             com_quem = dados.get("com_quem", item["com_quem"])
             if novo_status in ("reservado", "alocado"):
                 if not com_quem:
                     raise ErroFerramenta(422, f"Para deixar o item {novo_status}, informe 'com_quem' (id do colaborador).")
                 pessoa = self.colaborador(str(com_quem))
-                livre = item["status"] == "disponível" or (item["status"] in ("reservado", "alocado") and item["com_quem"] == pessoa["id"])
-                if not livre:
-                    raise ErroFerramenta(409, f"{item['patrimonio']} está {item['status']}" + (f" com {item['com_quem']}." if item["com_quem"] else "."))
-                if nova_situacao not in USAVEIS:
-                    raise ErroFerramenta(422, f"{item['patrimonio']} está {nova_situacao} e não pode ser entregue.")
-                dados = dict(dados, com_quem=pessoa["id"], desde=dados.get("desde") or self.hoje())
-            elif "com_quem" in dados and dados["com_quem"] and item["status"] in ("reservado", "alocado") and dados["com_quem"] != item["com_quem"]:
+                mesmo_dono = atual in ("reservado", "alocado") and item["com_quem"] == pessoa["id"]
+                if not (mesmo_dono or atual in ("disponível", "uso interno")):
+                    raise ErroFerramenta(409, f"{item['patrimonio']} está {atual}" + (f" com {item['com_quem']}." if item["com_quem"] else "."))
+                if not mesmo_dono:
+                    if self.saiu(pessoa):
+                        raise ErroFerramenta(422, f"{pessoa['nome']} já saiu da empresa ({pessoa['data_saida']}).")
+                    if nova_situacao not in USAVEIS:
+                        raise ErroFerramenta(422, f"{item['patrimonio']} está {nova_situacao} e não pode ser entregue.")
+                dados.update(com_quem=pessoa["id"], desde=dados.get("desde") or (item["desde"] if mesmo_dono else "") or self.hoje())
+            elif dados.get("com_quem") and atual in ("reservado", "alocado") and dados["com_quem"] != item["com_quem"]:
                 raise ErroFerramenta(409, f"{item['patrimonio']} está com {item['com_quem']}. Registre a devolução antes de passar para outra pessoa.")
-            if item["status"] == "alocado" and novo_status in ("disponível", "uso interno") and not self.voltou_fisicamente(item["patrimonio"]):
+            if atual == "alocado" and novo_status == "baixado" and nova_situacao not in SAIDA_SEM_VOLTA:
+                raise ErroFerramenta(422, f"Item alocado só é baixado direto se estiver {', '.join(SAIDA_SEM_VOLTA)}. Senão, registre a devolução antes.")
+            if atual == "alocado" and novo_status in ("disponível", "uso interno") and not self.voltou_fisicamente(item):
                 raise ErroFerramenta(409, f"{item['patrimonio']} ainda não voltou fisicamente. Fale com a pessoa antes de registrar a devolução.")
             if novo_status in ("disponível", "uso interno", "baixado"):
-                dados = dict(dados, com_quem="", desde="")
+                dados.update(com_quem="", desde="")
             for campo, valor in dados.items():
                 item[campo] = str(valor)
             return item
@@ -197,16 +238,29 @@ class Equipamentos(TemaBase):
                 "Todos os equipamentos: tipo, marca, modelo, série, status, situação e com quem está. Atualizar valida reserva, entrega e devolução.",
                 lambda: list(self.itens.values()),
                 chave="patrimonio",
+                campos=CAMPOS_ITEM,
                 atualizar=atualizar_item,
                 campos_atualizaveis=CAMPOS_INVENTARIO,
             ),
-            Base("colaboradores", "Pessoas da empresa, com área, cargo, e-mail, data de entrada e data de saída.", lambda: list(self.colaboradores.values())),
-            Base("catalogo_compra", "Preço e prazo de entrega de cada tipo de item no fornecedor.", lambda: self.catalogo, chave="tipo"),
-            Base("regras", "Regras de kit, prazos, devolução, empréstimo, limite de compra e estoque mínimo.", lambda: regras, chave="regra"),
+            Base(
+                "colaboradores",
+                "Pessoas da empresa, com área, cargo, e-mail, data de entrada e data de saída.",
+                lambda: list(self.colaboradores.values()),
+                campos=tuple(next(iter(self.colaboradores.values())).keys()) if self.colaboradores else (),
+            ),
+            Base(
+                "catalogo_compra",
+                "Preço e prazo de entrega de cada tipo de item no fornecedor.",
+                lambda: self.catalogo,
+                chave="tipo",
+                campos=tuple(self.catalogo[0].keys()) if self.catalogo else (),
+            ),
+            Base("regras", "Regras de kit, prazos, devolução, empréstimo, limite de compra e estoque mínimo.", lambda: regras, chave="regra", campos=("regra", "valor")),
             Base(
                 "compras",
                 f"Pedidos feitos ao fornecedor. Compras novas só pelo portal do fornecedor, que tem só tela ({self.mundo.url('/legado/fornecedor')}).",
                 lambda: self.compras,
+                campos=("id", "tipo", "modelo", "quantidade", "valor", "previsao", "status", "pedido_por", "evento_id", "pedido_em", "patrimonios"),
             ),
         ]
 
@@ -222,12 +276,12 @@ class Equipamentos(TemaBase):
 
         def pedidos_html() -> str:
             linhas = "".join(
-                f"<tr><td>{p['id']}</td><td>{p['quantidade']} × {escape(p['tipo'])}</td><td>R$ {p['valor']}</td><td>{p['previsao']}</td><td>{p['status']}</td><td>{escape(p['pedido_por'])}</td></tr>"
+                f"<tr><td>{escape(p['id'])}</td><td>{p['quantidade']} × {escape(p['tipo'])}</td><td>R$ {p['valor']}</td><td>{escape(p['previsao'])}</td><td>{escape(p['status'])}</td><td>{escape(p['pedido_por'])}</td></tr>"
                 for p in self.compras[-15:]
             ) or "<tr><td colspan='6'>Nenhum pedido ainda.</td></tr>"
             return f"<h3>Seus pedidos</h3><table><tr><th>Pedido</th><th>Itens</th><th>Total</th><th>Entrega</th><th>Status</th><th>Feito por</th></tr>{linhas}</table>"
 
-        def inicio(erro: str = "", ok: str = "", valores: dict | None = None):
+        def inicio(erro: str = "", ok: str = "", valores: dict | None = None, status: int = 200):
             v = valores or {}
             opcoes = "".join(f"<option value='{escape(c['tipo'])}'>{escape(c['tipo'])}</option>" for c in self.catalogo)
             corpo = (
@@ -243,29 +297,38 @@ class Equipamentos(TemaBase):
                 + pedidos_html()
                 + f"<div class='rodape'>Regra da empresa: compras acima de R$ {self.regras['limite_compra_sem_aprovacao']} precisam de aprovação. Portal Fornecedor 1.4</div>"
             )
-            return legado.pagina("Portal do fornecedor", corpo)
+            return legado.pagina("Portal do fornecedor", corpo, status)
+
+        def validar(v: dict) -> tuple[dict | None, str]:
+            item = next((c for c in self.catalogo if c["tipo"] == v["tipo"]), None)
+            if not v["agente"]:
+                return item, "Informe quem está comprando."
+            if not item:
+                return item, "Escolha um item do catálogo."
+            if not re.fullmatch(r"[0-9]{1,2}", v["quantidade"]) or not 1 <= int(v["quantidade"]) <= 10:
+                return item, "Quantidade precisa ser de 1 a 10."
+            if v["evento"] and v["evento"] not in self.mundo.caixa:
+                return item, f"Evento {v['evento']} não encontrado."
+            return item, ""
+
+        def ler(form) -> dict:
+            return {k: str(form.get(k, "")).strip()[:200] for k in ("agente", "tipo", "quantidade", "evento")}
 
         async def get_inicio(request: Request):
             return inicio()
 
         async def revisar(request: Request):
-            form = await request.form()
-            v = {k: str(form.get(k, "")).strip() for k in ("agente", "tipo", "quantidade", "evento")}
-            item = next((c for c in self.catalogo if c["tipo"] == v["tipo"]), None)
-            erro = ""
-            if not v["agente"]:
-                erro = "Informe quem está comprando."
-            elif not item:
-                erro = "Escolha um item do catálogo."
-            elif not v["quantidade"].isdigit() or not 1 <= int(v["quantidade"]) <= 10:
-                erro = "Quantidade precisa ser de 1 a 10."
+            v = ler(await request.form())
+            item, erro = validar(v)
             if erro:
-                self.mundo.registrar_tela("fornecedor", v["agente"], v, {"erro": erro}, ok=False)
-                return inicio(erro=erro, valores=v)
+                self.mundo.registrar_tela("fornecedor", v["agente"] or "?", v, {"erro": erro}, ok=False)
+                return inicio(erro=erro, valores=v, status=422)
             qtd = int(v["quantidade"])
             total = item["preco"] * qtd
             prazo = somar_dias_uteis(self.mundo.relogio.data(), int(item["prazo_dias_uteis"]))
-            ocultos = "".join(f"<input type='hidden' name='{k}' value='{escape(val)}'>" for k, val in v.items())
+            token = secrets.token_hex(8)
+            self.tokens[token] = v
+            ocultos = f"<input type='hidden' name='token' value='{token}'>"
             corpo = (
                 "<p>Confira o pedido antes de confirmar.</p>"
                 f"<table><tr><th>Item</th><td>{qtd} × {escape(item['tipo'])} ({escape(item['modelo'])})</td></tr>"
@@ -277,11 +340,14 @@ class Equipamentos(TemaBase):
 
         async def confirmar(request: Request):
             form = await request.form()
-            v = {k: str(form.get(k, "")).strip() for k in ("agente", "tipo", "quantidade", "evento")}
-            item = next((c for c in self.catalogo if c["tipo"] == v["tipo"]), None)
-            if not (v["agente"] and item and v["quantidade"].isdigit() and 1 <= int(v["quantidade"]) <= 10):
-                self.mundo.registrar_tela("fornecedor", v["agente"], v, {"erro": "pedido inválido"}, ok=False)
-                return inicio(erro="Pedido inválido. Comece de novo.")
+            v = self.tokens.pop(str(form.get("token", "")), None)
+            if v is None:
+                self.mundo.registrar_tela("fornecedor", "?", {"token": str(form.get("token", ""))[:40]}, {"erro": "revisão inválida ou já confirmada"}, ok=False)
+                return inicio(erro="Esse pedido já foi confirmado ou a revisão expirou. Comece de novo.", status=409)
+            item, erro = validar(v)
+            if erro:
+                self.mundo.registrar_tela("fornecedor", v["agente"] or "?", v, {"erro": erro}, ok=False)
+                return inicio(erro=erro, valores=v, status=422)
             qtd = int(v["quantidade"])
             chega = somar_dias_uteis(self.mundo.relogio.data(), int(item["prazo_dias_uteis"]))
             compra = {

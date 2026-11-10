@@ -217,12 +217,31 @@ function renderEstado(s) {
   }).join("") : '<div class="vazio">Nenhum pedido ainda.</div>';
 }
 
+function semConexao() {
+  const sit = $("situacao");
+  sit.className = "pilula fim";
+  sit.textContent = "Sem conexão com o servidor";
+}
+
 async function atualizar() {
-  try { renderEstado(await (await fetch("/api/estado")).json()); } catch (e) {}
+  try {
+    const r = await fetch("/api/estado");
+    if (!r.ok) throw new Error(r.status);
+    renderEstado(await r.json());
+  } catch (e) { semConexao(); }
 }
 
 async function iniciar() {
-  const s = await (await fetch("/api/estado")).json();
+  let s;
+  try {
+    const r = await fetch("/api/estado");
+    if (!r.ok) throw new Error(r.status);
+    s = await r.json();
+  } catch (e) {
+    semConexao();
+    setTimeout(iniciar, 2000);
+    return;
+  }
   renderEstado(s);
   s.historico.forEach((ev) => {
     if (ev.tipo === "chamada" || ev.tipo === "conversa") adicionarNoFeed(ev);
@@ -230,7 +249,8 @@ async function iniciar() {
   });
   const fonte = new EventSource("/api/eventos");
   fonte.onmessage = (m) => {
-    const ev = JSON.parse(m.data);
+    let ev;
+    try { ev = JSON.parse(m.data); } catch (e) { return; }
     if (ev.tipo === "chamada" || ev.tipo === "conversa") adicionarNoFeed(ev);
     else if (["alerta", "mundo", "inicio", "fim"].includes(ev.tipo)) adicionarAlerta(ev);
   };
@@ -240,8 +260,11 @@ $("abrir-form").addEventListener("click", () => $("form-evento").classList.toggl
 $("form-evento").addEventListener("submit", async (e) => {
   e.preventDefault();
   const dados = Object.fromEntries(new FormData(e.target));
-  const r = await fetch("/api/evento", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(dados)});
-  if (r.ok) { e.target.reset(); e.target.classList.remove("aberto"); atualizar(); }
+  try {
+    const r = await fetch("/api/evento", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(dados)});
+    if (r.ok) { e.target.reset(); e.target.classList.remove("aberto"); atualizar(); }
+    else alert((await r.json()).erro || "Não deu para criar o evento.");
+  } catch (err) { alert("Sem conexão com o servidor."); }
 });
 iniciar();
 </script>
