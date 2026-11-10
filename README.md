@@ -6,7 +6,7 @@ Este repositório reúne os desafios técnicos usados nas vagas e processos sele
 
 | Projeto | Descrição | Áreas |
 | --- | --- | --- |
-| [Hackathon UNIFEI 2026](Hackathon%20-%20UNIFEI%202026/) | Hackathon de 7 horas em que times de alunos montam um time de agentes de IA para resolver problemas do dia a dia de uma empresa | Triagem N1 (Chamados e incidentes), Gestão de equipamentos (Parque de TI) |
+| [Hackathon UNIFEI 2026](Hackathon%20-%20UNIFEI%202026/) | Hackathon de 7 horas em que times de alunos montam um time de agentes de IA para resolver problemas do dia a dia de uma empresa | Triagem N1 (Chamados e incidentes), Admissão (Onboarding CLT), Gestão de equipamentos (Parque de TI) |
 | [Vaga Estágio Pesquisa e Inovação 2026](Vaga%20-%20Est%C3%A1gio%20Pesquisa%20e%20Inova%C3%A7%C3%A3o%202026/) | Desafio de seleção para o estágio em Pesquisa e Inovação: melhorar uma aplicação lenta com pesquisa e medição | Performance (API e PostgreSQL) |
 | [TechLab CEU 2025](Techlab%20-%20CEU%202025/) | Desafios para os candidatos do TechLab CEU 2025 | DevOps, Low Code, WebApp |
 

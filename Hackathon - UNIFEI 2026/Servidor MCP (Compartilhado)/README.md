@@ -10,7 +10,7 @@ Com Docker, dentro desta pasta:
 TEMA=triagem docker compose up --build mundo
 ```
 
-Para o Tema 3, use `TEMA=equipamentos`. Para parar, `Ctrl+C` (ou `docker compose down` em outro terminal).
+Para o Tema 2, use `TEMA=admissao`; para o Tema 3, `TEMA=equipamentos`. Para parar, `Ctrl+C` (ou `docker compose down` em outro terminal).
 
 No Windows, defina a variável antes: no PowerShell, `$env:TEMA="triagem"`; no Prompt de Comando, `set TEMA=triagem`. Depois rode `docker compose up --build mundo`.
 
@@ -37,15 +37,46 @@ Sem Docker, o servidor só aceita conexões da própria máquina. Se o agente ro
 
 ## Quem chama quem
 
-O servidor nunca chama o agente. O agente chama o servidor, o tempo todo:
+Vocês constroem o time de agentes; o servidor MCP é o mundo e só responde. Nada no servidor chama o agente: quem puxa é sempre o time.
 
 ```mermaid
-flowchart LR
-  P1["1. Pega um evento<br/>proximo_evento<br/>(nada novo? espera)"] --> P2["2. Consulta<br/>as bases do tema<br/>e a própria memória"]
-  P2 --> P3["3. Combina<br/>os agentes conversam<br/>e um revisa o outro"]
-  P3 --> P4["4. Age<br/>registra, atualiza,<br/>responde ou usa a tela"]
-  P4 -- chama a ferramenta --> P5["5. O mundo reage<br/>respostas e entregas<br/>viram eventos novos"]
-  P5 -- a reação chega na caixa de entrada como evento novo --> P1
+flowchart TB
+  subgraph TIME["O que o seu time constrói · linguagem, framework e modelo: escolha do time"]
+    direction TB
+    subgraph T1[" "]
+      direction LR
+      A1["<b>Agentes do time</b><br/>cada um com um papel<br/>conversam e um revisa o outro"] ~~~ A2["<b>Laço de trabalho</b><br/>chama proximo_evento em laço<br/>e trata as falhas do servidor"] ~~~ A3["<b>Memória</b><br/>curto prazo: o caso em aberto<br/>longo prazo: o que já aprendeu"]
+    end
+    subgraph T2[" "]
+      direction LR
+      A4["<b>Escalação</b><br/>quando chamar uma pessoa<br/>e como passar o caso"] ~~~ A5["<b>Aprovação</b><br/>como pedir o OK de alguém<br/>e registrar a decisão"] ~~~ A6["<b>Operador de tela</b><br/>computer use ou navegador<br/>para os sistemas sem API"]
+    end
+    T1 ~~~ T2
+  end
+
+  subgraph MUNDO["O que o servidor MCP entrega pronto"]
+    direction TB
+    subgraph M1L[" "]
+      direction LR
+      M1["<b>Caixa de entrada</b><br/>eventos do cenário e do painel<br/>proximo_evento, ler_evento"] ~~~ M2["<b>Bases do tema</b><br/>validam as regras do tema<br/>consultar, registrar, atualizar"] ~~~ M3["<b>Sistemas só com tela</b><br/>férias (Tema 1), contabilidade (Tema 2)<br/>e fornecedor (Tema 3), em /legado"]
+    end
+    subgraph M2L[" "]
+      direction LR
+      M4["<b>Pessoas e times</b><br/>só responde quem o tema prevê<br/>a resposta vira evento novo"] ~~~ M5["<b>Relógio e falhas</b><br/>dias úteis das 08:00 às 18:00<br/>15% das chamadas falham"] ~~~ M6["<b>Painel e log</b><br/>mostra tudo ao vivo e grava log<br/>+ Novo evento cria um evento"]
+    end
+    M1L ~~~ M2L
+  end
+
+  TIME -- "chamadas MCP em /mcp e telas em /legado: o agente chama, o servidor responde" --> MUNDO
+
+  classDef time fill:#e7f1fb,stroke:#2f6fd1,color:#1a1a1a
+  classDef mundo fill:#f9ece7,stroke:#d9663a,color:#1a1a1a
+  classDef linha fill:none,stroke:none
+  class A1,A2,A3,A4,A5,A6 time
+  class M1,M2,M3,M4,M5,M6 mundo
+  class T1,T2,M1L,M2L linha
+  style TIME fill:#f3f8fd,stroke:#2f6fd1
+  style MUNDO fill:#fcf6f3,stroke:#d9663a
 ```
 
 O agente precisa rodar em laço: chamar `proximo_evento` até a resposta trazer `encerrado: true`. Quando não há evento novo, a resposta traz `evento: null` e a hora em que chega o próximo evento do cenário. Com `esperar_segundos` (até 30), o próprio servidor segura a resposta até chegar um evento.
@@ -62,7 +93,7 @@ As reações do mundo não vêm na hora: chegam minutos depois, no relógio simu
 
 ## O relógio
 
-- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, 5 dias em 40 minutos no Tema 1 e 22 dias em 44 minutos no Tema 3. `--segundos-por-dia` muda isso: mais alto dá mais tempo para o agente pensar.
+- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, 5 dias em 40 minutos no Tema 1, 10 dias em 40 minutos no Tema 2 e 22 dias em 44 minutos no Tema 3. `--segundos-por-dia` muda isso: mais alto dá mais tempo para o agente pensar.
 - O relógio começa na primeira chamada de qualquer agente, por MCP ou por uma tela.
 - Toda resposta traz a hora simulada em `agora`.
 - Quando o cenário acaba, as consultas continuam funcionando e as ações (`registrar`, `atualizar`, `responder_evento`, `enviar_mensagem`) passam a dar erro 410.
@@ -122,7 +153,7 @@ Toda opção também pode vir de uma variável de ambiente, que é como o Docker
 
 | Opção | Variável | Para quê |
 | --- | --- | --- |
-| `--tema triagem` ou `--tema equipamentos` | `TEMA` | Escolhe o tema |
+| `--tema triagem`, `admissao` ou `equipamentos` | `TEMA` | Escolhe o tema |
 | `--erros 0` | `ERROS` | Desliga as falhas simuladas (padrão `0.15`) |
 | `--sem-cenario` | `SEM_CENARIO=1` | Só chegam os eventos criados no painel |
 | `--segundos-por-dia 900` | `SEGUNDOS_POR_DIA` | Muda a velocidade do relógio |

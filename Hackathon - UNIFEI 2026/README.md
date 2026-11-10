@@ -24,6 +24,8 @@ Hackathon - UNIFEI 2026/
 │   └── dados/                                 # as bases fictícias de cada tema
 ├── Triagem N1 (Chamados e incidentes)/
 │   └── README.md                              # ficha técnica do Tema 1
+├── Admissão (Onboarding CLT)/
+│   └── README.md                              # ficha técnica do Tema 2
 └── Gestão de equipamentos (Parque de TI)/
     └── README.md                              # ficha técnica do Tema 3
 ```
@@ -40,6 +42,10 @@ Hackathon - UNIFEI 2026/
 
 - `README.md`: como subir o tema, as bases, o sistema de férias (só tela) e o que o mundo faz sozinho
 
+### 2. [Admissão (Onboarding CLT)](Admiss%C3%A3o%20%28Onboarding%20CLT%29/)
+
+- `README.md`: como subir o tema, as bases, quem responde a quê, o portal da contabilidade (só tela) e o que o mundo faz sozinho
+
 ### 3. [Gestão de equipamentos (Parque de TI)](Gest%C3%A3o%20de%20equipamentos%20%28Parque%20de%20TI%29/)
 
 - `README.md`: como subir o tema, as bases, o portal do fornecedor (só tela) e o que o mundo faz sozinho
@@ -53,6 +59,6 @@ Hackathon - UNIFEI 2026/
 
 ## Observações Importantes
 
-- Todos os dados são fictícios: pessoas, e-mails, produtos e equipamentos
+- Todos os dados são fictícios: pessoas, e-mails, documentos, produtos e equipamentos
 - Nunca commite chaves de API nem arquivos `.env`
 - Não altere o servidor: os agentes do time é que precisam se adaptar a ele

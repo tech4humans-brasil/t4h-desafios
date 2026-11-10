@@ -26,11 +26,12 @@ import mcp_types as types
 
 from hackathon.nucleo import Mundo
 from hackathon.painel import rotas
+from hackathon.temas.admissao import Admissao
 from hackathon.temas.equipamentos import Equipamentos
 from hackathon.temas.triagem import Triagem
 
 AQUI = pathlib.Path(__file__).resolve().parent
-TEMAS = {"triagem": Triagem, "equipamentos": Equipamentos}
+TEMAS = {"triagem": Triagem, "admissao": Admissao, "equipamentos": Equipamentos}
 
 
 def env(nome: str, padrao=None):
@@ -56,7 +57,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Mundo simulado do Hackathon UNIFEI 2026. Toda opção também pode vir de variável de ambiente (entre colchetes)."
     )
-    parser.add_argument("--tema", default=env("TEMA"), choices=sorted(TEMAS), help="triagem (Tema 1) ou equipamentos (Tema 3) [TEMA]")
+    parser.add_argument("--tema", default=env("TEMA"), choices=sorted(TEMAS), help="triagem (Tema 1), admissao (Tema 2) ou equipamentos (Tema 3) [TEMA]")
     parser.add_argument("--cenario", default=env("CENARIO"), help="arquivo do cenário (padrão: o de treino do tema) [CENARIO]")
     parser.add_argument("--dados", default=env("DADOS"), help="pasta com as bases do tema (padrão: dados/<tema>) [DADOS]")
     parser.add_argument("--porta", type=int, default=int(env("PORTA", 8765)), help="porta (padrão 8765) [PORTA]")
@@ -77,7 +78,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if not args.tema:
-        parser.error("informe o tema: --tema triagem ou --tema equipamentos (ou a variável TEMA)")
+        parser.error("informe o tema: --tema triagem, admissao ou equipamentos (ou a variável TEMA)")
     if not 0 <= args.erros <= 1:
         parser.error("--erros vai de 0 a 1 (0.15 = 15% das chamadas falham)")
     if args.segundos_por_dia is not None and args.segundos_por_dia <= 0:
