@@ -1,92 +1,45 @@
 # Tema 1 — Triagem N1 de chamados e incidentes
 
-Um time de agentes lê cada pedido interno que chega por e-mail, decide a ação certa e deixa para uma pessoa só o que é dela.
+Um time de agentes faz o primeiro atendimento dos pedidos internos: entende cada e-mail, responde, encaminha, abre chamado ou incidente e deixa para uma pessoa só o que é dela. Para subir o mundo deste tema, na pasta do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/): `TEMA=triagem docker compose up mundo`.
 
-As regras gerais, a entrega e a avaliação estão no [README do hackathon](../README.md).
+As regras gerais e a entrega estão no [README do hackathon](../README.md).
 
 ## A história
 
-Na T4H, os pedidos internos chegam o dia todo: acesso a sistema, equipamento, férias, suporte aos produtos. Muitos vêm no tipo errado, sem informação ou repetidos, e no meio deles pode estar um sistema fora do ar que precisa de atenção já. O desafio é montar um time de agentes que faça essa primeira leitura.
+Na T4H, os pedidos internos chegam o dia todo: acesso a sistema, equipamento, férias, suporte aos produtos. Muitos vêm no tipo errado, sem informação ou repetidos, e no meio deles pode estar um sistema fora do ar que precisa de atenção já.
 
-## O que tem no mundo deste tema
+## O que tem no mundo
 
 | O que existe | O que é |
 | --- | --- |
-| Caixa de entrada | ~60 e-mails de treino que chegam ao longo de 5 dias de expediente: dúvidas, pedidos, duplicados, urgências falsas, pedidos incompletos e alguns incidentes de verdade |
+| Caixa de entrada | ~60 e-mails ao longo de 5 dias: dúvidas, pedidos, duplicados, urgências falsas, pedidos incompletos e alguns incidentes de verdade |
 | FAQ | 15 respostas prontas |
-| Catálogo | Os 8 tipos de chamado da tabela abaixo |
+| Catálogo | 8 tipos de chamado, cada um com time, campos obrigatórios, aprovação e prazo |
 | Times | Os times da empresa e o que cada um atende |
-| Chamados já abertos | O que já estava em andamento antes do cenário, útil para achar duplicados |
+| Chamados já abertos | O que já estava em andamento, útil para achar duplicados |
 
-Os agentes consultam e agem pelas ferramentas do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/), que aparecem na lista ao conectar. Para subir este tema: `python mundo.py --tema triagem`. O mundo também reage: quem pediu responde quando o agente pede informação e cobra quando fica sem resposta, e o gestor aprova ou recusa chamados e propostas. O cenário da banca tem ~40 e-mails inéditos no mesmo formato.
+O mundo reage: quem pediu responde quando o agente pede informação e cobra quando fica sem resposta, e o gestor aprova ou recusa chamados e propostas.
 
-## Os tipos de chamado
+## O que o time precisa saber
 
-Todo pedido que vira chamado precisa de um tipo e dos campos obrigatórios dele. O agente nunca aprova: a aprovação é de uma pessoa.
+- Chamado só abre com um tipo do catálogo e todos os campos obrigatórios dele.
+- Urgência no assunto não é criticidade. A criticidade vem do impacto:
 
-| Tipo | Time | Campos obrigatórios | Aprovação | Prazo |
-| --- | --- | --- | --- | --- |
-| Acesso a sistema | Segurança | sistema, nível de acesso, justificativa | Gestor de quem pediu | 2 dias úteis |
-| Retirada de acessos | Segurança | pessoa, data de saída | Gestor | 1 dia útil |
-| Novo equipamento | Infraestrutura | item, motivo | Gestor | 10 dias úteis |
-| Troca de equipamento | Infraestrutura | item, patrimônio, defeito | Não precisa | 5 dias úteis |
-| Férias | Pessoas | data de início, data de fim | Gestor | 5 dias úteis |
-| Reembolso | Financeiro | valor, data, comprovante | Gestor | 5 dias úteis |
-| Suporte a produto | Produto | produto, o que aconteceu, desde quando | Não precisa | Pela criticidade |
-| Outros pedidos | Operações | descrição | Não precisa | 5 dias úteis |
-
-## Criticidade de incidente
-
-Urgência no assunto do e-mail não é criticidade. A criticidade vem do impacto.
-
-| Criticidade | Quando | O que o agente faz |
+| Criticidade | Quando | O que fazer |
 | --- | --- | --- |
-| P0 | Produto fora do ar para todos os clientes | Abre o incidente e escala na hora |
-| P1 | Função importante fora para muitos clientes | Abre o incidente e escala na hora |
-| P2 | Falha parcial, com contorno | Abre o incidente |
-| P3 | Falha para um cliente ou uma pessoa | Abre chamado de Suporte a produto |
-| P4 | Dúvida ou pedido de melhoria | Responde ou abre chamado de Suporte a produto |
-| Não é incidente | Pedido comum, mesmo que escrito como urgente | Trata como pedido pelo catálogo |
+| P0 | Produto fora do ar para todos os clientes | Abrir incidente e escalar na hora |
+| P1 | Função importante fora para muitos clientes | Abrir incidente e escalar na hora |
+| P2 | Falha parcial, com contorno | Abrir incidente |
+| P3 e P4 | Falha para uma pessoa, dúvida ou melhoria | Chamado de Suporte a produto, ou resposta |
 
-Suspeita de incidente de segurança (e-mail falso, vazamento, acesso indevido) e pedido com dado pessoal sensível vão sempre para uma pessoa, sem nenhuma outra ação.
-
-## Um exemplo
-
-Chega este e-mail do treino:
-
-```text
-De: marina@t4h.exemplo
-Assunto: URGENTE!!! acesso
-Preciso de acesso ao sistema financeiro hoje, é urgente!
-```
-
-Um agente faz a triagem e passa o caso para outro, que age:
-
-```json
-[
-  {
-    "ferramenta": "registrar_conversa",
-    "agente": "triador",
-    "de": "triador",
-    "para": "atendente",
-    "mensagem": "Acesso a sistema sem nível de acesso e justificativa. A urgência é só do assunto: não é incidente."
-  },
-  {
-    "ferramenta": "pedir_informacao",
-    "agente": "atendente",
-    "motivo": "Faltam campos obrigatórios do tipo Acesso a sistema.",
-    "pedido_id": "PED-017",
-    "campos": ["nivel_de_acesso", "justificativa"],
-    "mensagem": "Oi, Marina! Para liberar, preciso saber o nível de acesso (leitura ou edição) e para que você vai usar."
-  }
-]
-```
+- Suspeita de golpe, vazamento ou acesso indevido e pedido com dado pessoal sensível vão sempre para uma pessoa.
+- O agente nunca aprova nada: aprovação é de uma pessoa.
 
 ## Níveis de entrega
 
 - **Mínimo:** pelo menos dois agentes com papéis diferentes passam por todos os e-mails e decidem uma ação para cada um, com motivo.
-- **Bom:** responde citando o FAQ, junta os duplicados, pede o que falta, acerta a criticidade e tem um agente revisando o trabalho dos outros antes de agir.
-- **Excelente:** uma tela de abertura de chamado caindo no mesmo agente, ou um painel do que está esperando uma pessoa.
+- **Bom:** respondem com o FAQ, juntam duplicados, pedem o que falta, acertam a criticidade e um agente revisa o trabalho dos outros antes de agir.
+- **Excelente:** uma tela de abertura de chamado caindo no mesmo time de agentes, ou um painel do que está esperando uma pessoa.
 
 ## Erros graves
 

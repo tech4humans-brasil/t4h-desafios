@@ -37,7 +37,19 @@ async def chamar(cliente: Client, ferramenta: str, **argumentos) -> dict:
 
 
 async def main() -> None:
-    async with Client(URL) as cliente:
+    for tentativa in range(1, 16):
+        try:
+            async with Client(URL) as cliente:
+                await trabalhar(cliente)
+            return
+        except Exception as erro:  # o servidor ainda não subiu
+            if tentativa == 15:
+                raise
+            print(f"Esperando o servidor em {URL}... ({type(erro).__name__})")
+            await asyncio.sleep(2)
+
+
+async def trabalhar(cliente: Client) -> None:
         ferramentas = await cliente.list_tools()
         print(f"Conectado. O servidor tem {len(ferramentas.tools)} ferramentas.")
         while True:
