@@ -135,7 +135,7 @@ Os dados de cada tema ficam dentro do servidor, em `dados/`. Nada disso é real.
 
 ## Os temas
 
-Dois temas estão prontos para escolha (1 e 3); o 2 está em preparação com o time de Pessoas e o 4 ainda será anunciado.
+Dois temas estão prontos para escolha (1 e 3); o 2 está em preparação com o time de Pessoas.
 
 | Tema | O que o time de agentes faz | O que chega para ele | Situação |
 | --- | --- | --- | --- |
@@ -169,10 +169,6 @@ Três pessoas começam na T4H daqui a 10 dias. Até lá precisam entregar os doc
 Um time de agentes cuida do parque de equipamentos: atende pedidos, mantém o inventário certo, prepara o kit de quem entra e cobra a devolução de quem sai:
 
 - `README.md`: enunciado completo, com o kit, o inventário, as regras, as ações e os erros graves
-
-### 4. Tema de negócio (a definir)
-
-Será um problema de negócio da Tech for Humans, com o mesmo formato dos outros: história, kit, ações com nível de autonomia e cenário inédito.
 
 ## Como Utilizar
 
