@@ -1,0 +1,111 @@
+[
+  {
+    "id": "FAQ-01",
+    "pergunta": "CNH serve no lugar do RG?",
+    "resposta": "Não. Para a admissão é preciso o RG, frente e verso. A CNH não substitui o RG.",
+    "palavras_chave": [
+      "cnh",
+      "rg",
+      "habilitação"
+    ]
+  },
+  {
+    "id": "FAQ-02",
+    "pergunta": "Posso mandar a carteira de trabalho digital?",
+    "resposta": "Pode. Mande o PDF ou um print da página de dados da carteira de trabalho digital.",
+    "palavras_chave": [
+      "carteira de trabalho",
+      "digital",
+      "ctps"
+    ]
+  },
+  {
+    "id": "FAQ-03",
+    "pergunta": "Como funciona o vale-refeição e o vale-alimentação?",
+    "resposta": "São R$ 45 por dia útil num cartão só. A pessoa divide entre refeição e alimentação como quiser, pelo aplicativo do cartão.",
+    "palavras_chave": [
+      "vale",
+      "refeição",
+      "alimentação",
+      "vr",
+      "va"
+    ]
+  },
+  {
+    "id": "FAQ-04",
+    "pergunta": "Quando entro no plano de saúde? Posso incluir dependentes?",
+    "resposta": "O plano começa no primeiro dia do mês seguinte à admissão. Cônjuge e filhos podem entrar como dependentes, com desconto em folha.",
+    "palavras_chave": [
+      "plano de saúde",
+      "dependente",
+      "convênio"
+    ]
+  },
+  {
+    "id": "FAQ-05",
+    "pergunta": "Quando recebo o primeiro salário?",
+    "resposta": "No 5º dia útil do mês seguinte, proporcional aos dias trabalhados.",
+    "palavras_chave": [
+      "salário",
+      "pagamento"
+    ]
+  },
+  {
+    "id": "FAQ-06",
+    "pergunta": "Qual o horário e o endereço do primeiro dia?",
+    "resposta": "Às 09:00, na recepção da sede: Avenida Central, 500, Itajubá - MG. O gestor recebe a pessoa lá.",
+    "palavras_chave": [
+      "horário",
+      "endereço",
+      "primeiro dia"
+    ]
+  },
+  {
+    "id": "FAQ-07",
+    "pergunta": "Preciso de jejum para o exame admissional?",
+    "resposta": "Não precisa de jejum. Leve um documento com foto e a guia que a clínica enviar.",
+    "palavras_chave": [
+      "exame",
+      "jejum",
+      "clínica"
+    ]
+  },
+  {
+    "id": "FAQ-08",
+    "pergunta": "O que levar no primeiro dia?",
+    "resposta": "Só um documento com foto. O notebook e o kit são entregues no primeiro dia.",
+    "palavras_chave": [
+      "levar",
+      "primeiro dia"
+    ]
+  },
+  {
+    "id": "FAQ-09",
+    "pergunta": "Como funciona o home office?",
+    "resposta": "O modelo é híbrido: dois dias por semana no escritório, combinados com o gestor.",
+    "palavras_chave": [
+      "home office",
+      "híbrido",
+      "remoto"
+    ]
+  },
+  {
+    "id": "FAQ-10",
+    "pergunta": "O notebook vem configurado?",
+    "resposta": "Vem, com e-mail e os programas básicos. Acessos específicos do time o gestor pede para a TI.",
+    "palavras_chave": [
+      "notebook",
+      "configurado",
+      "programas"
+    ]
+  },
+  {
+    "id": "FAQ-11",
+    "pergunta": "Até quando preciso mandar os documentos?",
+    "resposta": "Até 7 dias úteis antes do primeiro dia. Sem os documentos, a admissão não anda.",
+    "palavras_chave": [
+      "prazo",
+      "documentos"
+    ]
+  }
+]

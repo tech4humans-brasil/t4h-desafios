@@ -10,7 +10,7 @@ Com Docker, dentro desta pasta:
 TEMA=triagem docker compose up --build mundo
 ```
 
-Para o Tema 3, use `TEMA=equipamentos`. Para parar, `Ctrl+C` (ou `docker compose down` em outro terminal).
+Para o Tema 2, use `TEMA=admissao`; para o Tema 3, `TEMA=equipamentos`. Para parar, `Ctrl+C` (ou `docker compose down` em outro terminal).
 
 No Windows, defina a variável antes: no PowerShell, `$env:TEMA="triagem"`; no Prompt de Comando, `set TEMA=triagem`. Depois rode `docker compose up --build mundo`.
 
@@ -58,7 +58,7 @@ flowchart TB
     direction TB
     subgraph M1L[" "]
       direction LR
-      M1["<b>Caixa de entrada</b><br/>eventos do cenário e do painel<br/>proximo_evento, ler_evento"] ~~~ M2["<b>Bases do tema</b><br/>validam as regras do tema<br/>consultar, registrar, atualizar"] ~~~ M3["<b>Sistemas só com tela</b><br/>férias (Tema 1), fornecedor (Tema 3)<br/>sem API, em /legado"]
+      M1["<b>Caixa de entrada</b><br/>eventos do cenário e do painel<br/>proximo_evento, ler_evento"] ~~~ M2["<b>Bases do tema</b><br/>validam as regras do tema<br/>consultar, registrar, atualizar"] ~~~ M3["<b>Sistemas só com tela</b><br/>férias (Tema 1), contabilidade (Tema 2)<br/>e fornecedor (Tema 3), em /legado"]
     end
     subgraph M2L[" "]
       direction LR
@@ -93,7 +93,7 @@ As reações do mundo não vêm na hora: chegam minutos depois, no relógio simu
 
 ## O relógio
 
-- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, 5 dias em 40 minutos no Tema 1 e 22 dias em 44 minutos no Tema 3. `--segundos-por-dia` muda isso: mais alto dá mais tempo para o agente pensar.
+- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, 5 dias em 40 minutos no Tema 1, 10 dias em 40 minutos no Tema 2 e 22 dias em 44 minutos no Tema 3. `--segundos-por-dia` muda isso: mais alto dá mais tempo para o agente pensar.
 - O relógio começa na primeira chamada de qualquer agente, por MCP ou por uma tela.
 - Toda resposta traz a hora simulada em `agora`.
 - Quando o cenário acaba, as consultas continuam funcionando e as ações (`registrar`, `atualizar`, `responder_evento`, `enviar_mensagem`) passam a dar erro 410.
@@ -153,7 +153,7 @@ Toda opção também pode vir de uma variável de ambiente, que é como o Docker
 
 | Opção | Variável | Para quê |
 | --- | --- | --- |
-| `--tema triagem` ou `--tema equipamentos` | `TEMA` | Escolhe o tema |
+| `--tema triagem`, `admissao` ou `equipamentos` | `TEMA` | Escolhe o tema |
 | `--erros 0` | `ERROS` | Desliga as falhas simuladas (padrão `0.15`) |
 | `--sem-cenario` | `SEM_CENARIO=1` | Só chegam os eventos criados no painel |
 | `--segundos-por-dia 900` | `SEGUNDOS_POR_DIA` | Muda a velocidade do relógio |
