@@ -1,0 +1,120 @@
+[
+  {
+    "tipo": "rg",
+    "nome": "RG",
+    "regra": "Documento de identidade (RG) frente e verso. CNH não serve no lugar do RG.",
+    "exigido": "sempre",
+    "palavras": [
+      "rg",
+      "identidade"
+    ]
+  },
+  {
+    "tipo": "cpf",
+    "nome": "CPF",
+    "regra": "Comprovante do CPF ou o número no RG.",
+    "exigido": "sempre",
+    "palavras": [
+      "cpf"
+    ]
+  },
+  {
+    "tipo": "titulo_eleitor",
+    "nome": "Título de eleitor",
+    "regra": "Título físico ou o e-Título.",
+    "exigido": "sempre",
+    "palavras": [
+      "titulo",
+      "eleitor"
+    ]
+  },
+  {
+    "tipo": "comprovante_residencia",
+    "nome": "Comprovante de residência",
+    "regra": "Conta de consumo dos últimos 90 dias, no nome da pessoa. Em nome de outra pessoa é divergência: só vale com o OK de uma pessoa.",
+    "exigido": "sempre",
+    "palavras": [
+      "comprovante de residencia",
+      "comprovante de endereco",
+      "endereco"
+    ]
+  },
+  {
+    "tipo": "ctps",
+    "nome": "Carteira de trabalho",
+    "regra": "Carteira de trabalho física ou digital (PDF ou print da página de dados).",
+    "exigido": "sempre",
+    "palavras": [
+      "carteira de trabalho",
+      "ctps"
+    ]
+  },
+  {
+    "tipo": "pis",
+    "nome": "PIS",
+    "regra": "Número do PIS (aparece na carteira de trabalho ou no extrato do FGTS).",
+    "exigido": "sempre",
+    "palavras": [
+      "pis"
+    ]
+  },
+  {
+    "tipo": "foto_3x4",
+    "nome": "Foto 3x4",
+    "regra": "Foto 3x4 recente, colorida, fundo claro.",
+    "exigido": "sempre",
+    "palavras": [
+      "foto",
+      "3x4"
+    ]
+  },
+  {
+    "tipo": "escolaridade",
+    "nome": "Comprovante de escolaridade",
+    "regra": "Diploma ou declaração da instituição.",
+    "exigido": "sempre",
+    "palavras": [
+      "escolaridade",
+      "diploma"
+    ]
+  },
+  {
+    "tipo": "cartao_sus",
+    "nome": "Cartão do SUS",
+    "regra": "Cartão Nacional de Saúde (físico ou do aplicativo).",
+    "exigido": "sempre",
+    "palavras": [
+      "sus",
+      "cartao nacional de saude"
+    ]
+  },
+  {
+    "tipo": "certidao_casamento",
+    "nome": "Certidão de casamento",
+    "regra": "Só para quem é casado ou casada.",
+    "exigido": "se casado ou casada",
+    "palavras": [
+      "casamento"
+    ]
+  },
+  {
+    "tipo": "certidao_nascimento_filhos",
+    "nome": "Certidão de nascimento dos filhos",
+    "regra": "Uma por filho.",
+    "exigido": "se tiver filhos",
+    "palavras": [
+      "nascimento",
+      "filho"
+    ]
+  },
+  {
+    "tipo": "certificado_militar",
+    "nome": "Certificado militar",
+    "regra": "Certificado de reservista ou de dispensa.",
+    "exigido": "para homens",
+    "palavras": [
+      "militar",
+      "reservista"
+    ]
+  }
+]

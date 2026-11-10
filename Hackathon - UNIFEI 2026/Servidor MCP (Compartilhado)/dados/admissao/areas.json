@@ -1,0 +1,32 @@
+[
+  {
+    "area": "Contabilidade",
+    "email": "contabilidade@contabil.exemplo",
+    "faz": "Registra o contratado. Recebe os dados só pelo portal da contabilidade.",
+    "responde": "em até 1 dia útil"
+  },
+  {
+    "area": "Clínica",
+    "email": "clinica@clinica.exemplo",
+    "faz": "Agenda e faz o exame admissional e avisa o resultado.",
+    "responde": "em algumas horas"
+  },
+  {
+    "area": "TI",
+    "email": "ti@t4h.exemplo",
+    "faz": "Cria o e-mail e os acessos de quem vai começar.",
+    "responde": "em até 1 dia útil"
+  },
+  {
+    "area": "Equipamentos",
+    "email": "equipamentos@t4h.exemplo",
+    "faz": "Separa o kit de cada pessoa (notebook, headset, teclado e mouse; monitor para desenvolvimento e design).",
+    "responde": "em até 2 dias úteis"
+  },
+  {
+    "area": "Gestores",
+    "email": "veja gestor_email na base contratados",
+    "faz": "Preparam o primeiro dia da pessoa do time.",
+    "responde": "quando dá"
+  }
+]

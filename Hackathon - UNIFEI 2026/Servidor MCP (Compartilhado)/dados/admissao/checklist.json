@@ -1,0 +1,82 @@
+[
+  {
+    "id": "E1",
+    "fase": "1. Proposta",
+    "etapa": "Proposta enviada e aceita",
+    "prazo_dias_uteis_antes": null,
+    "quem": "empresa e contratado"
+  },
+  {
+    "id": "E2",
+    "fase": "3. Preparação",
+    "etapa": "Acionar TI e equipamentos",
+    "prazo_dias_uteis_antes": null,
+    "quando": "logo que a admissão começa",
+    "quem": "TI e equipamentos"
+  },
+  {
+    "id": "E3",
+    "fase": "2. Documentação",
+    "etapa": "Documentos completos e conferidos",
+    "prazo_dias_uteis_antes": 7,
+    "quem": "contratado e time"
+  },
+  {
+    "id": "E4",
+    "fase": "2. Documentação",
+    "etapa": "Dados enviados à contabilidade, pelo portal",
+    "prazo_dias_uteis_antes": 6,
+    "quem": "time, pelo portal"
+  },
+  {
+    "id": "E5",
+    "fase": "3. Preparação",
+    "etapa": "Exame admissional agendado",
+    "prazo_dias_uteis_antes": 5,
+    "quem": "clínica"
+  },
+  {
+    "id": "E6",
+    "fase": "3. Preparação",
+    "etapa": "Gestor avisado",
+    "prazo_dias_uteis_antes": 3,
+    "quem": "gestor"
+  },
+  {
+    "id": "E7",
+    "fase": "3. Preparação",
+    "etapa": "Exame realizado (apto)",
+    "prazo_dias_uteis_antes": 2,
+    "quem": "clínica e contratado"
+  },
+  {
+    "id": "E8",
+    "fase": "3. Preparação",
+    "etapa": "Contrato assinado",
+    "prazo_dias_uteis_antes": 2,
+    "quem": "contratado"
+  },
+  {
+    "id": "E9",
+    "fase": "4. Primeiro dia",
+    "etapa": "Boas-vindas, liberação dos acessos e onboarding",
+    "prazo_dias_uteis_antes": 0,
+    "quem": "gestor, TI e time"
+  },
+  {
+    "id": "E10",
+    "fase": "5. Pós-admissão",
+    "etapa": "Benefícios, plano de saúde e feedback de experiência",
+    "prazo_dias_uteis_antes": null,
+    "quando": "semanas seguintes: só mensagem de próximos passos",
+    "quem": "RH"
+  },
+  {
+    "id": "R1",
+    "fase": "Regra",
+    "etapa": "Contratado sem responder",
+    "prazo_dias_uteis_antes": null,
+    "quando": "cobrar depois de 2 dias úteis; escalar depois de 4",
+    "quem": "time"
+  }
+]

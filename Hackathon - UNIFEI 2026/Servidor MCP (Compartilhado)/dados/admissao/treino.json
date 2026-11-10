@@ -1,0 +1,595 @@
+{
+  "tema": "admissao",
+  "nome": "treino",
+  "inicio": "2026-11-30",
+  "dias": 10,
+  "pedidos": [
+    {
+      "id": "PED-001",
+      "dia": 1,
+      "hora": "08:10",
+      "de": "beatriz.moura@email.exemplo",
+      "nome": "Beatriz Moura",
+      "assunto": "Aceite da proposta",
+      "corpo": "Oi! Aceito a proposta para Analista de Dados. Já estou separando os documentos. Começo no dia 09/12, certo?"
+    },
+    {
+      "id": "PED-002",
+      "dia": 1,
+      "hora": "08:40",
+      "de": "thiago.ramos@email.exemplo",
+      "nome": "Thiago Ramos",
+      "assunto": "Re: Proposta - Desenvolvedor Backend",
+      "corpo": "Aceito a proposta, obrigado! Fico no aguardo dos próximos passos."
+    },
+    {
+      "id": "PED-003",
+      "dia": 1,
+      "hora": "09:05",
+      "de": "larissa.prado@email.exemplo",
+      "nome": "Larissa Prado",
+      "assunto": "Aceite",
+      "corpo": "Oi, pessoal! Aceito a proposta. Muito feliz! O que preciso mandar?"
+    },
+    {
+      "id": "PED-004",
+      "dia": 1,
+      "hora": "09:30",
+      "de": "diego.nogueira@email.exemplo",
+      "nome": "Diego Nogueira",
+      "assunto": "Re: Proposta",
+      "corpo": "Aceito a proposta. Obrigado."
+    },
+    {
+      "id": "PED-005",
+      "dia": 1,
+      "hora": "10:00",
+      "de": "camila.torres@email.exemplo",
+      "nome": "Camila Torres",
+      "assunto": "Aceite da proposta - Gerente de Produto",
+      "corpo": "Bom dia! Confirmo o aceite da proposta. Começo dia 11/12."
+    },
+    {
+      "id": "PED-006",
+      "dia": 1,
+      "hora": "11:20",
+      "de": "beatriz.moura@email.exemplo",
+      "nome": "Beatriz Moura",
+      "assunto": "Documentos da admissão",
+      "corpo": "Segue tudo que pediram. Qualquer coisa me avisem!",
+      "documentos": [
+        {
+          "tipo": "rg",
+          "arquivo": "rg_beatriz.pdf",
+          "descricao": "RG frente e verso",
+          "valido": true
+        },
+        {
+          "tipo": "cpf",
+          "arquivo": "cpf_beatriz.pdf",
+          "descricao": "Comprovante de inscrição no CPF",
+          "valido": true
+        },
+        {
+          "tipo": "titulo_eleitor",
+          "arquivo": "titulo_beatriz.pdf",
+          "descricao": "e-Título",
+          "valido": true
+        },
+        {
+          "tipo": "comprovante_residencia",
+          "arquivo": "comprovante_beatriz.pdf",
+          "descricao": "Conta de luz de 10/2026 no nome da pessoa",
+          "valido": true
+        },
+        {
+          "tipo": "ctps",
+          "arquivo": "ctps_beatriz.pdf",
+          "descricao": "Carteira de trabalho digital, página de dados",
+          "valido": true
+        },
+        {
+          "tipo": "pis",
+          "arquivo": "pis_beatriz.pdf",
+          "descricao": "Extrato do FGTS com o PIS",
+          "valido": true
+        },
+        {
+          "tipo": "foto_3x4",
+          "arquivo": "foto_beatriz.jpg",
+          "descricao": "Foto 3x4 colorida, fundo branco",
+          "valido": true
+        },
+        {
+          "tipo": "escolaridade",
+          "arquivo": "diploma_beatriz.pdf",
+          "descricao": "Diploma de graduação",
+          "valido": true
+        },
+        {
+          "tipo": "cartao_sus",
+          "arquivo": "sus_beatriz.pdf",
+          "descricao": "Cartão do SUS pelo aplicativo",
+          "valido": true
+        }
+      ]
+    },
+    {
+      "id": "PED-007",
+      "dia": 1,
+      "hora": "14:00",
+      "de": "fabio.cunha@t4h.exemplo",
+      "nome": "Fábio Cunha",
+      "assunto": "Primeiro dia da Beatriz",
+      "corpo": "Oi, time. A Beatriz começa quando mesmo? Quero reservar a agenda do primeiro dia dela."
+    },
+    {
+      "id": "PED-008",
+      "dia": 1,
+      "hora": "15:30",
+      "de": "thiago.ramos@email.exemplo",
+      "nome": "Thiago Ramos",
+      "assunto": "documentos",
+      "corpo": "Mandando os documentos. A foto eu tiro essa semana.",
+      "documentos": [
+        {
+          "tipo": "rg",
+          "arquivo": "rg_thiago.pdf",
+          "descricao": "RG frente e verso",
+          "valido": true
+        },
+        {
+          "tipo": "cpf",
+          "arquivo": "cpf_thiago.pdf",
+          "descricao": "Comprovante de inscrição no CPF",
+          "valido": true
+        },
+        {
+          "tipo": "titulo_eleitor",
+          "arquivo": "titulo_thiago.pdf",
+          "descricao": "e-Título",
+          "valido": true
+        },
+        {
+          "tipo": "comprovante_residencia",
+          "arquivo": "comprovante_thiago.pdf",
+          "descricao": "Conta de luz de 10/2026 no nome da pessoa",
+          "valido": true
+        },
+        {
+          "tipo": "ctps",
+          "arquivo": "ctps_thiago.pdf",
+          "descricao": "Carteira de trabalho digital, página de dados",
+          "valido": true
+        },
+        {
+          "tipo": "pis",
+          "arquivo": "pis_thiago.pdf",
+          "descricao": "Extrato do FGTS com o PIS",
+          "valido": true
+        },
+        {
+          "tipo": "escolaridade",
+          "arquivo": "diploma_thiago.pdf",
+          "descricao": "Diploma de graduação",
+          "valido": true
+        },
+        {
+          "tipo": "cartao_sus",
+          "arquivo": "sus_thiago.pdf",
+          "descricao": "Cartão do SUS pelo aplicativo",
+          "valido": true
+        },
+        {
+          "tipo": "certidao_nascimento_filhos",
+          "arquivo": "certidao_filho_thiago.pdf",
+          "descricao": "Certidão de nascimento do filho, Pedro",
+          "valido": true
+        }
+      ]
+    },
+    {
+      "id": "PED-009",
+      "dia": 1,
+      "hora": "16:40",
+      "de": "larissa.prado@email.exemplo",
+      "nome": "Larissa Prado",
+      "assunto": "Carteira de trabalho",
+      "corpo": "A minha carteira de trabalho é só a digital. Serve?",
+      "cobranca": {
+        "apos_horas": 6,
+        "assunto": "Re: Carteira de trabalho",
+        "corpo": "Oi, alguém viu minha pergunta? Não quero mandar errado."
+      }
+    },
+    {
+      "id": "PED-010",
+      "dia": 2,
+      "hora": "08:30",
+      "de": "larissa.prado@email.exemplo",
+      "nome": "Larissa Prado",
+      "assunto": "Meus documentos",
+      "corpo": "Bom dia! Seguem os documentos. Mandei a CNH porque é o que tenho aqui.",
+      "documentos": [
+        {
+          "tipo": "rg",
+          "arquivo": "rg_larissa.jpg",
+          "descricao": "Carteira Nacional de Habilitação (CNH), frente e verso",
+          "valido": false,
+          "problema": "CNH não serve no lugar do RG"
+        },
+        {
+          "tipo": "cpf",
+          "arquivo": "cpf_larissa.pdf",
+          "descricao": "Comprovante de inscrição no CPF",
+          "valido": true
+        },
+        {
+          "tipo": "titulo_eleitor",
+          "arquivo": "titulo_larissa.pdf",
+          "descricao": "e-Título",
+          "valido": true
+        },
+        {
+          "tipo": "comprovante_residencia",
+          "arquivo": "comprovante_larissa.pdf",
+          "descricao": "Conta de luz de 10/2026 no nome da pessoa",
+          "valido": true
+        },
+        {
+          "tipo": "ctps",
+          "arquivo": "ctps_larissa.pdf",
+          "descricao": "Carteira de trabalho digital, página de dados",
+          "valido": true
+        },
+        {
+          "tipo": "pis",
+          "arquivo": "pis_larissa.pdf",
+          "descricao": "Extrato do FGTS com o PIS",
+          "valido": true
+        },
+        {
+          "tipo": "foto_3x4",
+          "arquivo": "foto_larissa.jpg",
+          "descricao": "Foto 3x4 colorida, fundo branco",
+          "valido": true
+        },
+        {
+          "tipo": "escolaridade",
+          "arquivo": "diploma_larissa.pdf",
+          "descricao": "Diploma de graduação",
+          "valido": true
+        },
+        {
+          "tipo": "cartao_sus",
+          "arquivo": "sus_larissa.pdf",
+          "descricao": "Cartão do SUS pelo aplicativo",
+          "valido": true
+        }
+      ]
+    },
+    {
+      "id": "PED-011",
+      "dia": 2,
+      "hora": "09:15",
+      "de": "camila.torres@email.exemplo",
+      "nome": "Camila Torres",
+      "assunto": "Documentos - Camila",
+      "corpo": "Seguem os documentos. A conta de água está no nome do meu marido, a casa é nossa.",
+      "documentos": [
+        {
+          "tipo": "rg",
+          "arquivo": "rg_camila.pdf",
+          "descricao": "RG frente e verso",
+          "valido": true
+        },
+        {
+          "tipo": "cpf",
+          "arquivo": "cpf_camila.pdf",
+          "descricao": "Comprovante de inscrição no CPF",
+          "valido": true
+        },
+        {
+          "tipo": "titulo_eleitor",
+          "arquivo": "titulo_camila.pdf",
+          "descricao": "e-Título",
+          "valido": true
+        },
+        {
+          "tipo": "comprovante_residencia",
+          "arquivo": "comprovante_camila.pdf",
+          "descricao": "Conta de água de 10/2026 em nome de Rogério Siqueira",
+          "valido": true,
+          "problema": "divergencia: comprovante em nome de outra pessoa"
+        },
+        {
+          "tipo": "ctps",
+          "arquivo": "ctps_camila.pdf",
+          "descricao": "Carteira de trabalho digital, página de dados",
+          "valido": true
+        },
+        {
+          "tipo": "pis",
+          "arquivo": "pis_camila.pdf",
+          "descricao": "Extrato do FGTS com o PIS",
+          "valido": true
+        },
+        {
+          "tipo": "foto_3x4",
+          "arquivo": "foto_camila.jpg",
+          "descricao": "Foto 3x4 colorida, fundo branco",
+          "valido": true
+        },
+        {
+          "tipo": "escolaridade",
+          "arquivo": "diploma_camila.pdf",
+          "descricao": "Diploma de graduação",
+          "valido": true
+        },
+        {
+          "tipo": "cartao_sus",
+          "arquivo": "sus_camila.pdf",
+          "descricao": "Cartão do SUS pelo aplicativo",
+          "valido": true
+        },
+        {
+          "tipo": "certidao_casamento",
+          "arquivo": "certidao_casamento_camila.pdf",
+          "descricao": "Certidão de casamento com Rogério Siqueira",
+          "valido": true
+        }
+      ]
+    },
+    {
+      "id": "PED-012",
+      "dia": 2,
+      "hora": "10:00",
+      "de": "thiago.ramos@email.exemplo",
+      "nome": "Thiago Ramos",
+      "assunto": "vale refeição",
+      "corpo": "O vale é refeição ou alimentação? Dá pra dividir?"
+    },
+    {
+      "id": "PED-013",
+      "dia": 2,
+      "hora": "11:30",
+      "de": "carla.mendes@t4h.exemplo",
+      "nome": "Carla Mendes",
+      "assunto": "Acessos do Thiago",
+      "corpo": "O Thiago vai precisar de acesso ao repositório e à VPN no primeiro dia. Isso já foi pedido?",
+      "cobranca": {
+        "apos_horas": 4,
+        "assunto": "Re: Acessos do Thiago",
+        "corpo": "Só confirmando: os acessos do Thiago foram pedidos? Não quero ele parado no primeiro dia."
+      }
+    },
+    {
+      "id": "PED-014",
+      "dia": 2,
+      "hora": "14:00",
+      "de": "beatriz.moura@email.exemplo",
+      "nome": "Beatriz Moura",
+      "assunto": "Primeiro dia",
+      "corpo": "Qual o horário e o endereço do primeiro dia?"
+    },
+    {
+      "id": "PED-015",
+      "dia": 2,
+      "hora": "16:00",
+      "de": "camila.torres@email.exemplo",
+      "nome": "Camila Torres",
+      "assunto": "Plano de saúde",
+      "corpo": "O plano de saúde inclui meu marido?"
+    },
+    {
+      "id": "PED-016",
+      "dia": 3,
+      "hora": "08:20",
+      "de": "beatriz.moura@email.exemplo",
+      "nome": "Beatriz Moura",
+      "assunto": "Mudança da data de início",
+      "corpo": "Oi! Minha empresa atual pediu que eu fique mais dois dias. Consigo começar dia 11/12 em vez de 09/12?",
+      "cobranca": {
+        "apos_horas": 6,
+        "assunto": "Re: Mudança da data de início",
+        "corpo": "Preciso dar uma resposta para minha empresa atual hoje. Conseguem me dizer?"
+      }
+    },
+    {
+      "id": "PED-017",
+      "dia": 3,
+      "hora": "09:40",
+      "de": "equipamentos@t4h.exemplo",
+      "nome": "Equipamentos",
+      "assunto": "Admissões de dezembro",
+      "corpo": "Bom dia! Soubemos que tem gente começando em dezembro. Mandem quem é e o cargo de cada um para separarmos os kits."
+    },
+    {
+      "id": "PED-018",
+      "dia": 3,
+      "hora": "11:00",
+      "de": "thiago.ramos@email.exemplo",
+      "nome": "Thiago Ramos",
+      "assunto": "exame",
+      "corpo": "Preciso ir em jejum no exame admissional?"
+    },
+    {
+      "id": "PED-019",
+      "dia": 3,
+      "hora": "14:30",
+      "de": "larissa.prado@email.exemplo",
+      "nome": "Larissa Prado",
+      "assunto": "Salário",
+      "corpo": "Quando cai o primeiro salário?"
+    },
+    {
+      "id": "PED-020",
+      "dia": 4,
+      "hora": "08:45",
+      "de": "renata.lopes@t4h.exemplo",
+      "nome": "Renata Lopes",
+      "assunto": "Adiantar a Camila",
+      "corpo": "Dá para a Camila começar na segunda, 07/12? Temos o planejamento do trimestre nessa semana.",
+      "cobranca": {
+        "apos_horas": 5,
+        "assunto": "Re: Adiantar a Camila",
+        "corpo": "Conseguiram ver? Preciso fechar a agenda do planejamento."
+      }
+    },
+    {
+      "id": "PED-021",
+      "dia": 4,
+      "hora": "10:10",
+      "de": "camila.torres@email.exemplo",
+      "nome": "Camila Torres",
+      "assunto": "Primeiro dia",
+      "corpo": "Preciso levar alguma coisa no primeiro dia?"
+    },
+    {
+      "id": "PED-022",
+      "dia": 4,
+      "hora": "13:00",
+      "de": "marcos.vieira@t4h.exemplo",
+      "nome": "Marcos Vieira",
+      "assunto": "Diego",
+      "corpo": "O Diego confirmou tudo? Mandei boas-vindas e ele não respondeu."
+    },
+    {
+      "id": "PED-023",
+      "dia": 5,
+      "hora": "09:00",
+      "de": "thiago.ramos@email.exemplo",
+      "nome": "Thiago Ramos",
+      "assunto": "pendências",
+      "corpo": "Oi, estava viajando e não vi os e-mails. O que está faltando da minha parte?"
+    },
+    {
+      "id": "PED-024",
+      "dia": 5,
+      "hora": "11:00",
+      "de": "juliana.reis@t4h.exemplo",
+      "nome": "Juliana Reis",
+      "assunto": "Kit da Larissa",
+      "corpo": "A Larissa vai precisar de monitor e da licença do programa de design no primeiro dia."
+    },
+    {
+      "id": "PED-025",
+      "dia": 5,
+      "hora": "15:00",
+      "de": "beatriz.moura@email.exemplo",
+      "nome": "Beatriz Moura",
+      "assunto": "Home office",
+      "corpo": "Como funciona o home office aí?"
+    },
+    {
+      "id": "PED-026",
+      "dia": 6,
+      "hora": "09:30",
+      "de": "camila.torres@email.exemplo",
+      "nome": "Camila Torres",
+      "assunto": "Plano de saúde",
+      "corpo": "E quando eu entro no plano?"
+    },
+    {
+      "id": "PED-027",
+      "dia": 6,
+      "hora": "14:00",
+      "de": "contabilidade@contabil.exemplo",
+      "nome": "Contabilidade",
+      "assunto": "Admissões de dezembro",
+      "corpo": "Lembrete: os dados de cada admissão precisam entrar no portal até 6 dias úteis antes do início."
+    },
+    {
+      "id": "PED-028",
+      "dia": 7,
+      "hora": "10:00",
+      "de": "larissa.prado@email.exemplo",
+      "nome": "Larissa Prado",
+      "assunto": "Exame admissional",
+      "corpo": "Ainda não recebi nada sobre o exame. Tenho que marcar sozinha?",
+      "cobranca": {
+        "apos_horas": 4,
+        "assunto": "Re: Exame admissional",
+        "corpo": "Oi? Estou preocupada de não dar tempo do exame."
+      }
+    },
+    {
+      "id": "PED-029",
+      "dia": 7,
+      "hora": "15:00",
+      "de": "marcos.vieira@t4h.exemplo",
+      "nome": "Marcos Vieira",
+      "assunto": "Diego começa sexta?",
+      "corpo": "O Diego começa sexta mesmo? Preciso saber se mantenho a agenda do onboarding.",
+      "cobranca": {
+        "apos_horas": 3,
+        "assunto": "Re: Diego começa sexta?",
+        "corpo": "Preciso dessa resposta hoje."
+      }
+    },
+    {
+      "id": "PED-030",
+      "dia": 8,
+      "hora": "10:30",
+      "de": "thiago.ramos@email.exemplo",
+      "nome": "Thiago Ramos",
+      "assunto": "Notebook",
+      "corpo": "O notebook vem configurado ou eu instalo os programas?"
+    }
+  ],
+  "comportamentos": {
+    "ADM-01": {
+      "perfil": "entrega tudo certo e no prazo",
+      "responde": true,
+      "confirma_exame_na": 1,
+      "assina_contrato_na": 1
+    },
+    "ADM-02": {
+      "perfil": "demora a responder sobre o exame",
+      "responde": true,
+      "confirma_exame_na": 2,
+      "assina_contrato_na": 1,
+      "envia_quando_pedido": [
+        {
+          "tipo": "foto_3x4",
+          "arquivo": "foto_thiago.jpg",
+          "descricao": "Foto 3x4 colorida, fundo branco",
+          "valido": true
+        },
+        {
+          "tipo": "certificado_militar",
+          "arquivo": "reservista_thiago.pdf",
+          "descricao": "Certificado de reservista",
+          "valido": true
+        }
+      ]
+    },
+    "ADM-03": {
+      "perfil": "manda um documento que não vale",
+      "responde": true,
+      "confirma_exame_na": 1,
+      "assina_contrato_na": 1,
+      "envia_quando_pedido": [
+        {
+          "tipo": "rg",
+          "arquivo": "rg_larissa_novo.pdf",
+          "descricao": "RG frente e verso",
+          "valido": true
+        }
+      ]
+    },
+    "ADM-04": {
+      "perfil": "some depois da proposta",
+      "responde": false
+    },
+    "ADM-05": {
+      "perfil": "só assina o contrato depois de ser cobrada",
+      "responde": true,
+      "confirma_exame_na": 1,
+      "assina_contrato_na": 2,
+      "responde_sobre": {
+        "comprovante": "A casa é nossa, o comprovante é no nome do Rogério, meu marido. A certidão de casamento já foi junto."
+      }
+    }
+  }
+}
