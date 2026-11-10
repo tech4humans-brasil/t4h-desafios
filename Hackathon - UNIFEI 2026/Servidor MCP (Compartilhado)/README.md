@@ -115,6 +115,8 @@ São as mesmas em todos os temas. As bases de cada tema aparecem com `listar_bas
 | `atualizar` | Altera campos de um registro pela chave da base (`id`, `patrimonio`, `tipo`...); o mundo valida as regras do tema |
 | `registrar_conversa` | Deixa no painel e no log uma conversa entre dois agentes (não entrega nada a ninguém) |
 
+Além das bases do tema, todo tema tem `eventos` (a caixa de entrada) e `mensagens` (o que o time enviou com `enviar_mensagem`, para conferir um envio que deu 504 antes de repetir).
+
 Regras de toda chamada:
 
 - Todas recebem `agente` (obrigatório: é assim que o painel mostra quem chamou cada ferramenta) e `motivo` (opcional, aparece no painel). `registrar`, `atualizar` e `enviar_mensagem` aceitam `evento_id` para ligar a ação a um evento.

@@ -27,6 +27,8 @@ def rotas(mundo) -> list[Route]:
         return Response(para_json(mundo.estado()), media_type="application/json")
 
     async def novo_evento(request: Request) -> JSONResponse:
+        if mundo.relogio.encerrado():
+            return JSONResponse({"erro": "O cenário terminou: não dá para criar eventos novos."}, status_code=410)
         corpo_bruto = await request.body()
         if len(corpo_bruto) > LIMITE_CORPO:
             return JSONResponse({"erro": f"O corpo do pedido passa de {LIMITE_CORPO // 1000} KB."}, status_code=413)
