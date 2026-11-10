@@ -259,7 +259,7 @@ class Mundo:
         self._fim_avisado = False
 
         self.tema = tema_cls(self, dados, cenario)
-        self.bases: dict[str, Base] = {b.nome: b for b in [self._base_eventos(), *self.tema.bases()]}
+        self.bases: dict[str, Base] = {b.nome: b for b in [self._base_eventos(), self._base_mensagens(), *self.tema.bases()]}
         self.ferramentas: dict[str, Ferramenta] = {f.nome: f for f in self._ferramentas()}
 
         if not getattr(args, "sem_cenario", False):
@@ -393,6 +393,14 @@ class Mundo:
             campos=("id", "de", "nome", "assunto", "corpo", "chegou_em", "status", "responde_a", "origem", "acoes", "observacao"),
             atualizar=atualizar,
             campos_atualizaveis=("status", "observacao"),
+        )
+
+    def _base_mensagens(self) -> Base:
+        return Base(
+            "mensagens",
+            "Mensagens que o time enviou com enviar_mensagem. Serve para conferir se um envio que deu erro 504 chegou antes de repetir.",
+            lambda: self.mensagens,
+            campos=("id", "para", "assunto", "mensagem", "agente", "evento_id", "enviada_em"),
         )
 
     # ---------- relógio ----------
@@ -552,7 +560,7 @@ class Mundo:
                 if item["status"] == "novo":
                     item["status"] = "lido"
                     item["lido_por"] = agente
-                    return {"evento": self.publico(item)}
+                    return {"evento": self.publico(item), "encerrado": self.relogio.encerrado()}
             encerrado = self.relogio.encerrado()
             return {
                 "evento": None,
