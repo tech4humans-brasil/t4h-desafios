@@ -10,7 +10,7 @@ Na pasta do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/):
 TEMA=equipamentos docker compose up --build mundo
 ```
 
-Ou, sem Docker: `python mundo.py --tema equipamentos`. O cenário de treino tem ~50 eventos ao longo de 22 dias de expediente, a partir de 01/12/2026. Por padrão, um dia de expediente dura 2 minutos.
+Ou, sem Docker: `python mundo.py --tema equipamentos`. O cenário de treino tem ~50 eventos ao longo de 22 dias de expediente, a partir de 01/12/2026. Por padrão, um dia de expediente dura 55 segundos e o cenário inteiro, uns 20 minutos.
 
 ## As bases
 

@@ -55,7 +55,7 @@ INTERVALO_COBRANCA = 60  # minutos simulados: duas cobranças seguidas só conta
 
 class Admissao(TemaBase):
     titulo = "Tema 2 — Admissão de novo colaborador"
-    segundos_por_dia_padrao = 240  # 10 dias de expediente em 40 minutos
+    segundos_por_dia_padrao = 120  # 10 dias de expediente em 20 minutos
     legado = [{"nome": "Portal da contabilidade", "caminho": "/legado/contabilidade", "descricao": "Envio dos dados do contratado para registro. Só tela, sem API."}]
 
     def __init__(self, mundo, dados: pathlib.Path, cenario: dict) -> None:
