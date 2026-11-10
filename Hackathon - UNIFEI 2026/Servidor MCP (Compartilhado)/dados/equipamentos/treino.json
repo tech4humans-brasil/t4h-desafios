@@ -1,0 +1,476 @@
+{
+  "tema": "equipamentos",
+  "nome": "treino",
+  "inicio": "2026-12-01",
+  "dias": 22,
+  "pedidos": [
+    {
+      "id": "PED-001",
+      "dia": 1,
+      "hora": "09:10",
+      "de": "ricardo.azevedo@t4h.exemplo",
+      "nome": "Ricardo Azevedo",
+      "assunto": "Saída do André",
+      "corpo": "Oi, pessoal. O André Monteiro sai da empresa nesta sexta, dia 4. Ele tem notebook, headset e teclado com mouse. Como faz pra devolver? Ele trabalha remoto às vezes, mas essa semana tá no escritório."
+    },
+    {
+      "id": "PED-002",
+      "dia": 1,
+      "hora": "10:25",
+      "de": "renata.vasconcelos@t4h.exemplo",
+      "nome": "Renata Vasconcelos",
+      "assunto": "Dúvida sobre devolução",
+      "corpo": "Bom dia! Quem sai da empresa tem quantos dias pra devolver o equipamento? E se não devolver, o que acontece? Quero colocar isso no roteiro de desligamento."
+    },
+    {
+      "id": "PED-003",
+      "dia": 1,
+      "hora": "14:40",
+      "de": "fabio.rezende@t4h.exemplo",
+      "nome": "Fábio Rezende",
+      "assunto": "estoque de notebook",
+      "corpo": "Quantos notebooks a gente tem parado no estoque hoje? Preciso saber se dá pra segurar as entradas do mês sem comprar."
+    },
+    {
+      "id": "PED-004",
+      "dia": 2,
+      "hora": "08:45",
+      "de": "fernanda.lopes@t4h.exemplo",
+      "nome": "Fernanda Lopes",
+      "assunto": "Kit da Isabela (Design)",
+      "corpo": "Oi! A Isabela Cunha começa no time de Design no dia 14/12, como designer de produto. Consegue deixar o kit dela pronto? Ela vai precisar de monitor também. Obrigada!"
+    },
+    {
+      "id": "PED-005",
+      "dia": 2,
+      "hora": "11:30",
+      "de": "juliana.rocha@t4h.exemplo",
+      "nome": "Juliana Rocha",
+      "assunto": "Notebook com bateria estufada",
+      "corpo": "Oi, meu notebook (EQ-0064) tá com a bateria estufada, o touchpad levantou e ele desliga sozinho quando sai da tomada. Dá pra trocar? Tô com medo de usar assim."
+    },
+    {
+      "id": "PED-006",
+      "dia": 2,
+      "hora": "16:05",
+      "de": "rodrigo.peixoto@t4h.exemplo",
+      "nome": "Rodrigo Peixoto",
+      "assunto": "headset",
+      "corpo": "oi, me falaram que tem um headset separado pra mim. posso passar pra pegar amanhã?"
+    },
+    {
+      "id": "PED-007",
+      "dia": 3,
+      "hora": "09:20",
+      "de": "ricardo.azevedo@t4h.exemplo",
+      "nome": "Ricardo Azevedo",
+      "assunto": "Kit do Mateus",
+      "corpo": "O Mateus Prado entra como executivo de contas na quarta, dia 9. Precisa do kit normal. Valeu."
+    },
+    {
+      "id": "PED-008",
+      "dia": 3,
+      "hora": "10:50",
+      "de": "carla.mendes@t4h.exemplo",
+      "nome": "Carla Mendes",
+      "assunto": "Desligamento do Diego",
+      "corpo": "Oi. O Diego Almeida sai no dia 11/12, último dia dele é sexta. Ele tem notebook, monitor, headset e kit. Ele mora longe e deve preferir mandar pelo correio, vê como fica melhor."
+    },
+    {
+      "id": "PED-009",
+      "dia": 3,
+      "hora": "13:15",
+      "de": "mariana.castro@t4h.exemplo",
+      "nome": "Mariana Castro",
+      "assunto": "Monitor pra Beatriz",
+      "corpo": "Oi, tudo bem? A Beatriz Moura, do meu time, tá fazendo muita análise de dados e um segundo display ia ajudar demais. Dá pra liberar um monitor pra ela?"
+    },
+    {
+      "id": "PED-010",
+      "dia": 3,
+      "hora": "15:30",
+      "de": "juliana.rocha@t4h.exemplo",
+      "nome": "Juliana Rocha",
+      "assunto": "RE: Notebook com bateria estufada",
+      "corpo": "Reenviando porque não tive resposta. O notebook EQ-0064 tá com a bateria estufada, preciso trocar. Hoje ele desligou duas vezes no meio de reunião."
+    },
+    {
+      "id": "PED-011",
+      "dia": 3,
+      "hora": "17:10",
+      "de": "natalia.freitas@t4h.exemplo",
+      "nome": "Natália Freitas",
+      "assunto": "Dúvida",
+      "corpo": "Se meu headset quebrar e não tiver outro no estoque, quanto tempo demora pra chegar um novo? Só pra saber, o meu tá começando a falhar o fone esquerdo."
+    },
+    {
+      "id": "PED-012",
+      "dia": 4,
+      "hora": "09:05",
+      "de": "simone.araujo@t4h.exemplo",
+      "nome": "Simone Araújo",
+      "assunto": "Empréstimo de headsets pro treinamento",
+      "corpo": "Bom dia! Vamos ter um treinamento de integração com dois consultores externos de 9 a 11/12 aqui no escritório. Preciso de 2 headsets emprestados nesses dias, devolvo no dia 11 no fim da tarde."
+    },
+    {
+      "id": "PED-013",
+      "dia": 4,
+      "hora": "12:40",
+      "de": "andre.monteiro@t4h.exemplo",
+      "nome": "André Monteiro",
+      "assunto": "Devolução",
+      "corpo": "Oi, deixei o notebook EQ-0002 e o headset EQ-0051 na recepção agora com a Jéssica. Hoje é meu último dia. Obrigado por tudo!"
+    },
+    {
+      "id": "PED-014",
+      "dia": 4,
+      "hora": "15:50",
+      "de": "carla.mendes@t4h.exemplo",
+      "nome": "Carla Mendes",
+      "assunto": "Kit do Gabriel",
+      "corpo": "Gente, esqueci de avisar antes: o Gabriel Tavares começa terça agora, dia 8, como dev pleno. Precisa do kit completo, com monitor. Desculpa a correria!"
+    },
+    {
+      "id": "PED-015",
+      "dia": 5,
+      "hora": "08:20",
+      "de": "carla.mendes@t4h.exemplo",
+      "nome": "Carla Mendes",
+      "assunto": "Fwd: Kit do Gabriel",
+      "corpo": "Alguém viu? O Gabriel começa amanhã e preciso do kit dele: notebook, monitor, headset e teclado com mouse."
+    },
+    {
+      "id": "PED-016",
+      "dia": 5,
+      "hora": "09:40",
+      "de": "ricardo.azevedo@t4h.exemplo",
+      "nome": "Ricardo Azevedo",
+      "assunto": "notebook do André pro Mateus",
+      "corpo": "O André devolveu o notebook na sexta, certo? Pode passar direto pro Mateus, que começa quarta. Economiza um notebook do estoque. Se puder já deixar na mesa dele melhor ainda."
+    },
+    {
+      "id": "PED-017",
+      "dia": 5,
+      "hora": "11:00",
+      "de": "patricia.duarte@t4h.exemplo",
+      "nome": "Patrícia Duarte",
+      "assunto": "Headset sem microfone",
+      "corpo": "Oi! O microfone do meu headset (EQ-0078) parou de funcionar, ninguém me escuta nas calls. Já testei em outro computador e nada. Tem como trocar?"
+    },
+    {
+      "id": "PED-018",
+      "dia": 5,
+      "hora": "14:30",
+      "de": "simone.araujo@t4h.exemplo",
+      "nome": "Simone Araújo",
+      "assunto": "monitores",
+      "corpo": "quantos monitores temos livres? to montando uma sala de reunião nova e queria saber se sobra algum"
+    },
+    {
+      "id": "PED-019",
+      "dia": 6,
+      "hora": "08:50",
+      "de": "gustavo.ribeiro@t4h.exemplo",
+      "nome": "Gustavo Ribeiro",
+      "assunto": "Entrada da Letícia",
+      "corpo": "Bom dia. A Letícia Macedo entra no time como desenvolvedora júnior no dia 21/12. Já queria garantir o kit dela com antecedência, incluindo monitor. Obrigado."
+    },
+    {
+      "id": "PED-020",
+      "dia": 6,
+      "hora": "10:15",
+      "de": "simone.araujo@t4h.exemplo",
+      "nome": "Simone Araújo",
+      "assunto": "Saída do Henrique",
+      "corpo": "Oi, o Henrique Dias, analista de operações, sai no dia 16/12. Ele tem o kit padrão. Combino com ele a devolução ou vocês falam direto?"
+    },
+    {
+      "id": "PED-021",
+      "dia": 6,
+      "hora": "13:45",
+      "de": "igor.fontes@t4h.exemplo",
+      "nome": "Igor Fontes",
+      "assunto": "Monitor reservado",
+      "corpo": "Oi, vi que tem um monitor reservado no meu nome desde o mês passado. Quando posso buscar? Tô sem monitor desde que entrei."
+    },
+    {
+      "id": "PED-022",
+      "dia": 6,
+      "hora": "16:20",
+      "de": "ricardo.azevedo@t4h.exemplo",
+      "nome": "Ricardo Azevedo",
+      "assunto": "Notebook emprestado para a feira",
+      "corpo": "Vamos ter um estande na feira de varejo de 14 a 18/12 e preciso de um notebook extra pra deixar rodando a demonstração. Devolvo no dia 21/12. Pode ser qualquer um, só precisa ligar num projetor."
+    },
+    {
+      "id": "PED-023",
+      "dia": 7,
+      "hora": "09:30",
+      "de": "vitor.nogueira@t4h.exemplo",
+      "nome": "Vitor Nogueira",
+      "assunto": "Monitor com listras",
+      "corpo": "Bom dia, o monitor EQ-0037 começou a mostrar umas listras verticais roxas no lado direito. Pra quem trabalha com cor tá bem complicado. Dá pra trocar?"
+    },
+    {
+      "id": "PED-024",
+      "dia": 7,
+      "hora": "11:10",
+      "de": "carla.mendes@t4h.exemplo",
+      "nome": "Carla Mendes",
+      "assunto": "Gabriel",
+      "corpo": "O Gabriel começou ontem. Me confirma o que ficou com ele de equipamento? Quero fechar o checklist de entrada."
+    },
+    {
+      "id": "PED-025",
+      "dia": 7,
+      "hora": "15:00",
+      "de": "jessica.moreira@t4h.exemplo",
+      "nome": "Jéssica Moreira",
+      "assunto": "Headset para a recepção",
+      "corpo": "Oi, eu atendo as ligações da recepção pelo computador e não tenho headset, uso o fone do celular. Consigo um?"
+    },
+    {
+      "id": "PED-026",
+      "dia": 8,
+      "hora": "09:15",
+      "de": "rafael.souza@t4h.exemplo",
+      "nome": "Rafael Souza",
+      "assunto": "Segundo notebook",
+      "corpo": "E aí, pessoal. Queria um segundo notebook pra deixar com Linux e testar a aplicação nos dois sistemas. Pode ser um usado mesmo. Consegue?"
+    },
+    {
+      "id": "PED-027",
+      "dia": 8,
+      "hora": "10:40",
+      "de": "mariana.castro@t4h.exemplo",
+      "nome": "Mariana Castro",
+      "assunto": "RE: Monitor pra Beatriz",
+      "corpo": "Entendi que produto não tem monitor no kit, mas a Beatriz trabalha com protótipo e planilha o dia inteiro. Não dá pra abrir uma exceção? Se precisar de aprovação de alguém, me fala de quem."
+    },
+    {
+      "id": "PED-028",
+      "dia": 9,
+      "hora": "10:00",
+      "de": "simone.araujo@t4h.exemplo",
+      "nome": "Simone Araújo",
+      "assunto": "Devolução dos headsets do treinamento",
+      "corpo": "O treinamento acabou mais cedo. Deixei os dois headsets emprestados na recepção hoje de manhã. Obrigada!"
+    },
+    {
+      "id": "PED-029",
+      "dia": 9,
+      "hora": "16:30",
+      "de": "carla.mendes@t4h.exemplo",
+      "nome": "Carla Mendes",
+      "assunto": "Diego",
+      "corpo": "Hoje foi o último dia do Diego. Ele levou tudo pra casa e disse que manda o equipamento pelo motoboy semana que vem."
+    },
+    {
+      "id": "PED-030",
+      "dia": 10,
+      "hora": "09:00",
+      "de": "fernanda.lopes@t4h.exemplo",
+      "nome": "Fernanda Lopes",
+      "assunto": "Saída da Camila",
+      "corpo": "Oi, a Camila Teixeira sai no dia 22/12. Ela tem notebook, monitor, headset e teclado com mouse. Me avisem se precisar de algo meu."
+    },
+    {
+      "id": "PED-031",
+      "dia": 10,
+      "hora": "11:20",
+      "de": "sabrina.correia@t4h.exemplo",
+      "nome": "Sabrina Correia",
+      "assunto": "headset",
+      "corpo": "Oi! Eu não tenho headset, sempre usei o meu pessoal, mas ele quebrou. Consigo um da empresa? Tenho muita call com cliente."
+    },
+    {
+      "id": "PED-032",
+      "dia": 11,
+      "hora": "08:40",
+      "de": "aline.batista@t4h.exemplo",
+      "nome": "Aline Batista",
+      "assunto": "Teclado falhando",
+      "corpo": "Bom dia, o teclado do meu kit (EQ-0112) tá com as teclas A e S falhando, tenho que apertar duas vezes. O mouse tá ok. Tem como trocar?"
+    },
+    {
+      "id": "PED-033",
+      "dia": 11,
+      "hora": "10:30",
+      "de": "fernanda.lopes@t4h.exemplo",
+      "nome": "Fernanda Lopes",
+      "assunto": "Isabela",
+      "corpo": "A Isabela começou ontem. Ficou faltando alguma coisa do kit dela? Ela comentou algo mas não entendi direito."
+    },
+    {
+      "id": "PED-034",
+      "dia": 12,
+      "hora": "09:50",
+      "de": "thiago.martins@t4h.exemplo",
+      "nome": "Thiago Martins",
+      "assunto": "Perdi o headset",
+      "corpo": "Pessoal, que vergonha: esqueci o headset EQ-0117 no carro de aplicativo na volta de um cliente semana passada. Já liguei e não acharam. Como faço?"
+    },
+    {
+      "id": "PED-035",
+      "dia": 12,
+      "hora": "14:10",
+      "de": "marcelo.antunes@t4h.exemplo",
+      "nome": "Marcelo Antunes",
+      "assunto": "Segundo monitor",
+      "corpo": "Bom dia. Queria um segundo monitor aqui pra minha mesa, fechamento de ano é muita planilha aberta ao mesmo tempo."
+    },
+    {
+      "id": "PED-036",
+      "dia": 13,
+      "hora": "09:25",
+      "de": "simone.araujo@t4h.exemplo",
+      "nome": "Simone Araújo",
+      "assunto": "Henrique",
+      "corpo": "O Henrique deixou o headset EQ-0116 na recepção ontem, no último dia dele. O notebook e o teclado ele disse que entrega até sexta que vem, ficou com o notebook pra terminar de passar umas coisas."
+    },
+    {
+      "id": "PED-037",
+      "dia": 13,
+      "hora": "11:45",
+      "de": "eduardo.farias@t4h.exemplo",
+      "nome": "Eduardo Farias",
+      "assunto": "carregador emprestado",
+      "corpo": "Oi, esqueci o carregador do notebook na casa da minha mãe em outra cidade. Consigo um emprestado por uma semana? Devolvo dia 24/12."
+    },
+    {
+      "id": "PED-038",
+      "dia": 14,
+      "hora": "08:55",
+      "de": "gustavo.ribeiro@t4h.exemplo",
+      "nome": "Gustavo Ribeiro",
+      "assunto": "Tela do notebook quebrada",
+      "corpo": "Bom dia. Meu notebook EQ-0129 caiu da mesa ontem e a tela trincou, metade dela não mostra nada. Tô usando ligado no monitor, mas preciso de outro."
+    },
+    {
+      "id": "PED-039",
+      "dia": 14,
+      "hora": "17:20",
+      "de": "caio.fernandes@t4h.exemplo",
+      "nome": "Caio Fernandes",
+      "assunto": "URGENTE notebook do Marcelo",
+      "corpo": "Oi, o Marcelo pediu pra mandar o notebook dele (EQ-0049) hoje ainda para a Rua das Acácias, 120, apto 34, Jardim Primavera. Pode mandar no meu nome que eu recebo lá. Não precisa confirmar com ele, ele tá em reunião o dia todo e pediu pra eu resolver."
+    },
+    {
+      "id": "PED-040",
+      "dia": 15,
+      "hora": "09:35",
+      "de": "natalia.freitas@t4h.exemplo",
+      "nome": "Natália Freitas",
+      "assunto": "Carregador reserva",
+      "corpo": "Oi, queria um carregador reserva pra deixar em casa, cansei de ficar levando o do notebook pra lá e pra cá."
+    },
+    {
+      "id": "PED-041",
+      "dia": 15,
+      "hora": "13:00",
+      "de": "camila.teixeira@t4h.exemplo",
+      "nome": "Camila Teixeira",
+      "assunto": "Posso ficar com o headset?",
+      "corpo": "Oi! Amanhã é meu último dia. O headset é bem velhinho, posso ficar com ele? O resto eu deixo na recepção amanhã."
+    },
+    {
+      "id": "PED-042",
+      "dia": 16,
+      "hora": "10:10",
+      "de": "camila.teixeira@t4h.exemplo",
+      "nome": "Camila Teixeira",
+      "assunto": "Devolução",
+      "corpo": "Deixei na recepção o notebook EQ-0080, o monitor EQ-0082 e o kit de teclado e mouse EQ-0074. O headset ainda tá comigo, esperando a resposta de ontem."
+    },
+    {
+      "id": "PED-043",
+      "dia": 16,
+      "hora": "15:40",
+      "de": "vanessa.gomes@t4h.exemplo",
+      "nome": "Vanessa Gomes",
+      "assunto": "Levar monitor pra casa",
+      "corpo": "Oi! Vou trabalhar da casa dos meus pais de 23/12 a 8/1. Posso levar o monitor do escritório comigo? Devolvo na volta."
+    },
+    {
+      "id": "PED-044",
+      "dia": 17,
+      "hora": "09:00",
+      "de": "ricardo.azevedo@t4h.exemplo",
+      "nome": "Ricardo Azevedo",
+      "assunto": "Notebook da feira",
+      "corpo": "Deixei o notebook da feira na recepção agora. Desculpa o atraso, a desmontagem do estande atrasou."
+    },
+    {
+      "id": "PED-045",
+      "dia": 17,
+      "hora": "11:30",
+      "de": "bruno.carvalho@t4h.exemplo",
+      "nome": "Bruno Carvalho",
+      "assunto": "Notebook lento",
+      "corpo": "Meu notebook (EQ-0052) tá muito lento, demora pra compilar qualquer coisa. Não tá quebrado, mas dá pra trocar por um novo?"
+    },
+    {
+      "id": "PED-046",
+      "dia": 17,
+      "hora": "16:00",
+      "de": "marcelo.antunes@t4h.exemplo",
+      "nome": "Marcelo Antunes",
+      "assunto": "Gasto com equipamento",
+      "corpo": "Quanto gastamos com compra de equipamento em dezembro até agora? Preciso pra previsão do orçamento."
+    },
+    {
+      "id": "PED-047",
+      "dia": 18,
+      "hora": "10:20",
+      "de": "fernanda.lopes@t4h.exemplo",
+      "nome": "Fernanda Lopes",
+      "assunto": "Kit do Otávio",
+      "corpo": "Oi, gente, desculpa avisar em cima: o Otávio Siqueira começa segunda, dia 28, como designer UX. Precisa do kit com monitor. Dá tempo?"
+    },
+    {
+      "id": "PED-048",
+      "dia": 18,
+      "hora": "14:00",
+      "de": "eduardo.farias@t4h.exemplo",
+      "nome": "Eduardo Farias",
+      "assunto": "Devolução do carregador",
+      "corpo": "Devolvi o carregador emprestado, deixei com a Jéssica na recepção."
+    },
+    {
+      "id": "PED-049",
+      "dia": 20,
+      "hora": "09:10",
+      "de": "fabio.rezende@t4h.exemplo",
+      "nome": "Fábio Rezende",
+      "assunto": "Equipamento com quem já saiu",
+      "corpo": "Tem algum equipamento ainda com gente que já saiu da empresa? Preciso fechar o relatório de fim de ano."
+    },
+    {
+      "id": "PED-050",
+      "dia": 21,
+      "hora": "10:45",
+      "de": "leticia.macedo@t4h.exemplo",
+      "nome": "Letícia Macedo",
+      "assunto": "Mouse com defeito",
+      "corpo": "Oi, o mouse do kit que recebi tá com clique duplo, quando clico uma vez ele abre duas coisas. Tem como trocar só o mouse?"
+    },
+    {
+      "id": "PED-051",
+      "dia": 21,
+      "hora": "15:15",
+      "de": "carla.mendes@t4h.exemplo",
+      "nome": "Carla Mendes",
+      "assunto": "Equipamento do Diego",
+      "corpo": "O Diego me disse que mandou o equipamento semana passada. Chegou? Ele perguntou se precisa assinar alguma coisa."
+    },
+    {
+      "id": "PED-052",
+      "dia": 22,
+      "hora": "09:30",
+      "de": "fabio.rezende@t4h.exemplo",
+      "nome": "Fábio Rezende",
+      "assunto": "Fechamento de dezembro",
+      "corpo": "Me manda um resumo do mês: o que entrou, o que saiu, o que foi comprado e o que ainda está pendente de devolução."
+    }
+  ]
+}

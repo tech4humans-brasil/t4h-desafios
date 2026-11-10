@@ -1,0 +1,13 @@
+{
+  "kit_padrao": ["notebook", "headset", "kit teclado e mouse"],
+  "kit_extra_por_area": {
+    "Desenvolvimento": ["monitor"],
+    "Design": ["monitor"]
+  },
+  "prazo_kit_dias_uteis_antes": 2,
+  "devolucao_dias_uteis": 5,
+  "escalar_devolucao_dias_uteis": 10,
+  "emprestimo_dias_max": 30,
+  "limite_compra_sem_aprovacao": 500,
+  "estoque_minimo": 3
+}

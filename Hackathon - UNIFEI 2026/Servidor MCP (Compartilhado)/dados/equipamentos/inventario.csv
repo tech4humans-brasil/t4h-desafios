@@ -1,0 +1,151 @@
+patrimonio,tipo,marca,modelo,numero_serie,status,situacao,com_quem,desde
+EQ-0001,notebook,Dell,Latitude 3440,D619RTP,alocado,usado,C-029,2026-07-13
+EQ-0002,notebook,Lenovo,ThinkPad T14 Gen 4,PFMVXM8H,alocado,usado,C-019,2026-08-04
+EQ-0003,carregador,Lenovo,Adaptador USB-C 65W,PFQSDM3H,disponível,novo,,
+EQ-0004,headset,Jabra,Evolve2 30,517502806968,alocado,usado,C-017,2023-04-19
+EQ-0005,headset,Jabra,Evolve2 30,109375940305,alocado,usado,C-031,2025-12-19
+EQ-0006,carregador,Dell,Adaptador USB-C 65W,M12K8PZ,baixado,quebrado,,
+EQ-0007,notebook,Dell,Latitude 5440,BGBYUUB,disponível,usado,,
+EQ-0008,monitor,Samsung,LF24T350,ZZT12Q89284,alocado,usado,C-002,2022-12-28
+EQ-0009,headset,JBL,Quantum 100,TL0267108139,alocado,usado,C-011,2026-06-15
+EQ-0010,monitor,Samsung,LF24T350,ZZZXVF86977,alocado,usado,C-009,2023-02-24
+EQ-0011,monitor,Samsung,LF24T350,ZZLSXN22640,alocado,usado,C-017,2022-01-11
+EQ-0012,kit teclado e mouse,Dell,KM3322W,G1XGUJR,alocado,usado,C-011,2026-02-27
+EQ-0013,headset,JBL,Quantum 100,TL0469297861,alocado,usado,C-026,2025-03-20
+EQ-0014,kit teclado e mouse,Logitech,MK270,2343LZ0DHDPH,alocado,usado,C-027,2023-12-25
+EQ-0015,monitor,Samsung,LF24T350,ZZ676L97074,baixado,danificado,,
+EQ-0016,kit teclado e mouse,Logitech,MK270,2266LZ0EJBJ7,disponível,novo,,
+EQ-0017,notebook,Lenovo,ThinkPad T14 Gen 4,PFD75YNV,baixado,perdido,,
+EQ-0018,kit teclado e mouse,Logitech,MK235,2226LZ0LXRAN,alocado,usado,C-016,2025-10-14
+EQ-0019,headset,Jabra,Evolve2 30,481828675963,alocado,danificado,C-006,2026-01-23
+EQ-0020,monitor,LG,24MK430H,284NT22593,alocado,usado,C-007,2022-04-15
+EQ-0021,kit teclado e mouse,Logitech,MK235,2444LZ0DZKEC,disponível,usado,,
+EQ-0022,headset,Logitech,H390,2300LZ0KSS7D,alocado,usado,C-005,2026-04-01
+EQ-0023,monitor,LG,24MK430H,302NT02805,alocado,usado,C-003,2025-08-01
+EQ-0024,kit teclado e mouse,Dell,KM3322W,QUUKMNZ,alocado,usado,C-022,2025-06-09
+EQ-0025,kit teclado e mouse,Logitech,MK270,2442LZ0DQ7JD,alocado,usado,C-031,2026-05-08
+EQ-0026,kit teclado e mouse,Logitech,MK235,2241LZ04VDEF,alocado,usado,C-007,2026-05-01
+EQ-0027,notebook,Lenovo,ThinkPad T14 Gen 4,PF0UGJC3,alocado,usado,C-021,2022-05-06
+EQ-0028,notebook,Dell,Latitude 5440,8WTYANN,disponível,novo,,
+EQ-0029,notebook,DELL,Latitude 3440,HDBMLXR,alocado,usado,C-035,2025-05-26
+EQ-0030,notebook,Lenovo,ThinkPad E14 Gen 5,PFCJS99R,reservado,novo,C-016,2026-04-14
+EQ-0031,headset,Jabra,Evolve2 30,062494631635,alocado,usado,C-030,2025-11-28
+EQ-0032,monitor,Dell,P2422H,328JFSB,baixado,quebrado,,
+EQ-0033,monitor,dell inc.,P2422H,3RG2CT6,baixado,quebrado,,
+EQ-0034,notebook,Lenovo,ThinkPad T14 Gen 4,PFCZMNHL,alocado,usado,C-007,2026-01-14
+EQ-0035,monitor,LG,24MK430H,313NT04426,alocado,usado,C-001,2024-11-21
+EQ-0036,notebook,DELL,Latitude 5440,C2PJSP1,alocado,usado,C-031,2025-07-03
+EQ-0037,monitor,dell inc.,P2422H,VYH5FHP,alocado,usado,C-013,2024-12-27
+EQ-0038,monitor,LG,24MK430H,367NT37316,reservado,novo,C-031,2026-11-26
+EQ-0039,monitor,Dell,P2422H,PBBJK52,alocado,usado,C-023,2026-05-14
+EQ-0040,notebook,Lenovo,ThinkPad E14 Gen 5,PF4XKK1X,alocado,usado,C-024,2024-02-08
+EQ-0041,headset,Logitech,H390,2227LZ0W6H4R,alocado,usado,C-003,2025-01-22
+EQ-0042,kit teclado e mouse,Dell,KM3322W,4P4RSGM,alocado,usado,C-003,2023-07-07
+EQ-0043,kit teclado e mouse,Logitech,MK270,2408LZ00EW7J,alocado,usado,C-028,2026-11-18
+EQ-0044,carregador,Dell,Adaptador USB-C 65W,X72FVZP,alocado,usado,C-017,2023-01-10
+EQ-0045,notebook,Dell,Latitude 5440,6ZZ3MEQ,alocado,usado,C-016,2025-07-15
+EQ-0046,notebook,Lenovo,ThinkPad E14 Gen 5,PFNH9XBR,alocado,usado,C-015,2025-07-11
+EQ-0047,kit teclado e mouse,Logitech,MK235,2283LZ0XPHLN,alocado,usado,C-029,2025-04-11
+EQ-0048,kit teclado e mouse,Logitech,MK235,2297LZ0VSA68,alocado,usado,C-008,2026-10-28
+EQ-0049,notebook,Dell,Latitude 5440,ER5QCHN,alocado,usado,C-023,2023-09-13
+EQ-0050,kit teclado e mouse,Logitech,MK270,2252LZ02GXXS,alocado,usado,C-005,2026-06-15
+EQ-0051,headset,Logitech,H390,2406LZ04SJJE,alocado,usado,C-019,2024-05-16
+EQ-0052,notebook,Dell,Latitude 5440,QZCSB9U,alocado,usado,C-005,2025-02-28
+EQ-0053,kit teclado e mouse,Logitech,MK235,2302LZ0GR0G3,alocado,usado,C-030,2026-09-18
+EQ-0054,monitor,LG,24MK430H,302NT02805,alocado,usado,C-011,2026-07-31
+EQ-0055,monitor,DELL,P2422H,7K59XQA,baixado,danificado,,
+EQ-0056,notebook,Dell,Latitude 3440,UHC1A1W,disponível,novo,,
+EQ-0057,monitor,Samsung,LF24T350,ZZ92YE02305,alocado,usado,C-034,2026-04-21
+EQ-0058,headset,Jabra,Evolve2 30,528885616721,alocado,usado,C-009,2022-12-30
+EQ-0059,monitor,Dell,P2422H,C7MFSJF,baixado,quebrado,,
+EQ-0060,kit teclado e mouse,Logitech,MK270,2236LZ0HHGW5,alocado,usado,C-006,2025-05-30
+EQ-0061,notebook,Lenovo,ThinkPad T14 Gen 4,PFWX67XJ,alocado,usado,C-004,2023-02-14
+EQ-0062,headset,Jabra,Evolve2 30,,disponível,usado,,
+EQ-0063,kit teclado e mouse,Logitech,MK270,2398LZ0496C3,alocado,usado,C-004,2024-04-24
+EQ-0064,notebook,Lenovo,ThinkPad T14 Gen 4,PFQWHF9W,alocado,usado,C-003,2024-09-09
+EQ-0065,carregador,Lenovo,Adaptador USB-C 65W,PF3FALM9,disponível,usado,,
+EQ-0066,notebook,Lenovo,ThinkPad E14 Gen 5,PFJ4H1WG,baixado,quebrado,,
+EQ-0067,kit teclado e mouse,Logitech,MK270,2320LZ0HJCH2,alocado,usado,C-020,2025-03-31
+EQ-0068,carregador,Dell,Adaptador USB-C 65W,JGR1FWU,alocado,usado,C-018,2024-11-28
+EQ-0069,headset,JBL,Quantum 100,TL0760571682,reservado,novo,C-025,2026-11-25
+EQ-0070,monitor,Dell,P2422H,NVKWYZY,alocado,novo,C-006,2026-09-28
+EQ-0071,headset,Logitech,H390,2283LZ0C5MGV,alocado,usado,C-001,2022-07-01
+EQ-0072,headset,Logitech,Zone Vibe 100,2280LZ03SUJ4,alocado,usado,C-023,2023-10-11
+EQ-0073,headset,Logitech,H390,2390LZ0ZB1JL,alocado,usado,C-012,2025-03-25
+EQ-0074,kit teclado e mouse,Logitech,MK235,2209LZ0Q9JRE,alocado,usado,C-012,2022-11-14
+EQ-0075,notebook,Lenovo,ThinkPad E14 Gen 5,PF7Y58W0,alocado,usado,C-030,2025-11-03
+EQ-0076,headset,JBL,Quantum 100,TL0942667872,alocado,usado,C-014,2025-09-05
+EQ-0077,headset,Jabra,Evolve2 30,492839421332,alocado,usado,C-008,2024-05-27
+EQ-0078,headset,Logitech,H390,2296LZ07X3DV,alocado,usado,C-018,2025-11-03
+EQ-0079,monitor,Dell,P2422H,R1ZR8WJ,alocado,usado,C-004,2023-09-13
+EQ-0080,notebook,Apple,MacBook Air M2,C02SDEATRM,alocado,usado,C-012,2024-04-30
+EQ-0081,notebook,Dell,Latitude 5440,SPHTGVG,disponível,novo,,
+EQ-0082,monitor,Dell,P2422H,UGA6R09,alocado,usado,C-012,2025-02-04
+EQ-0083,headset,Logitech,H390,2211LZ0A0BNU,disponível,usado,,
+EQ-0084,kit teclado e mouse,Logitech,MK270,2354LZ0WY05E,alocado,usado,C-025,2025-11-28
+EQ-0085,notebook,Apple,MacBook Air M2,C02PJMJJ7U,alocado,usado,C-010,2024-11-06
+EQ-0086,kit teclado e mouse,Logitech,MK235,2395LZ05P6C0,alocado,usado,C-019,2024-07-12
+EQ-0087,monitor,Dell,P2422H,90T2405,alocado,usado,C-005,2026-05-15
+EQ-0088,kit teclado e mouse,Logitech,MK270,2411LZ0RQL34,disponível,novo,,
+EQ-0089,monitor,LG,24MK430H,379NT07488,disponível,novo,,
+EQ-0090,notebook,Dell,Latitude 3440,U3FAHVC,alocado,usado,C-033,2026-02-04
+EQ-0091,headset,Logitech,H390,2374LZ04G8M3,disponível,novo,,
+EQ-0092,kit teclado e mouse,Dell,KM3322W,YVY3WDC,baixado,quebrado,,
+EQ-0093,monitor,Dell,P2422H,7LH6BZA,alocado,usado,C-010,2023-07-07
+EQ-0094,headset,Logitech,H390,2415LZ04QB1L,uso interno,usado,,
+EQ-0095,notebook,Lenovo,ThinkPad E14 Gen 5,PF90BSTM,alocado,usado,C-008,2025-03-20
+EQ-0096,notebook,Lenovo,ThinkPad E14 Gen 5,PF19TG46,alocado,usado,C-017,2022-12-09
+EQ-0097,notebook,Dell,Latitude 5440,1A150H8,baixado,novo,,
+EQ-0098,headset,Jabra,Evolve2 30,323970790586,alocado,usado,C-016,2026-02-13
+EQ-0099,headset,Logitech,Zone Vibe 100,2362LZ0W1MP8,alocado,usado,C-002,2024-11-08
+EQ-0100,notebook,Lenovo,ThinkPad E14 Gen 5,PFS0RWP8,uso interno,usado,,
+EQ-0101,notebook,Dell,Latitude 5440,QZCSB9U,disponível,usado,,
+EQ-0102,notebook,Lenovo,ThinkPad T14 Gen 4,PFRKQNLE,alocado,usado,C-001,2022-10-27
+EQ-0103,notebook,Lenovo,ThinkPad E14 Gen 5,PF8D8G9C,alocado,usado,C-018,2022-09-27
+EQ-0104,kit teclado e mouse,Dell,KM3322W,ZVUZT48,uso interno,usado,,
+EQ-0105,notebook,Apple,MacBook Air M2,C0277KJ0HP,alocado,usado,C-013,2025-07-18
+EQ-0106,notebook,Dell,Latitude 3440,,uso interno,usado,,
+EQ-0107,notebook,Dell,Latitude 3440,JEAH8AY,alocado,usado,C-006,2025-09-23
+EQ-0108,kit teclado e mouse,Dell,KM3322W,EEH7QQV,disponível,usado,,
+EQ-0109,kit teclado e mouse,Logitech,MK270,2436LZ0KWH7A,alocado,usado,C-032,2026-01-16
+EQ-0110,kit teclado e mouse,Dell,KM3322W,611P148,alocado,usado,C-015,2026-11-06
+EQ-0111,kit teclado e mouse,Logitech,MK270,2233LZ0R5A6X,alocado,usado,C-013,2026-02-16
+EQ-0112,kit teclado e mouse,Logitech,MK270,,alocado,usado,C-024,2025-09-29
+EQ-0113,kit teclado e mouse,Logitech,MK270,2234LZ05PJ7A,alocado,usado,C-035,2025-06-05
+EQ-0114,notebook,Lenovo,ThinkPad E14 Gen 5,PFRFPBHF,alocado,usado,C-026,2022-04-15
+EQ-0115,kit teclado e mouse,Logitech,MK270,2405LZ0SLH1K,alocado,usado,C-026,2023-04-06
+EQ-0116,headset,Jabra,Evolve2 30,651824833651,alocado,usado,C-029,2024-11-04
+EQ-0117,headset,Logitech,Zone Vibe 100,2261LZ0GFUE7,alocado,usado,C-004,2025-12-19
+EQ-0118,headset,Logitech,H390,2366LZ0LQC0X,alocado,usado,C-021,2025-02-14
+EQ-0119,headset,Jabra,Evolve2 30,279633540363,alocado,usado,C-027,2022-07-13
+EQ-0120,notebook,Lenovo,ThinkPad E14 Gen 5,PFRNEA26,alocado,usado,C-022,2025-04-18
+EQ-0121,notebook,Lenovo,ThinkPad E14 Gen 5,PFRL8C2P,alocado,usado,C-028,2024-11-08
+EQ-0122,headset,Jabra,Evolve2 30,915406823672,baixado,novo,,
+EQ-0123,notebook,Lenovo,ThinkPad E14 Gen 5,PFHZETJL,disponível,usado,,
+EQ-0124,kit teclado e mouse,Dell,KM3322W,MAJT5R3,alocado,usado,C-010,2025-04-22
+EQ-0125,monitor,Dell,P2422H,GK1CMML,alocado,usado,C-026,2022-01-17
+EQ-0126,kit teclado e mouse,Logitech,MK270,2303LZ0MFBAM,alocado,usado,C-021,2022-07-27
+EQ-0127,monitor,Samsung,LF24T350,ZZT24489806,alocado,usado,C-008,2025-12-12
+EQ-0128,headset,Logitech,H390,2360LZ0KWGRD,alocado,novo,C-010,2026-09-11
+EQ-0129,notebook,Lenovo,ThinkPad E14 Gen 5,PFTKD7JW,alocado,usado,C-009,2024-04-12
+EQ-0130,monitor,LG,24MK430H,395NT50509,alocado,usado,C-030,2026-03-17
+EQ-0131,notebook,Lenovo,ThinkPad E14 Gen 5,PFXMV7HK,alocado,usado,C-002,2022-03-21
+EQ-0132,monitor,LG,24MK430H,403NT39166,uso interno,usado,,
+EQ-0133,monitor,LG,24MK430H,297NT52238,alocado,usado,C-021,2022-10-21
+EQ-0134,monitor,LG,24MK430H,372NT56150,baixado,novo,,
+EQ-0135,kit teclado e mouse,Logitech,MK270,2376LZ0Z3P68,alocado,usado,C-033,2026-04-10
+EQ-0136,headset,Logitech,H390,2388LZ0G648Z,alocado,usado,C-013,2025-04-21
+EQ-0137,notebook,Lenovo,ThinkPad E14 Gen 5,PFH6TEC7,alocado,usado,C-025,2025-09-11
+EQ-0138,notebook,Lenovo,ThinkPad T14 Gen 4,PFWHGAMX,alocado,usado,C-014,2026-07-06
+EQ-0139,headset,Logitech,Zone Vibe 100,2267LZ0R0XCF,alocado,usado,C-032,2025-11-06
+EQ-0140,notebook,Dell,Latitude 3440,D4KCEU6,alocado,usado,C-020,2025-11-11
+EQ-0141,notebook,Apple,MacBook Air M2,C02RJYSR1G,alocado,usado,C-011,2025-05-13
+EQ-0142,notebook,Dell,Latitude 3440,9X3F87B,alocado,usado,C-032,2026-08-07
+EQ-0143,kit teclado e mouse,Dell,KM3322W,7Z0064R,alocado,usado,C-014,2026-04-22
+EQ-0144,monitor,Samsung,LF24T350,ZZ2Y8A66411,alocado,usado,C-014,2023-07-21
+EQ-0145,headset,Jabra,Evolve2 30,213443612989,alocado,usado,C-007,2026-09-18
+EQ-0146,notebook,Dell,Latitude 5440,R1HWXD8,alocado,usado,C-034,2024-02-05
+EQ-0147,kit teclado e mouse,Logitech,MK270,2338LZ0XS15G,alocado,usado,C-001,2026-05-29
+EQ-0148,headset,Jabra,Evolve2 30,138966858731,disponível,novo,,
+EQ-0149,headset,LOGITECH,H390,2395LZ00S26C,alocado,usado,C-035,2024-05-10
+EQ-0150,notebook,Dell,Latitude 5440,CUMVP4D,alocado,usado,C-027,2023-03-28

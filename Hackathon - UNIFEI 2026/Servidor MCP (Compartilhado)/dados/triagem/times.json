@@ -1,0 +1,10 @@
+[
+  {"time": "Segurança", "atende": "Acessos a sistemas, retirada de acessos, suspeita de golpe, vazamento ou acesso indevido"},
+  {"time": "Infraestrutura", "atende": "Notebooks, monitores, periféricos, rede e internet do escritório"},
+  {"time": "Pessoas", "atende": "Férias, benefícios, admissão, desligamento e dúvidas de políticas internas"},
+  {"time": "Financeiro", "atende": "Reembolsos, notas fiscais e pagamentos a fornecedores"},
+  {"time": "Produto", "atende": "Problemas e dúvidas nos produtos: Portal do Cliente, App Agenda e Painel de Vendas"},
+  {"time": "Operações", "atende": "Escritório, compras gerais e pedidos que não se encaixam em outro time"},
+  {"time": "Marketing", "atende": "Eventos, patrocínios, redes sociais e materiais com a marca da empresa"},
+  {"time": "Jurídico", "atende": "Contratos, termos de uso e dúvidas legais"}
+]

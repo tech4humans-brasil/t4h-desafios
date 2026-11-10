@@ -1,0 +1,41 @@
+id,nome,email,cargo,area,data_entrada,data_saida
+C-001,Carla Mendes,carla.mendes@t4h.exemplo,Gerente de Engenharia,Desenvolvimento,2021-03-08,
+C-002,Rafael Souza,rafael.souza@t4h.exemplo,Desenvolvedor Sênior,Desenvolvimento,2021-06-14,
+C-003,Juliana Rocha,juliana.rocha@t4h.exemplo,Desenvolvedora Pleno,Desenvolvimento,2022-02-01,
+C-004,Thiago Martins,thiago.martins@t4h.exemplo,Desenvolvedor Pleno,Desenvolvimento,2022-08-15,
+C-005,Bruno Carvalho,bruno.carvalho@t4h.exemplo,Desenvolvedor Júnior,Desenvolvimento,2024-03-04,
+C-006,Larissa Pires,larissa.pires@t4h.exemplo,Engenheira de Dados,Desenvolvimento,2023-05-02,
+C-007,Diego Almeida,diego.almeida@t4h.exemplo,Desenvolvedor Sênior,Desenvolvimento,2020-11-03,2026-12-11
+C-008,Natália Freitas,natalia.freitas@t4h.exemplo,Analista de QA,Desenvolvimento,2023-09-11,
+C-009,Gustavo Ribeiro,gustavo.ribeiro@t4h.exemplo,Tech Lead,Desenvolvimento,2020-07-20,
+C-010,Fernanda Lopes,fernanda.lopes@t4h.exemplo,Coordenadora de Design,Design,2021-09-13,
+C-011,Lucas Barbosa,lucas.barbosa@t4h.exemplo,Designer de Produto,Design,2023-01-16,
+C-012,Camila Teixeira,camila.teixeira@t4h.exemplo,Designer UX,Design,2022-10-03,2026-12-22
+C-013,Vitor Nogueira,vitor.nogueira@t4h.exemplo,Designer Visual,Design,2024-07-01,
+C-014,Mariana Castro,mariana.castro@t4h.exemplo,Gerente de Produto,Produto,2021-04-05,
+C-015,Eduardo Farias,eduardo.farias@t4h.exemplo,Product Owner,Produto,2022-05-16,
+C-016,Beatriz Moura,beatriz.moura@t4h.exemplo,Analista de Produto,Produto,2024-02-19,
+C-017,Ricardo Azevedo,ricardo.azevedo@t4h.exemplo,Gerente Comercial,Comercial,2020-09-01,
+C-018,Patrícia Duarte,patricia.duarte@t4h.exemplo,Executiva de Contas,Comercial,2022-03-21,
+C-019,André Monteiro,andre.monteiro@t4h.exemplo,Executivo de Contas,Comercial,2023-06-05,2026-12-04
+C-020,Sabrina Correia,sabrina.correia@t4h.exemplo,Analista de Pré-vendas,Comercial,2024-10-14,
+C-021,Renata Vasconcelos,renata.vasconcelos@t4h.exemplo,Coordenadora de Pessoas,Pessoas,2021-01-11,
+C-022,Felipe Cardoso,felipe.cardoso@t4h.exemplo,Analista de Pessoas,Pessoas,2023-03-13,
+C-023,Marcelo Antunes,marcelo.antunes@t4h.exemplo,Gerente Financeiro,Financeiro,2020-05-04,
+C-024,Aline Batista,aline.batista@t4h.exemplo,Analista Financeira,Financeiro,2022-11-07,
+C-025,Rodrigo Peixoto,rodrigo.peixoto@t4h.exemplo,Assistente Financeiro,Financeiro,2025-02-03,
+C-026,Simone Araújo,simone.araujo@t4h.exemplo,Coordenadora de Operações,Operações,2021-07-19,
+C-027,Fábio Rezende,fabio.rezende@t4h.exemplo,Analista de Infraestrutura,Operações,2022-06-06,
+C-028,Jéssica Moreira,jessica.moreira@t4h.exemplo,Assistente Administrativa,Operações,2024-05-13,
+C-029,Henrique Dias,henrique.dias@t4h.exemplo,Analista de Operações,Operações,2023-11-20,2026-12-16
+C-030,Vanessa Gomes,vanessa.gomes@t4h.exemplo,Desenvolvedora Júnior,Desenvolvimento,2025-08-04,
+C-031,Igor Fontes,igor.fontes@t4h.exemplo,Desenvolvedor Pleno,Desenvolvimento,2025-04-07,
+C-032,Daniela Pacheco,daniela.pacheco@t4h.exemplo,Analista de Produto,Produto,2025-10-06,
+C-033,Caio Fernandes,caio.fernandes@t4h.exemplo,Analista de Controladoria,Financeiro,2024-09-02,
+C-034,Leonardo Brito,leonardo.brito@t4h.exemplo,Desenvolvedor Pleno,Desenvolvimento,2022-04-04,2026-11-13
+C-035,Tatiane Ramos,tatiane.ramos@t4h.exemplo,Analista Comercial,Comercial,2023-08-14,2026-11-27
+C-036,Gabriel Tavares,gabriel.tavares@t4h.exemplo,Desenvolvedor Pleno,Desenvolvimento,2026-12-08,
+C-037,Isabela Cunha,isabela.cunha@t4h.exemplo,Designer de Produto,Design,2026-12-14,
+C-038,Mateus Prado,mateus.prado@t4h.exemplo,Executivo de Contas,Comercial,2026-12-09,
+C-039,Letícia Macedo,leticia.macedo@t4h.exemplo,Desenvolvedora Júnior,Desenvolvimento,2026-12-21,
+C-040,Otávio Siqueira,otavio.siqueira@t4h.exemplo,Designer UX,Design,2026-12-28,

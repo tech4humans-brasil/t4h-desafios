@@ -1,0 +1,82 @@
+[
+  {
+    "id": "CH-0901",
+    "tipo": "Acesso a sistema",
+    "solicitante": "rafael.costa@t4h.exemplo",
+    "resumo": "Acesso de leitura ao CRM para acompanhar a carteira de clientes",
+    "status": "aguardando aprovação",
+    "aberto_em": "2026-11-30"
+  },
+  {
+    "id": "CH-0902",
+    "tipo": "Troca de equipamento",
+    "solicitante": "helena.duarte@t4h.exemplo",
+    "resumo": "Notebook patrimônio 4471 com bateria estufada, desligando sozinho",
+    "status": "aberto",
+    "aberto_em": "2026-12-01"
+  },
+  {
+    "id": "CH-0903",
+    "tipo": "Novo equipamento",
+    "solicitante": "igor.nascimento@t4h.exemplo",
+    "resumo": "Segundo monitor para a estação de trabalho",
+    "status": "aguardando aprovação",
+    "aberto_em": "2026-12-01"
+  },
+  {
+    "id": "CH-0904",
+    "tipo": "Suporte a produto",
+    "solicitante": "larissa.moura@t4h.exemplo",
+    "resumo": "Painel de Vendas: exportação para planilha sai com as colunas de data e vencimento trocadas",
+    "status": "aberto",
+    "aberto_em": "2026-12-02"
+  },
+  {
+    "id": "CH-0905",
+    "tipo": "Reembolso",
+    "solicitante": "thiago.barbosa@t4h.exemplo",
+    "resumo": "Reembolso de táxi da visita a cliente em 25/11/2026, R$ 87,40",
+    "status": "aguardando aprovação",
+    "aberto_em": "2026-12-02"
+  },
+  {
+    "id": "CH-0906",
+    "tipo": "Férias",
+    "solicitante": "patricia.gomes@t4h.exemplo",
+    "resumo": "Férias de 04/01/2027 a 18/01/2027",
+    "status": "aguardando aprovação",
+    "aberto_em": "2026-12-03"
+  },
+  {
+    "id": "CH-0907",
+    "tipo": "Retirada de acessos",
+    "solicitante": "renato.freitas@t4h.exemplo",
+    "resumo": "Retirar os acessos de Joaquim Prates, que sai da empresa em 11/12/2026",
+    "status": "aberto",
+    "aberto_em": "2026-12-03"
+  },
+  {
+    "id": "CH-0908",
+    "tipo": "Outros pedidos",
+    "solicitante": "vanessa.cardoso@t4h.exemplo",
+    "resumo": "Ar-condicionado da Sala 3 pingando em cima da mesa",
+    "status": "aberto",
+    "aberto_em": "2026-12-03"
+  },
+  {
+    "id": "CH-0909",
+    "tipo": "Suporte a produto",
+    "solicitante": "leonardo.pires@t4h.exemplo",
+    "resumo": "App Agenda: lembrete de agendamento chegando duplicado para alguns usuários",
+    "status": "aberto",
+    "aberto_em": "2026-12-04"
+  },
+  {
+    "id": "CH-0910",
+    "tipo": "Acesso a sistema",
+    "solicitante": "aline.santana@t4h.exemplo",
+    "resumo": "Acesso de escrita ao repositório de código do Painel de Vendas",
+    "status": "aberto",
+    "aberto_em": "2026-12-04"
+  }
+]

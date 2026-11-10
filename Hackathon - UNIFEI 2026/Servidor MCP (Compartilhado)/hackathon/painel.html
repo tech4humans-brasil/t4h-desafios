@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel do Hackathon</title>
+<style>
+  :root {
+    --fundo: #f6f5f1; --cartao: #ffffff; --borda: #e3e1da; --texto: #1d1c19; --suave: #6b6962;
+    --ok: #2f7d4f; --ok-fundo: #e5f4e4; --erro: #b3261e; --erro-fundo: #fbebeb;
+    --atencao: #8a5a00; --atencao-fundo: #f9eeda; --info: #2b5ea7; --info-fundo: #e7f1fb;
+    --conversa: #6a4fb3; --conversa-fundo: #efedff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fundo: #161614; --cartao: #1f1f1c; --borda: #33322e; --texto: #ecebe6; --suave: #a3a199;
+      --ok: #7fcf9b; --ok-fundo: #1d3326; --erro: #f08a82; --erro-fundo: #3a1e1c;
+      --atencao: #e8b75c; --atencao-fundo: #3a2e17; --info: #8ab4f0; --info-fundo: #1c2a3d;
+      --conversa: #b4a3f0; --conversa-fundo: #2a2440;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--borda); background: var(--cartao); position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 16px; margin: 0; }
+  .relogio { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .barra { flex: 1 1 160px; height: 6px; background: var(--borda); border-radius: 3px; overflow: hidden; min-width: 120px; }
+  .barra div { height: 100%; background: var(--info); width: 0; transition: width .5s; }
+  .pilula { padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; background: var(--info-fundo); color: var(--info); }
+  .pilula.rodando { background: var(--ok-fundo); color: var(--ok); }
+  .pilula.fim { background: var(--atencao-fundo); color: var(--atencao); }
+  main { display: grid; grid-template-columns: minmax(240px, 1fr) minmax(320px, 2fr) minmax(260px, 1.1fr); gap: 16px; padding: 16px 20px; }
+  @media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+  section { background: var(--cartao); border: 1px solid var(--borda); border-radius: 10px; display: flex; flex-direction: column; min-height: 0; max-height: calc(100vh - 110px); }
+  @media (max-width: 1000px) { section { max-height: 70vh; } }
+  section h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); margin: 0; padding: 12px 14px; border-bottom: 1px solid var(--borda); display: flex; justify-content: space-between; }
+  .lista { overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .pedido { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--borda); }
+  .pedido .topo { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--suave); }
+  .pedido .assunto { font-weight: 600; margin-top: 2px; overflow-wrap: anywhere; }
+  .status { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 99px; background: var(--info-fundo); color: var(--info); white-space: nowrap; }
+  .status.novo { background: var(--atencao-fundo); color: var(--atencao); }
+  .status.feito { background: var(--ok-fundo); color: var(--ok); }
+  .evento { padding: 8px 10px; border-radius: 8px; border-left: 3px solid var(--borda); background: var(--fundo); }
+  .evento.ok { border-left-color: var(--ok); }
+  .evento.erro { border-left-color: var(--erro); background: var(--erro-fundo); }
+  .evento.conversa { border-left-color: var(--conversa); background: var(--conversa-fundo); }
+  .evento.mundo, .evento.pedido { border-left-color: var(--info); }
+  .evento .linha { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+  .evento .hora { font-size: 12px; color: var(--suave); font-variant-numeric: tabular-nums; }
+  .agente { font-weight: 600; }
+  .ferramenta { font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+  .codigo { font-size: 11px; font-weight: 700; color: var(--erro); }
+  .motivo { color: var(--suave); margin-top: 2px; }
+  details { margin-top: 4px; }
+  summary { cursor: pointer; color: var(--suave); font-size: 12px; }
+  pre { margin: 4px 0 0; font: 12px/1.4 ui-monospace, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .alerta { padding: 8px 10px; border-radius: 8px; background: var(--info-fundo); }
+  .alerta.atencao { background: var(--atencao-fundo); }
+  .alerta.grave { background: var(--erro-fundo); }
+  .alerta .nivel { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .grade { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px; border-bottom: 1px solid var(--borda); }
+  .indicador { padding: 6px 8px; border-radius: 8px; background: var(--fundo); }
+  .indicador .valor { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .indicador .nome { font-size: 12px; color: var(--suave); }
+  .indicador.alerta-ind .valor { color: var(--erro); }
+  .filtros { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 8px 0; }
+  .filtros button { border: 1px solid var(--borda); background: var(--cartao); color: var(--texto); border-radius: 99px; padding: 2px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+  .filtros button.ativo { background: var(--texto); color: var(--fundo); }
+  .vazio { color: var(--suave); padding: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="tema">Painel do Hackathon</h1>
+  <span class="relogio" id="relogio">—</span>
+  <div class="barra"><div id="progresso"></div></div>
+  <span class="pilula" id="situacao">Aguardando o primeiro agente</span>
+  <span id="contadores" class="hora"></span>
+</header>
+<main>
+  <section>
+    <h2>Caixa de entrada <span id="total-caixa"></span></h2>
+    <div class="lista" id="caixa"><div class="vazio">Nenhum pedido ainda.</div></div>
+  </section>
+  <section>
+    <h2>Chamadas e conversas dos agentes <span id="total-chamadas"></span></h2>
+    <div class="filtros" id="filtros"></div>
+    <div class="lista" id="feed"><div class="vazio">Conecte um agente ao servidor MCP.</div></div>
+  </section>
+  <section>
+    <h2>O mundo</h2>
+    <div class="grade" id="indicadores"></div>
+    <div class="lista" id="alertas"><div class="vazio">Nada aconteceu ainda.</div></div>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const hora = (agora) => esc((agora || "").slice(-5));
+let filtro = null;
+const abertos = new Set();
+document.addEventListener("toggle", (e) => {
+  const el = e.target;
+  if (el.classList && el.classList.contains("pedido")) el.open ? abertos.add(el.dataset.id) : abertos.delete(el.dataset.id);
+}, true);
+const agentesVistos = new Set();
+const FEITOS = ["respondido", "chamado aberto", "duplicado", "encaminhado", "incidente aberto", "escalado"];
+
+function renderFiltros() {
+  const botoes = [`<button class="${filtro ? "" : "ativo"}" data-a="">todos</button>`]
+    .concat([...agentesVistos].map((a) => `<button class="${filtro === a ? "ativo" : ""}" data-a="${esc(a)}">${esc(a)}</button>`));
+  $("filtros").innerHTML = botoes.join("");
+}
+$("filtros").addEventListener("click", (e) => {
+  if (e.target.dataset.a === undefined) return;
+  filtro = e.target.dataset.a || null;
+  renderFiltros();
+  document.querySelectorAll("#feed .evento").forEach((el) => {
+    el.style.display = !filtro || el.dataset.agente === filtro ? "" : "none";
+  });
+});
+
+function cartaoEvento(ev) {
+  const el = document.createElement("div");
+  if (ev.tipo === "conversa") {
+    el.className = "evento conversa";
+    el.dataset.agente = ev.de;
+    el.innerHTML = `<div class="linha"><span class="hora">${hora(ev.agora)}</span><span class="agente">${esc(ev.de)} → ${esc(ev.para)}</span></div><div>${esc(ev.mensagem)}</div>`;
+    agentesVistos.add(ev.de);
+  } else if (ev.tipo === "chamada") {
+    if (ev.ferramenta === "proximo_pedido" && ev.resultado === "ok" && !ev.resposta.pedido) return null;
+    el.className = "evento " + (ev.resultado === "ok" ? "ok" : "erro");
+    el.dataset.agente = ev.agente;
+    const codigo = ev.resultado === "ok" ? "" : `<span class="codigo">${esc(ev.codigo)}${ev.falha ? " · falha simulada" : ""}</span>`;
+    const lento = ev.falha === "lento" ? `<span class="hora">lento · ${Math.round(ev.duracao_ms / 1000)} s</span>` : "";
+    el.innerHTML = `<div class="linha"><span class="hora">${hora(ev.agora)}</span><span class="agente">${esc(ev.agente || "sem agente")}</span><span class="ferramenta">${esc(ev.ferramenta)}</span>${codigo}${lento}</div>`
+      + (ev.motivo ? `<div class="motivo">${esc(ev.motivo)}</div>` : "")
+      + `<details><summary>argumentos e resposta</summary><pre>${esc(JSON.stringify(ev.argumentos, null, 2))}</pre><pre>${esc(JSON.stringify(ev.resposta, null, 2))}</pre></details>`;
+    if (ev.agente) agentesVistos.add(ev.agente);
+  } else {
+    return null;
+  }
+  if (filtro && el.dataset.agente !== filtro) el.style.display = "none";
+  return el;
+}
+
+function adicionarNoFeed(ev) {
+  const el = cartaoEvento(ev);
+  if (!el) return;
+  const feed = $("feed");
+  if (feed.querySelector(".vazio")) feed.innerHTML = "";
+  feed.prepend(el);
+  while (feed.children.length > 300) feed.lastChild.remove();
+  renderFiltros();
+}
+
+function adicionarAlerta(ev) {
+  const lista = $("alertas");
+  if (lista.querySelector(".vazio")) lista.innerHTML = "";
+  const el = document.createElement("div");
+  if (ev.tipo === "alerta") {
+    el.className = "alerta " + ev.nivel;
+    const nome = {grave: "Grave", atencao: "Atenção", info: "Info"}[ev.nivel] || ev.nivel;
+    el.innerHTML = `<div class="nivel">${nome} · ${hora(ev.agora)}</div><div>${esc(ev.mensagem)}</div>`;
+  } else {
+    el.className = "alerta";
+    el.innerHTML = `<div class="nivel">${hora(ev.agora)}</div><div>${esc(ev.mensagem)}</div>`;
+  }
+  lista.prepend(el);
+}
+
+function renderEstado(s) {
+  $("tema").textContent = s.tema + (s.cenario ? ` · cenário ${s.cenario}` : "");
+  $("relogio").textContent = `${s.agora} · dia ${s.dia} de ${s.dias}`;
+  $("progresso").style.width = (s.progresso * 100).toFixed(1) + "%";
+  const sit = $("situacao");
+  sit.className = "pilula " + (s.encerrado ? "fim" : s.rodando ? "rodando" : "");
+  sit.textContent = s.encerrado ? "Cenário encerrado" : s.rodando ? "Rodando" : "Aguardando o primeiro agente";
+  const agentes = Object.keys(s.agentes).length;
+  $("contadores").textContent = `${s.chamadas} chamadas · ${s.erros} com erro · ${agentes} agente(s)`;
+  $("total-chamadas").textContent = s.chamadas;
+  $("indicadores").innerHTML = s.indicadores.map((i) =>
+    `<div class="indicador ${i.alerta ? "alerta-ind" : ""}"><div class="valor">${esc(i.valor)}</div><div class="nome">${esc(i.nome)}</div></div>`).join("");
+  const caixa = s.caixa.slice().reverse();
+  $("total-caixa").textContent = s.caixa.length;
+  $("caixa").innerHTML = caixa.length ? caixa.map((p) => {
+    const classe = p.status === "novo" ? "novo" : FEITOS.includes(p.status) ? "feito" : "";
+    const aberto = abertos.has(p.id) ? " open" : "";
+    return `<details class="pedido" data-id="${esc(p.id)}"${aberto}><summary style="list-style:none;cursor:pointer"><div class="topo"><span>${esc(p.id)} · ${hora(p.chegou_em)}</span><span class="status ${classe}">${esc(p.status)}</span></div>`
+      + `<div class="assunto">${esc(p.assunto)}</div><div class="topo"><span>${esc(p.nome || p.de)}</span><span>${p.acoes} ação(ões)</span></div></summary>`
+      + `<pre>${esc(p.de)}\n\n${esc(p.corpo)}</pre></details>`;
+  }).join("") : '<div class="vazio">Nenhum pedido ainda.</div>';
+}
+
+async function atualizar() {
+  try { renderEstado(await (await fetch("/api/estado")).json()); } catch (e) {}
+}
+
+async function iniciar() {
+  const s = await (await fetch("/api/estado")).json();
+  renderEstado(s);
+  s.historico.forEach((ev) => {
+    if (ev.tipo === "chamada" || ev.tipo === "conversa") adicionarNoFeed(ev);
+    else if (["alerta", "mundo", "inicio", "fim"].includes(ev.tipo)) adicionarAlerta(ev);
+  });
+  const fonte = new EventSource("/api/eventos");
+  fonte.onmessage = (m) => {
+    const ev = JSON.parse(m.data);
+    if (ev.tipo === "chamada" || ev.tipo === "conversa") adicionarNoFeed(ev);
+    else if (["alerta", "mundo", "inicio", "fim"].includes(ev.tipo)) adicionarAlerta(ev);
+  };
+  setInterval(atualizar, 1000);
+}
+iniciar();
+</script>
+</body>
+</html>
