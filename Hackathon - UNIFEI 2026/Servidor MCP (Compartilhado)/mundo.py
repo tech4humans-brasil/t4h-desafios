@@ -19,6 +19,7 @@ from datetime import datetime
 import anyio
 import uvicorn
 from mcp.server.lowlevel import Server
+from mcp.server.transport_security import TransportSecuritySettings
 import mcp_types as types
 
 from hackathon.nucleo import Mundo
@@ -36,6 +37,7 @@ def main() -> None:
     parser.add_argument("--cenario", help="arquivo do cenário (padrão: o de treino do tema)")
     parser.add_argument("--dados", help="pasta com as bases do tema (padrão: dados/<tema>)")
     parser.add_argument("--porta", type=int, default=8765)
+    parser.add_argument("--host", default="127.0.0.1", help="endereço de escuta (no Docker: 0.0.0.0)")
     parser.add_argument("--erros", type=float, default=0.15, help="chance de falha por chamada, de 0 a 1 (padrão 0.15)")
     parser.add_argument("--seed", type=int, default=None, help="semente: repete os mesmos sorteios")
     parser.add_argument("--segundos-por-dia", type=float, default=None, help="quanto dura um dia de expediente, em segundos reais")
@@ -69,8 +71,12 @@ def main() -> None:
         on_list_tools=listar,
         on_call_tool=chamar,
     )
-    app = servidor.streamable_http_app(custom_starlette_routes=rotas(mundo))
-    url = f"http://127.0.0.1:{args.porta}"
+    seguranca = None
+    if args.host not in ("127.0.0.1", "localhost", "::1"):
+        # No Docker o servidor escuta em 0.0.0.0 e recebe Host de outros nomes (localhost, mundo).
+        seguranca = TransportSecuritySettings(enable_dns_rebinding_protection=False)
+    app = servidor.streamable_http_app(custom_starlette_routes=rotas(mundo), host=args.host, transport_security=seguranca)
+    url = f"http://localhost:{args.porta}"
 
     print(f"\n  {tema.titulo} · cenário {cenario.get('nome', cenario_arquivo.name)}", file=sys.stderr)
     print(f"  Painel:       {url}/", file=sys.stderr)
@@ -83,7 +89,7 @@ def main() -> None:
         threading.Timer(1.5, lambda: webbrowser.open(f"{url}/")).start()
 
     async def rodar() -> None:
-        config = uvicorn.Config(app, host="127.0.0.1", port=args.porta, log_level="warning")
+        config = uvicorn.Config(app, host=args.host, port=args.porta, log_level="warning")
         async with anyio.create_task_group() as grupo:
             grupo.start_soon(mundo.rodar)
             await uvicorn.Server(config).serve()
