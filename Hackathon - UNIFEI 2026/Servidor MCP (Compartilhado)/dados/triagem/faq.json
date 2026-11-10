@@ -1,0 +1,184 @@
+[
+  {
+    "id": "FAQ-01",
+    "pergunta": "Como me conecto à VPN para trabalhar de fora do escritório?",
+    "resposta": "Instale o cliente de VPN pela Central de Software do notebook (ele já vem nos notebooks novos) e entre com o seu usuário e senha da rede. Se aparecer erro de certificado, reinicie o notebook conectado à internet e tente de novo. Persistindo, abra um chamado de suporte informando a mensagem de erro.",
+    "palavras_chave": [
+      "vpn",
+      "acesso remoto",
+      "home office",
+      "trabalhar de casa",
+      "conectar de fora"
+    ]
+  },
+  {
+    "id": "FAQ-02",
+    "pergunta": "Como troco a minha senha da rede e do e-mail?",
+    "resposta": "Você mesmo troca em Portal de Pessoas > Minha conta > Trocar senha, ou pelo atalho Ctrl+Alt+Del > Alterar senha no notebook da empresa. A senha vence a cada 90 dias e o sistema avisa 7 dias antes. A nova senha precisa ter 12 caracteres e não pode repetir as últimas 5.",
+    "palavras_chave": [
+      "senha",
+      "trocar senha",
+      "senha vencendo",
+      "senha expirada",
+      "alterar senha"
+    ]
+  },
+  {
+    "id": "FAQ-03",
+    "pergunta": "A impressora sumiu do meu computador. Como adiciono de novo?",
+    "resposta": "Abra Configurações > Impressoras > Adicionar e escolha a impressora do seu andar (os nomes seguem o padrão IMP-ANDAR2, IMP-ANDAR3). Ela só aparece quando o notebook está na rede do escritório, não na VPN. Se mesmo assim não aparecer, reinicie o notebook antes de abrir chamado.",
+    "palavras_chave": [
+      "impressora",
+      "imprimir",
+      "impressão",
+      "adicionar impressora"
+    ]
+  },
+  {
+    "id": "FAQ-04",
+    "pergunta": "Como libero Wi-Fi para visitantes?",
+    "resposta": "Visitantes usam a rede T4H-Visitante. A recepção gera um código de acesso individual, válido por 24 horas, mediante o nome do visitante e de quem o recebe. Não compartilhe a senha da rede dos colaboradores com visitantes.",
+    "palavras_chave": [
+      "wi-fi",
+      "wifi",
+      "visitante",
+      "rede de visitante",
+      "internet visitante",
+      "fornecedor no escritório"
+    ]
+  },
+  {
+    "id": "FAQ-05",
+    "pergunta": "Como peço férias e com quanto tempo de antecedência?",
+    "resposta": "Combine o período com o seu gestor e abra um chamado do tipo Férias com a data de início e a data de fim, com pelo menos 30 dias de antecedência. As férias podem ser divididas em até 3 períodos, e um deles precisa ter no mínimo 14 dias.",
+    "palavras_chave": [
+      "férias",
+      "pedir férias",
+      "antecedência",
+      "marcar férias",
+      "descanso"
+    ]
+  },
+  {
+    "id": "FAQ-06",
+    "pergunta": "Qual é o prazo do reembolso?",
+    "resposta": "A despesa deve ser enviada em até 30 dias depois da data em que foi paga, com o comprovante. Depois que o gestor aprova, o Financeiro paga em até 5 dias úteis, sempre por depósito na conta-salário já cadastrada.",
+    "palavras_chave": [
+      "reembolso",
+      "prazo do reembolso",
+      "quando cai",
+      "pagamento de despesa",
+      "ressarcimento"
+    ]
+  },
+  {
+    "id": "FAQ-07",
+    "pergunta": "Qual é o horário de atendimento do suporte interno?",
+    "resposta": "O suporte interno atende de segunda a sexta, das 8h às 18h, exceto feriados. Fora desse horário só há plantão para incidentes em produtos que estejam fora do ar.",
+    "palavras_chave": [
+      "horário",
+      "suporte",
+      "atendimento",
+      "até que horas",
+      "fim de semana",
+      "sábado"
+    ]
+  },
+  {
+    "id": "FAQ-08",
+    "pergunta": "Como reservo uma sala de reunião?",
+    "resposta": "Crie o evento na agenda corporativa e adicione a sala como convidado (ex.: Sala 1 - Grande, Sala 2, Sala 3). Se a sala aparecer como ocupada, o horário já está reservado. Reservas acima de 4 horas precisam de aprovação da Operações.",
+    "palavras_chave": [
+      "sala",
+      "reservar sala",
+      "sala de reunião",
+      "agendar sala",
+      "sala grande"
+    ]
+  },
+  {
+    "id": "FAQ-09",
+    "pergunta": "Posso levar equipamento da empresa para casa?",
+    "resposta": "O notebook pode ir para casa sem autorização. Monitor, cadeira e outros itens da estação precisam de um termo de responsabilidade assinado e aprovado pelo gestor, que a Infraestrutura envia por e-mail quando você pede. O equipamento continua no patrimônio e deve voltar quando você sair da empresa.",
+    "palavras_chave": [
+      "equipamento em casa",
+      "levar monitor",
+      "home office",
+      "termo de responsabilidade",
+      "levar para casa"
+    ]
+  },
+  {
+    "id": "FAQ-10",
+    "pergunta": "Como configuro o e-mail da empresa no celular?",
+    "resposta": "Instale o aplicativo de e-mail corporativo indicado na Central de Software, entre com seu e-mail e senha e confirme na verificação em duas etapas. O celular precisa ter bloqueio de tela ativo. Celular pessoal pode ser usado.",
+    "palavras_chave": [
+      "e-mail no celular",
+      "celular",
+      "configurar e-mail",
+      "celular novo",
+      "e-mail no telefone"
+    ]
+  },
+  {
+    "id": "FAQ-11",
+    "pergunta": "Esqueci o crachá. Como entro no prédio?",
+    "resposta": "Vá à recepção com um documento com foto: eles liberam um crachá provisório válido até o fim do dia. Em caso de perda, avise a Operações para bloquear o crachá antigo e emitir outro.",
+    "palavras_chave": [
+      "crachá",
+      "esqueci o crachá",
+      "perdi o crachá",
+      "entrar no prédio",
+      "catraca"
+    ]
+  },
+  {
+    "id": "FAQ-12",
+    "pergunta": "Onde vejo meu contracheque?",
+    "resposta": "No Portal de Pessoas, menu Meus documentos > Contracheques. O contracheque do mês fica disponível no quinto dia útil e os dos últimos 5 anos ficam guardados lá. O informe de rendimentos fica no mesmo menu a partir de fevereiro.",
+    "palavras_chave": [
+      "contracheque",
+      "holerite",
+      "comprovante de salário",
+      "informe de rendimentos",
+      "salário"
+    ]
+  },
+  {
+    "id": "FAQ-13",
+    "pergunta": "Quando os benefícios caem no cartão?",
+    "resposta": "O vale-refeição e o vale-alimentação são creditados no último dia útil do mês anterior. Para quem foi admitido depois do dia 15, o primeiro crédito é proporcional e cai no mês seguinte.",
+    "palavras_chave": [
+      "benefícios",
+      "vale-refeição",
+      "vale-alimentação",
+      "cartão de benefício",
+      "crédito do vale"
+    ]
+  },
+  {
+    "id": "FAQ-14",
+    "pergunta": "Como compartilho um arquivo grande com alguém de fora?",
+    "resposta": "Use o armazenamento em nuvem corporativo: clique com o botão direito no arquivo, escolha Compartilhar e gere um link com prazo de validade. Não envie arquivos de clientes por e-mail pessoal nem por aplicativos de mensagem.",
+    "palavras_chave": [
+      "arquivo grande",
+      "compartilhar arquivo",
+      "enviar arquivo",
+      "link de compartilhamento",
+      "nuvem"
+    ]
+  },
+  {
+    "id": "FAQ-15",
+    "pergunta": "Troquei de celular e perdi a verificação em duas etapas. E agora?",
+    "resposta": "Se ainda tiver o celular antigo, entre em Portal de Pessoas > Minha conta > Segurança e transfira a verificação para o novo aparelho. Sem o celular antigo, use um dos códigos de recuperação que você salvou no cadastro. Se não tiver os códigos, abra um chamado de suporte para que a Segurança confirme sua identidade e reinicie a verificação.",
+    "palavras_chave": [
+      "verificação em duas etapas",
+      "2fa",
+      "mfa",
+      "celular novo",
+      "autenticador",
+      "não consigo entrar"
+    ]
+  }
+]

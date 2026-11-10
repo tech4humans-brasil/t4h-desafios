@@ -1,0 +1,32 @@
+[
+  {
+    "tipo": "notebook",
+    "modelo": "Dell Latitude 5440",
+    "preco": 4800,
+    "prazo_dias_uteis": 10
+  },
+  {
+    "tipo": "monitor",
+    "modelo": "LG 24MK430H",
+    "preco": 890,
+    "prazo_dias_uteis": 7
+  },
+  {
+    "tipo": "headset",
+    "modelo": "Logitech H390",
+    "preco": 320,
+    "prazo_dias_uteis": 3
+  },
+  {
+    "tipo": "kit teclado e mouse",
+    "modelo": "Logitech MK270",
+    "preco": 180,
+    "prazo_dias_uteis": 3
+  },
+  {
+    "tipo": "carregador",
+    "modelo": "Dell Adaptador USB-C 65W",
+    "preco": 260,
+    "prazo_dias_uteis": 5
+  }
+]

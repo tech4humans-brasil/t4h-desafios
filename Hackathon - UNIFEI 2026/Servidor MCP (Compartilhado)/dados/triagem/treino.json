@@ -1,0 +1,643 @@
+{
+  "tema": "triagem",
+  "nome": "treino",
+  "inicio": "2026-12-07",
+  "dias": 5,
+  "pedidos": [
+    {
+      "id": "PED-001",
+      "dia": 1,
+      "hora": "08:05",
+      "de": "marina.alves@t4h.exemplo",
+      "nome": "Marina Alves",
+      "assunto": "vpn",
+      "corpo": "Bom dia! Peguei o notebook novo na sexta e agora em casa não consigo entrar na VPN, nem sei se tem que instalar alguma coisa. Como faço?\n\nObrigada,\nMarina"
+    },
+    {
+      "id": "PED-002",
+      "dia": 1,
+      "hora": "08:22",
+      "de": "bruno.teixeira@t4h.exemplo",
+      "nome": "Bruno Teixeira",
+      "assunto": "Acesso ao sistema financeiro",
+      "corpo": "Oi pessoal, tudo bem?\n\nPreciso de acesso ao sistema financeiro, só perfil de consulta mesmo (não vou lançar nada). É para acompanhar os pagamentos do fechamento mensal, que passou a ser responsabilidade minha a partir deste mês. Meu gestor é o Fábio Cunha, ele já está sabendo.\n\nValeu!\nBruno Teixeira"
+    },
+    {
+      "id": "PED-003",
+      "dia": 1,
+      "hora": "08:40",
+      "de": "camila.rocha@t4h.exemplo",
+      "nome": "Camila Rocha",
+      "assunto": "URGENTE!!! IMPRESSORA",
+      "corpo": "gente a impressora do segundo andar sumiu do meu computador, preciso imprimir uma coisa hj ainda!!! como coloco ela de volta??"
+    },
+    {
+      "id": "PED-004",
+      "dia": 1,
+      "hora": "09:10",
+      "de": "diego.martins@t4h.exemplo",
+      "nome": "Diego Martins",
+      "assunto": "reembolso almoço",
+      "corpo": "Opa, semana passada levei um cliente pra almoçar depois da reunião de renovação e paguei do meu bolso. Como faço pra pedir o reembolso?\n\nAbraço",
+      "complemento": {
+        "apos_horas": 1.5,
+        "corpo": "Foi na quarta, dia 02/12/2026. Deu R$ 142,50 no total. Tô mandando a foto da nota fiscal em anexo (nf_almoco_0212.jpg)."
+      }
+    },
+    {
+      "id": "PED-005",
+      "dia": 1,
+      "hora": "09:35",
+      "de": "fernanda.lima@t4h.exemplo",
+      "nome": "Fernanda Lima",
+      "assunto": "Portal do Cliente - segunda via do boleto não abre",
+      "corpo": "Oi, desde umas 9h os clientes estão reclamando que quando clicam em \"Baixar segunda via\" no Portal do Cliente aparece uma tela de erro e o PDF não gera. Já foram uns 6 contatos aqui no atendimento.\n\nO resto do portal funciona normal, e a linha digitável aparece na tela de detalhes da fatura, então estou orientando o pessoal a copiar de lá e pagar pelo app do banco. Mas está gerando bastante ligação.\n\nFernanda Lima - Atendimento",
+      "cobranca": {
+        "apos_horas": 1,
+        "assunto": "Re: Portal do Cliente - segunda via do boleto não abre",
+        "corpo": "Alguma novidade? Já são 14 clientes reclamando do PDF do boleto e a fila do atendimento tá crescendo."
+      }
+    },
+    {
+      "id": "PED-006",
+      "dia": 1,
+      "hora": "10:02",
+      "de": "gustavo.ribeiro@t4h.exemplo",
+      "nome": "Gustavo Ribeiro",
+      "assunto": "Pedido de headset",
+      "corpo": "Oi! Queria pedir um headset com microfone. Passo boa parte do dia em call com cliente e o fone que eu usava era meu e quebrou no fim de semana. Tô usando o fone do celular e o pessoal reclama do áudio.\n\nObrigado,\nGustavo Ribeiro"
+    },
+    {
+      "id": "PED-007",
+      "dia": 1,
+      "hora": "10:30",
+      "de": "helena.duarte@t4h.exemplo",
+      "nome": "Helena Duarte",
+      "assunto": "notebook ainda desligando",
+      "corpo": "Oi, tudo bem? Abri um pedido na semana passada por causa do meu notebook, que tá com a bateria estufada e desliga do nada. Continua do mesmo jeito, hoje já desligou duas vezes no meio de reunião. Tem previsão? Se tiver um emprestado eu pego enquanto isso.\n\nHelena",
+      "cobranca": {
+        "apos_horas": 5,
+        "assunto": "Re: notebook ainda desligando",
+        "corpo": "Oi de novo. A bateria parece que estufou mais, o touchpad tá levantando. Tô com medo de deixar ligado na tomada. Alguém consegue me dar um retorno?"
+      }
+    },
+    {
+      "id": "PED-008",
+      "dia": 1,
+      "hora": "11:15",
+      "de": "suporte@t4h-exemplo.com",
+      "nome": "Suporte T4H",
+      "assunto": "[AÇÃO NECESSÁRIA] Sua senha expira hoje",
+      "corpo": "Prezado(a) colaborador(a),\n\nIdentificamos que a senha da sua conta corporativa expira hoje às 18h. Para evitar o bloqueio do e-mail e dos sistemas, valide seu acesso no link abaixo informando seu usuário e a senha atual:\n\nhttp://t4h-exemplo.com/validar-acesso?id=88213\n\nContas não validadas até o fim do dia serão desativadas automaticamente.\n\nAtenciosamente,\nEquipe de Suporte T4H"
+    },
+    {
+      "id": "PED-009",
+      "dia": 1,
+      "hora": "13:20",
+      "de": "igor.nascimento@t4h.exemplo",
+      "nome": "Igor Nascimento",
+      "assunto": "rede pra visitante",
+      "corpo": "Bom dia, amanhã vou receber 3 pessoas de um fornecedor aqui no escritório o dia todo. Qual é a rede e a senha do wi-fi pra eles? Pode me mandar?"
+    },
+    {
+      "id": "PED-010",
+      "dia": 1,
+      "hora": "14:05",
+      "de": "juliana.prado@t4h.exemplo",
+      "nome": "Juliana Prado",
+      "assunto": "boleto do portal com erro?",
+      "corpo": "Oi pessoal, um cliente meu acabou de me ligar dizendo que não consegue baixar o boleto no portal, dá erro. Outro já tinha falado a mesma coisa de manhã. Vocês tão sabendo? É só com eles?"
+    },
+    {
+      "id": "PED-011",
+      "dia": 1,
+      "hora": "15:10",
+      "de": "sabrina.coelho@t4h.exemplo",
+      "nome": "Sabrina Coelho",
+      "assunto": "Patrocínio semana de tecnologia",
+      "corpo": "Oi, tudo bom?\n\nUm professor de uma universidade aqui da região me procurou porque eles vão fazer uma semana de tecnologia em março e querem saber se a empresa topa patrocinar. Pediram o logo em alta resolução, um banner e talvez uns brindes pros alunos.\n\nNão sei muito bem pra quem mandar isso, então tô mandando aqui. Tem um PDF com as cotas que eles mandaram, posso encaminhar.\n\nSabrina"
+    },
+    {
+      "id": "PED-012",
+      "dia": 1,
+      "hora": "16:45",
+      "de": "bruno.teixeira@t4h.exemplo",
+      "nome": "Bruno Teixeira",
+      "assunto": "Fwd: Acesso ao sistema financeiro",
+      "corpo": "Reenviando porque não recebi nenhuma confirmação e não sei se chegou. Preciso do acesso de consulta no financeiro pro fechamento.\n\nAbs,\nBruno\n\n---------- Mensagem encaminhada ----------\nAssunto: Acesso ao sistema financeiro\n\nPreciso de acesso ao sistema financeiro, só perfil de consulta mesmo (não vou lançar nada). É para acompanhar os pagamentos do fechamento mensal."
+    },
+    {
+      "id": "PED-013",
+      "dia": 2,
+      "hora": "08:10",
+      "de": "thiago.barbosa@t4h.exemplo",
+      "nome": "Thiago Barbosa",
+      "assunto": "Férias fevereiro",
+      "corpo": "Oi, quero registrar minhas férias de 01/02/2027 a 15/02/2027. Já alinhei com meu gestor.\n\nObrigado!\nThiago"
+    },
+    {
+      "id": "PED-014",
+      "dia": 2,
+      "hora": "08:35",
+      "de": "vinicius.andrade@t4h.exemplo",
+      "nome": "Vinicius Andrade",
+      "assunto": "App Agenda: clientes não conseguem confirmar agendamento",
+      "corpo": "Pessoal, desde as 8h e pouco o botão \"Confirmar agendamento\" do App Agenda está retornando \"Não foi possível concluir. Tente novamente.\" Testei com 3 contas diferentes de clientes e aconteceu em todas, no Android e no iPhone. Já chegaram mais de 40 reclamações no suporte em meia hora.\n\nQuem já tinha agendamento confirmado continua vendo normal, o problema é só para confirmar agendamento novo. Não achei contorno.\n\nVinicius Andrade - Suporte",
+      "cobranca": {
+        "apos_horas": 0.75,
+        "assunto": "Re: App Agenda: clientes não conseguem confirmar agendamento",
+        "corpo": "Atualizando: já passamos de 120 reclamações e os clientes estão ligando. Alguém está olhando isso?"
+      }
+    },
+    {
+      "id": "PED-015",
+      "dia": 2,
+      "hora": "09:00",
+      "de": "carolina.siqueira@t4h.exemplo",
+      "nome": "Carolina Siqueira",
+      "assunto": "senha vencendo",
+      "corpo": "Oi! Apareceu um aviso que minha senha vence em 5 dias. Consigo trocar sozinha ou preciso pedir pra alguém?"
+    },
+    {
+      "id": "PED-016",
+      "dia": 2,
+      "hora": "09:25",
+      "de": "renato.freitas@t4h.exemplo",
+      "nome": "Renato Freitas",
+      "assunto": "saída da Joana",
+      "corpo": "Bom dia. A Joana Ribeiro Lins, do meu time, pediu desligamento. Podem tirar os acessos dela?\n\nObrigado,\nRenato Freitas",
+      "complemento": {
+        "apos_horas": 1,
+        "corpo": "O último dia dela é 18/12/2026. Pode cortar no fim do expediente."
+      },
+      "cobranca": {
+        "apos_horas": 4,
+        "assunto": "Re: saída da Joana",
+        "corpo": "Só confirmando se vocês receberam. Preciso garantir que os acessos saiam no dia certo."
+      }
+    },
+    {
+      "id": "PED-017",
+      "dia": 2,
+      "hora": "09:50",
+      "de": "natalia.borges@t4h.exemplo",
+      "nome": "Natália Borges",
+      "assunto": "lembrete do app chegando 2x",
+      "corpo": "Oi, alguns clientes da minha carteira tão reclamando que o lembrete do App Agenda chega duas vezes, com poucos minutos de diferença. Não é grave mas eles acham estranho. Alguém já viu isso?"
+    },
+    {
+      "id": "PED-018",
+      "dia": 2,
+      "hora": "10:20",
+      "de": "felipe.araujo@t4h.exemplo",
+      "nome": "Felipe Araújo",
+      "assunto": "app agenda com problema",
+      "corpo": "oi, to em visita num cliente e ele tentou marcar um horario pelo app agenda e deu erro na hora de confirmar. ele disse que os funcionarios dele tambem nao tao conseguindo. ta fora?"
+    },
+    {
+      "id": "PED-019",
+      "dia": 2,
+      "hora": "10:55",
+      "de": "priscila.nunes@t4h.exemplo",
+      "nome": "Priscila Nunes",
+      "assunto": "atestado",
+      "corpo": "Oi, segue meu atestado dos dias 02 a 04/12, que fiquei fora. O médico colocou: diagnóstico de crise de enxaqueca com aura (CID G43.1), afastamento de 3 dias. Meu CPF é 123.456.789-XX, caso precisem pra lançar.\n\nPodem abonar as faltas?\n\nObrigada,\nPriscila Nunes",
+      "cobranca": {
+        "apos_horas": 6,
+        "assunto": "Re: atestado",
+        "corpo": "Oi, conseguiram lançar? Não quero ficar com falta no ponto."
+      }
+    },
+    {
+      "id": "PED-020",
+      "dia": 2,
+      "hora": "11:30",
+      "de": "caio.bastos@t4h.exemplo",
+      "nome": "Caio Bastos",
+      "assunto": "URGENTÍSSIMO - mouse parou",
+      "corpo": "meu mouse parou de funcionar direito, clica duas vezes sozinho, preciso de outro URGENTE pq nao consigo trabalhar assim",
+      "complemento": {
+        "apos_horas": 0.5,
+        "corpo": "o patrimônio é 3389 (etiqueta embaixo). o defeito é o clique esquerdo, que dá clique duplo sozinho e às vezes solta no meio do arrastar."
+      }
+    },
+    {
+      "id": "PED-021",
+      "dia": 2,
+      "hora": "13:15",
+      "de": "marcelo.vieira@t4h.exemplo",
+      "nome": "Marcelo Vieira",
+      "assunto": "teclado com defeito",
+      "corpo": "Bom dia. O teclado do meu kit (patrimônio 2210) está com as teclas A, S e Enter falhando, preciso apertar várias vezes. Já limpei e não resolveu. Podem trocar?\n\nMarcelo Vieira"
+    },
+    {
+      "id": "PED-022",
+      "dia": 2,
+      "hora": "14:00",
+      "de": "beatriz.campos@t4h.exemplo",
+      "nome": "Beatriz Campos",
+      "assunto": "quando cai o reembolso?",
+      "corpo": "Oi! Mandei um reembolso de combustível semana passada e ainda não caiu. Quanto tempo costuma demorar pra pagar?"
+    },
+    {
+      "id": "PED-023",
+      "dia": 2,
+      "hora": "15:20",
+      "de": "sergio.paiva@t4h.exemplo",
+      "nome": "Sérgio Paiva",
+      "assunto": "acesso repositorio",
+      "corpo": "e aí pessoal, preciso de acesso ao repositório de código. valeu",
+      "complemento": {
+        "apos_horas": 2,
+        "corpo": "Foi mal, faltou contexto. Entrei no time mobile essa semana e vou trabalhar no App Agenda. Preciso de permissão de escrita no repositório do App Agenda pra abrir branch e PR."
+      }
+    },
+    {
+      "id": "PED-024",
+      "dia": 2,
+      "hora": "16:50",
+      "de": "debora.antunes@t4h.exemplo",
+      "nome": "Débora Antunes",
+      "assunto": "Reembolso corrida de aplicativo",
+      "corpo": "Olá,\n\nSegue pedido de reembolso de corrida de aplicativo do escritório até o cliente em 03/12/2026, valor R$ 46,90. O comprovante da corrida está em anexo (recibo_corrida_0312.pdf).\n\nObrigada,\nDébora Antunes"
+    },
+    {
+      "id": "PED-025",
+      "dia": 3,
+      "hora": "08:15",
+      "de": "rafael.costa@t4h.exemplo",
+      "nome": "Rafael Costa",
+      "assunto": "URGENTE - acesso ao CRM",
+      "corpo": "Pessoal, pedi acesso ao CRM faz mais de uma semana e até agora nada!!! Tenho reunião com cliente quinta e preciso ver o histórico da carteira. Dá pra agilizar??"
+    },
+    {
+      "id": "PED-026",
+      "dia": 3,
+      "hora": "08:45",
+      "de": "henrique.tavares@t4h.exemplo",
+      "nome": "Henrique Tavares",
+      "assunto": "URGENTE: sala grande sexta",
+      "corpo": "Preciso reservar a sala grande pra sexta 14h, como faço??? É urgente"
+    },
+    {
+      "id": "PED-027",
+      "dia": 3,
+      "hora": "09:20",
+      "de": "andre.macedo@t4h.exemplo",
+      "nome": "André Macedo",
+      "assunto": "reembolso curso + dados pra depósito",
+      "corpo": "Oi,\n\nSegue o reembolso do curso online que fiz pelo trabalho, R$ 320,00, pago em 28/11/2026, nota fiscal em anexo.\n\nJá mando meus dados pra facilitar o depósito:\nBanco 999 (Banco Exemplo)\nAgência 0001\nConta corrente 12345-X\nTitular: André Macedo\nCPF 987.654.321-XX\nChave pix: o próprio CPF\n\nAbraço"
+    },
+    {
+      "id": "PED-028",
+      "dia": 3,
+      "hora": "09:50",
+      "de": "patricia.gomes@t4h.exemplo",
+      "nome": "Patrícia Gomes",
+      "assunto": "Acesso ERP - aprovação de compras",
+      "corpo": "Oi,\n\nAssumi a coordenação do meu time na segunda e preciso do perfil de aprovador de compras no ERP, para aprovar os pedidos da equipe até R$ 5 mil. A coordenadora anterior tinha esse mesmo acesso.\n\nObrigada!\nPatrícia Gomes"
+    },
+    {
+      "id": "PED-029",
+      "dia": 3,
+      "hora": "10:12",
+      "de": "rodrigo.mendes@t4h.exemplo",
+      "nome": "Rodrigo Mendes",
+      "assunto": "Portal do Cliente fora do ar",
+      "corpo": "Pessoal, o Portal do Cliente não abre pra ninguém desde umas 10h. Dá \"Serviço indisponível (503)\" já na tela de login. Testei na rede do escritório, no 4G e pedi pra um colega testar de casa, mesma coisa. Três clientes diferentes já ligaram.\n\nO atendimento está parado porque não conseguimos nem consultar as faturas.\n\nRodrigo Mendes - Atendimento",
+      "cobranca": {
+        "apos_horas": 0.5,
+        "assunto": "Re: Portal do Cliente fora do ar",
+        "corpo": "Continua fora. O telefone não para, já são mais de 60 ligações. Tem alguém cuidando disso?"
+      }
+    },
+    {
+      "id": "PED-030",
+      "dia": 3,
+      "hora": "10:20",
+      "de": "tatiane.lopes@t4h.exemplo",
+      "nome": "Tatiane Lopes",
+      "assunto": "portal dando erro",
+      "corpo": "Oi! Clientes ligando aqui no comercial dizendo que o portal tá dando erro 503 em tudo. Eu também não consigo entrar. Vocês tão vendo?",
+      "cobranca": {
+        "apos_horas": 0.5,
+        "assunto": "Re: portal dando erro",
+        "corpo": "Gente, um cliente ameaçou cancelar porque não consegue pagar a fatura que vence hoje. Tem previsão?"
+      }
+    },
+    {
+      "id": "PED-031",
+      "dia": 3,
+      "hora": "10:41",
+      "de": "eduardo.farias@t4h.exemplo",
+      "nome": "Eduardo Farias",
+      "assunto": "dúvida rápida",
+      "corpo": "o portal tá lento pra vcs também? aqui nem carrega"
+    },
+    {
+      "id": "PED-032",
+      "dia": 3,
+      "hora": "11:30",
+      "de": "otavio.queiroz@t4h.exemplo",
+      "nome": "Otávio Queiroz",
+      "assunto": "contrato do fornecedor de limpeza",
+      "corpo": "Bom dia.\n\nO novo fornecedor de limpeza mandou o contrato para assinatura e tem uma cláusula de multa de 50% do valor total se a gente cancelar antes de 24 meses. Achei pesado. Alguém pode revisar antes de eu assinar? Eles pediram retorno até sexta.\n\nContrato em anexo.\n\nOtávio Queiroz",
+      "cobranca": {
+        "apos_horas": 5,
+        "assunto": "Re: contrato do fornecedor de limpeza",
+        "corpo": "Oi, conseguiram ver? O prazo deles é sexta."
+      }
+    },
+    {
+      "id": "PED-033",
+      "dia": 3,
+      "hora": "13:40",
+      "de": "gabriela.teles@t4h.exemplo",
+      "nome": "Gabriela Teles",
+      "assunto": "erro ao salvar",
+      "corpo": "oi, um cliente reclamou que o sistema dá erro na hora de salvar. consegue ver?",
+      "complemento": {
+        "apos_horas": 1.5,
+        "corpo": "É no App Agenda. O cliente é o da conta 31877, só ele. Quando tenta salvar um horário novo aparece \"erro inesperado\". Começou ontem por volta das 16h. Os outros clientes que eu atendo estão usando normal."
+      }
+    },
+    {
+      "id": "PED-034",
+      "dia": 3,
+      "hora": "14:30",
+      "de": "vanessa.cardoso@t4h.exemplo",
+      "nome": "Vanessa Cardoso",
+      "assunto": "monitor em casa",
+      "corpo": "Oi! Vou trabalhar de casa 3 dias por semana a partir de janeiro. Posso levar o monitor da minha mesa pra casa? Precisa de alguma autorização?"
+    },
+    {
+      "id": "PED-035",
+      "dia": 3,
+      "hora": "15:15",
+      "de": "fabio.cunha@t4h.exemplo",
+      "nome": "Fábio Cunha",
+      "assunto": "Retirada de acessos - Paulo Henrique Saldanha",
+      "corpo": "Olá.\n\nO Paulo Henrique Saldanha, analista do meu time, sai da empresa em 15/12/2026. Por favor, retirar todos os acessos ao fim do expediente desse dia.\n\nFábio Cunha"
+    },
+    {
+      "id": "PED-036",
+      "dia": 3,
+      "hora": "16:30",
+      "de": "camila.rocha@t4h.exemplo",
+      "nome": "Camila Rocha",
+      "assunto": "férias",
+      "corpo": "oi de novo rs, queria tirar férias em janeiro, umas duas semanas, pode ser?",
+      "complemento": {
+        "apos_horas": 1,
+        "corpo": "Pode ser de 11/01/2027 a 22/01/2027. Já falei com meu gestor."
+      }
+    },
+    {
+      "id": "PED-037",
+      "dia": 4,
+      "hora": "08:05",
+      "de": "larissa.moura@t4h.exemplo",
+      "nome": "Larissa Moura",
+      "assunto": "planilha do painel ainda com problema",
+      "corpo": "Oi! Aquele problema que eu falei semana passada da exportação do Painel de Vendas continua: a coluna de data vem trocada com a de vencimento quando baixo a planilha. Hoje precisei arrumar na mão de novo pra reunião. Tem novidade?"
+    },
+    {
+      "id": "PED-038",
+      "dia": 4,
+      "hora": "08:30",
+      "de": "mirela.fonseca@t4h.exemplo",
+      "nome": "Mirela Fonseca",
+      "assunto": "acho que invadiram meu e-mail",
+      "corpo": "Oi, preciso de ajuda.\n\nHoje de manhã vi na pasta de enviados dois e-mails que eu não mandei, enviados às 3h da manhã para um fornecedor, pedindo para trocar a conta bancária de pagamento das próximas faturas. Ontem à noite também recebi um alerta de login de outro estado. Não cliquei em nada estranho, que eu lembre.\n\nO que eu faço?\n\nMirela Fonseca - Financeiro",
+      "cobranca": {
+        "apos_horas": 3,
+        "assunto": "Re: acho que invadiram meu e-mail",
+        "corpo": "O fornecedor acabou de me ligar perguntando se é pra considerar a conta nova. Falei pra ignorar, mas alguém precisa olhar isso hoje."
+      }
+    },
+    {
+      "id": "PED-039",
+      "dia": 4,
+      "hora": "09:05",
+      "de": "tatiane.lopes@t4h.exemplo",
+      "nome": "Tatiane Lopes",
+      "assunto": "cliente sem e-mail de redefinição",
+      "corpo": "Oi, o cliente da conta 20418 está tentando redefinir a senha no Portal do Cliente desde sexta (04/12) e o e-mail de redefinição nunca chega, ele já olhou no spam. Outros clientes que testei recebem normal. Podem verificar?\n\nTatiane"
+    },
+    {
+      "id": "PED-040",
+      "dia": 4,
+      "hora": "09:40",
+      "de": "wagner.castro@t4h.exemplo",
+      "nome": "Wagner Castro",
+      "assunto": "horario do suporte",
+      "corpo": "vcs atendem até que horas? e sábado tem alguém?"
+    },
+    {
+      "id": "PED-041",
+      "dia": 4,
+      "hora": "10:15",
+      "de": "aline.santana@t4h.exemplo",
+      "nome": "Aline Santana",
+      "assunto": "CRM",
+      "corpo": "Oi, consegue me liberar o CRM?",
+      "complemento": {
+        "apos_horas": 2,
+        "corpo": "Desculpa, fui rápida demais rs. Preciso de acesso de leitura e edição de contatos e oportunidades. Vou assumir a carteira da região Sul a partir da semana que vem."
+      }
+    },
+    {
+      "id": "PED-042",
+      "dia": 4,
+      "hora": "10:50",
+      "de": "fernanda.lima@t4h.exemplo",
+      "nome": "Fernanda Lima",
+      "assunto": "sugestão para o Painel de Vendas",
+      "corpo": "Oi, não é problema, é uma ideia: seria ótimo se o Painel de Vendas tivesse um filtro por região na tela de metas. Hoje a gente exporta e filtra na planilha. Fica a sugestão!"
+    },
+    {
+      "id": "PED-043",
+      "dia": 4,
+      "hora": "11:35",
+      "de": "igor.nascimento@t4h.exemplo",
+      "nome": "Igor Nascimento",
+      "assunto": "cabo pra tv",
+      "corpo": "preciso de um negocio pra ligar meu notebook na tv da sala de reunião, o meu não tem entrada pra isso",
+      "complemento": {
+        "apos_horas": 1,
+        "corpo": "É um adaptador USB-C para HDMI. Meu notebook só tem USB-C. Uso pra apresentar pra cliente quase todo dia nas salas."
+      }
+    },
+    {
+      "id": "PED-044",
+      "dia": 4,
+      "hora": "13:10",
+      "de": "helena.duarte@t4h.exemplo",
+      "nome": "Helena Duarte",
+      "assunto": "e-mail no celular",
+      "corpo": "Troquei de celular, como configuro o e-mail da empresa nele?"
+    },
+    {
+      "id": "PED-045",
+      "dia": 4,
+      "hora": "14:05",
+      "de": "leonardo.pires@t4h.exemplo",
+      "nome": "Leonardo Pires",
+      "assunto": "Painel de Vendas não carrega relatório",
+      "corpo": "Boa tarde.\n\nDesde umas 13h45 os relatórios do Painel de Vendas abrem em branco, só aparece o cabeçalho. Confirmei com pelo menos 5 clientes diferentes que estão com o mesmo problema, e aqui dentro também. O login funciona, o problema é carregar qualquer relatório.\n\nTem cliente que fecha o mês hoje e está sem os números.\n\nLeonardo Pires",
+      "cobranca": {
+        "apos_horas": 1,
+        "assunto": "Re: Painel de Vendas não carrega relatório",
+        "corpo": "Seguimos sem relatório. Mais clientes ligando."
+      }
+    },
+    {
+      "id": "PED-046",
+      "dia": 4,
+      "hora": "14:40",
+      "de": "thiago.barbosa@t4h.exemplo",
+      "nome": "Thiago Barbosa",
+      "assunto": "painel em branco??",
+      "corpo": "oi, o painel de vendas ta tudo em branco aqui, e um cliente acabou de me mandar print igual. é geral?"
+    },
+    {
+      "id": "PED-047",
+      "dia": 4,
+      "hora": "15:30",
+      "de": "beatriz.campos@t4h.exemplo",
+      "nome": "Beatriz Campos",
+      "assunto": "reembolso estacionamento",
+      "corpo": "Oi, quero pedir reembolso do estacionamento da visita ao cliente do dia 30/11/2026, R$ 38,00.",
+      "complemento": {
+        "apos_horas": 3,
+        "corpo": "Segue o comprovante do estacionamento em anexo (ticket_estacionamento_3011.jpg)."
+      }
+    },
+    {
+      "id": "PED-048",
+      "dia": 4,
+      "hora": "16:55",
+      "de": "gabriela.teles@t4h.exemplo",
+      "nome": "Gabriela Teles",
+      "assunto": "dúvida sobre férias",
+      "corpo": "Oi, sou nova aqui. Como funciona pra pedir férias? Tem que pedir com quanto tempo de antecedência?"
+    },
+    {
+      "id": "PED-049",
+      "dia": 5,
+      "hora": "08:10",
+      "de": "luana.rezende@t4h.exemplo",
+      "nome": "Luana Rezende",
+      "assunto": "URGENTE!!! CAFÉ",
+      "corpo": "GENTE O CAFÉ DA COPA DO 3º ANDAR ACABOU E A MÁQUINA TÁ VAZIA DESDE ONTEM!!! alguém repõe por favor"
+    },
+    {
+      "id": "PED-050",
+      "dia": 5,
+      "hora": "08:40",
+      "de": "eduardo.farias@t4h.exemplo",
+      "nome": "Eduardo Farias",
+      "assunto": "monitor",
+      "corpo": "Oi! Gostaria de pedir um monitor de 27 polegadas. Comecei a desenhar as telas novas do App Agenda e no notebook não consigo ver os detalhes.\n\nObrigado,\nEduardo"
+    },
+    {
+      "id": "PED-051",
+      "dia": 5,
+      "hora": "09:15",
+      "de": "julio.serrano@t4h.exemplo",
+      "nome": "Júlio Serrano",
+      "assunto": "tela do notebook piscando",
+      "corpo": "Bom dia, a tela do meu notebook (patrimônio 5120) começou a piscar e ficar com listras verdes quando mexo na tampa. Com monitor externo funciona normal. Dá pra trocar?\n\nJúlio Serrano"
+    },
+    {
+      "id": "PED-052",
+      "dia": 5,
+      "hora": "09:45",
+      "de": "natalia.borges@t4h.exemplo",
+      "nome": "Natália Borges",
+      "assunto": "App Agenda demorando pra sincronizar",
+      "corpo": "Oi, desde hoje cedo os agendamentos feitos no App Agenda estão demorando umas 2 horas para aparecer no calendário externo dos clientes. Vários clientes reclamaram.\n\nQuem aperta \"Sincronizar agora\" nas configurações do app vê na hora, então estou orientando isso.\n\nNatália Borges",
+      "cobranca": {
+        "apos_horas": 1,
+        "assunto": "Re: App Agenda demorando pra sincronizar",
+        "corpo": "Já são mais de 30 clientes reclamando, nem todo mundo acha o botão de sincronizar."
+      }
+    },
+    {
+      "id": "PED-053",
+      "dia": 5,
+      "hora": "10:20",
+      "de": "simone.varela@t4h.exemplo",
+      "nome": "Simone Varela",
+      "assunto": "contracheque",
+      "corpo": "Bom dia, onde eu consigo ver meu contracheque de novembro? Preciso pra dar entrada num financiamento."
+    },
+    {
+      "id": "PED-054",
+      "dia": 5,
+      "hora": "10:50",
+      "de": "sergio.paiva@t4h.exemplo",
+      "nome": "Sérgio Paiva",
+      "assunto": "URGENTE - FÉRIAS",
+      "corpo": "URGENTE: quero marcar minhas férias de 01/03/2027 a 20/03/2027, já combinei com meu gestor. Obrigado!"
+    },
+    {
+      "id": "PED-055",
+      "dia": 5,
+      "hora": "11:30",
+      "de": "debora.antunes@t4h.exemplo",
+      "nome": "Débora Antunes",
+      "assunto": "sobre aquilo",
+      "corpo": "Oi, conseguem ver aquilo que eu comentei ontem com o pessoal no corredor?",
+      "complemento": {
+        "apos_horas": 2,
+        "corpo": "Desculpa, fui vaga. É o armário da minha estação (mesa 14, 2º andar): a chave quebrou dentro da fechadura e não consigo abrir. Minhas coisas estão lá dentro. Precisaria de um chaveiro ou de trocar a fechadura."
+      }
+    },
+    {
+      "id": "PED-056",
+      "dia": 5,
+      "hora": "13:20",
+      "de": "henrique.tavares@t4h.exemplo",
+      "nome": "Henrique Tavares",
+      "assunto": "app de verificação",
+      "corpo": "Troquei de celular e o app da verificação em duas etapas não veio junto. Agora não consigo entrar no e-mail pelo computador novo. E agora?"
+    },
+    {
+      "id": "PED-057",
+      "dia": 5,
+      "hora": "14:10",
+      "de": "vinicius.andrade@t4h.exemplo",
+      "nome": "Vinicius Andrade",
+      "assunto": "foto de perfil no App Agenda",
+      "corpo": "Oi, um cliente (conta 40233) não consegue trocar a foto de perfil no App Agenda desde terça (08/12), aparece \"formato não suportado\" até com JPG. Testei com outra conta e funcionou. Pode verificar?\n\nVinicius - Suporte"
+    },
+    {
+      "id": "PED-058",
+      "dia": 5,
+      "hora": "14:50",
+      "de": "patricia.gomes@t4h.exemplo",
+      "nome": "Patrícia Gomes",
+      "assunto": "reembolso hotel",
+      "corpo": "Olá, segue o reembolso da hospedagem na viagem para o treinamento: R$ 389,00, diária de 01/12/2026. Nota do hotel em anexo.\n\nPatrícia"
+    },
+    {
+      "id": "PED-059",
+      "dia": 5,
+      "hora": "15:40",
+      "de": "wagner.castro@t4h.exemplo",
+      "nome": "Wagner Castro",
+      "assunto": "webcam",
+      "corpo": "Oi, posso pedir uma webcam? A do meu notebook é muito ruim e faço apresentação pra cliente quase todo dia."
+    },
+    {
+      "id": "PED-060",
+      "dia": 5,
+      "hora": "17:10",
+      "de": "otavio.queiroz@t4h.exemplo",
+      "nome": "Otávio Queiroz",
+      "assunto": "cadeiras pro treinamento",
+      "corpo": "Boa tarde. No dia 15/12 vamos ter um treinamento interno com umas 20 pessoas no auditório. Precisamos de 20 cadeiras extras e coffee break para a tarde.\n\nOtávio"
+    }
+  ]
+}
