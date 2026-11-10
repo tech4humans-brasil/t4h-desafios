@@ -66,11 +66,25 @@ def rotas(mundo) -> list[Route]:
     async def indice_legado(request: Request) -> HTMLResponse:
         return legado.indice(mundo.tema.legado)
 
+    def fecha_no_fim(rota: Route) -> Route:
+        """Depois do fim do cenário, as telas continuam abrindo, mas não aceitam mais envios (como o 410 do MCP)."""
+        if "POST" not in (rota.methods or ()):
+            return rota
+        original = rota.endpoint
+
+        async def endpoint(request: Request):
+            if mundo.relogio.encerrado():
+                corpo = "<div class='erro'>O cenário terminou: esta tela não aceita mais envios. Reinicie o servidor para começar de novo.</div>"
+                return legado.pagina("Cenário encerrado", corpo, 410)
+            return await original(request)
+
+        return Route(rota.path, endpoint, methods=["POST"])
+
     return [
         Route("/", pagina),
         Route("/api/estado", estado),
         Route("/api/eventos", eventos),
         Route("/api/evento", novo_evento, methods=["POST"]),
         Route("/legado", indice_legado),
-        *mundo.tema.rotas_legado(),
+        *[fecha_no_fim(r) for r in mundo.tema.rotas_legado()],
     ]

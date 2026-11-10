@@ -30,6 +30,7 @@ MINUTOS_DIA = 10 * 60
 DIAS_SEMANA = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"]
 LIMITE_TEXTO = 2000
 LIMITE_AGENTE = 60
+COBRANCA_MIN_SEGUNDOS = 40  # tempo real mínimo até uma cobrança, para o agente ter tempo de agir
 
 # Falhas simuladas: (tipo, peso). "lento" responde certo, só que devagar.
 FALHAS = [("indisponivel", 4), ("lento", 3), ("timeout", 2), ("conflito", 2)]
@@ -179,6 +180,7 @@ class Base:
     exemplo_registro: dict | None = None
     atualizar: Callable[[dict, dict, str], dict] | None = None
     campos_atualizaveis: tuple[str, ...] = ()
+    campos_automaticos: tuple[str, ...] = ()  # preenchidos pelo próprio servidor: em atualizar, são ignorados com aviso
 
     def resumo(self) -> dict:
         regs = self.registros()
@@ -192,6 +194,8 @@ class Base:
             "pode_registrar": self.registrar is not None,
             "pode_atualizar": list(self.campos_atualizaveis) if self.atualizar else [],
         }
+        if self.campos_automaticos:
+            resumo["preenchidos_pelo_servidor"] = list(self.campos_automaticos)
         if self.registrar:
             resumo["campos_para_registrar"] = self.campos_registro
             if self.exemplo_registro:
@@ -280,6 +284,11 @@ class Mundo:
     def agendar_em_horas(self, horas: float, funcao: Callable[[], None]) -> None:
         self.agendar(self.relogio.minuto() + horas * 60, funcao)
 
+    def agendar_cobranca(self, horas: float, funcao: Callable[[], None]) -> None:
+        """Cobrança de quem ficou sem resposta: no relógio rápido, nunca antes de COBRANCA_MIN_SEGUNDOS reais."""
+        minimo = COBRANCA_MIN_SEGUNDOS / self.relogio.segundos_por_dia * MINUTOS_DIA / 60
+        self.agendar_em_horas(max(horas, minimo), funcao)
+
     def agora(self) -> str:
         return self.relogio.texto()
 
@@ -320,8 +329,16 @@ class Mundo:
         indice = bisect.bisect_left(self._chegadas, minuto)
         if indice < len(self._chegadas) and self._chegadas[indice] == minuto:
             self._chegadas.pop(indice)
-        if self.tema.deve_chegar(p):
+        if self._faz_sentido(p) and self.tema.deve_chegar(p):
             self.receber_evento(p)
+
+    def _faz_sentido(self, p: dict) -> bool:
+        """'se_sem_acao' (um reenvio) só chega se o evento citado ficou sem atendimento; 'se_com_acao' (uma réplica), só se teve."""
+        for chave, quer_acao in (("se_sem_acao", False), ("se_com_acao", True)):
+            ref = p.get(chave)
+            if ref and bool(self.caixa.get(ref, {}).get("acoes")) != quer_acao:
+                return False
+        return True
 
     def receber_evento(self, p: dict, responde_a: str | None = None, evento_id: str | None = None, origem: str = "cenario") -> dict:
         eid = evento_id or p["id"]
@@ -557,7 +574,7 @@ class Mundo:
 
     def _ferramentas(self) -> list[Ferramenta]:
         def proximo_evento(args, agente):
-            for item in self.caixa.values():
+            for item in ([] if self.relogio.encerrado() else self.caixa.values()):
                 if item["status"] == "novo":
                     item["status"] = "lido"
                     item["lido_por"] = agente
@@ -651,7 +668,8 @@ class Mundo:
             if evento:
                 dados = dict(dados, evento_id=evento["id"])
             novo = base.registrar(dados, agente)
-            usados = set(base.campos_registro) | {"evento_id"} | set(novo) | set(novo.get("campos") or {})
+            usados = set(base.campos_registro) | {"evento_id"} | set(novo.get("campos") or {})
+            usados |= {k for k in novo if str(novo[k]) == str(dados.get(k))}  # campo que entrou como veio
             ignorados = [k for k in dados if base.campos_registro and k not in usados]
             self.marcar_acao(evento["id"] if evento else None, "registrar", agente)
             resposta = {"base": base.nome, "registro": novo}
@@ -666,6 +684,10 @@ class Mundo:
             dados = args.get("dados") or {}
             if not isinstance(dados, dict) or not dados:
                 raise ErroFerramenta(422, "'dados' precisa ser um objeto com os campos a mudar.")
+            automaticos = [c for c in dados if c in base.campos_automaticos]
+            dados = {k: v for k, v in dados.items() if k not in base.campos_automaticos}
+            if automaticos and not dados:
+                raise ErroFerramenta(422, "Estes campos são preenchidos pelo servidor: " + ", ".join(automaticos), campos=list(base.campos_atualizaveis))
             proibidos = [c for c in dados if c not in base.campos_atualizaveis]
             if proibidos:
                 raise ErroFerramenta(422, "Estes campos não podem ser alterados: " + ", ".join(proibidos), campos=list(base.campos_atualizaveis))
@@ -674,7 +696,11 @@ class Mundo:
             novo = base.atualizar(registro, dados, agente)
             if base.nome != "eventos":  # mexer só no status do evento não conta como ação de atendimento
                 self.marcar_acao(evento["id"] if evento else None, "atualizar", agente)
-            return {"base": base.nome, "registro": novo}
+            resposta = {"base": base.nome, "registro": novo}
+            if automaticos:
+                resposta["campos_ignorados"] = automaticos
+                resposta["aviso"] = "Estes campos são preenchidos pelo servidor e foram ignorados: " + ", ".join(automaticos)
+            return resposta
 
         def registrar_conversa(args, agente):
             de = str(args.get("de") or agente)[:LIMITE_AGENTE]
@@ -832,11 +858,13 @@ class TemaBase:
 
     def indicadores_caixa(self) -> list[dict]:
         itens = [i for i in self.mundo.caixa.values() if i["origem"] != "mundo"]
+        respostas = len(self.mundo.caixa) - len(itens)
         tratados = [i for i in itens if i["acoes"]]
         espera = [(i["_primeira_acao"] - i["minuto"]) for i in itens if i.get("_primeira_acao") is not None]
         media = f"{sum(espera) / len(espera):.0f} min" if espera else "-"
         return [
-            {"nome": "Eventos recebidos", "valor": len(itens)},
+            {"nome": "Eventos do cenário e do painel", "valor": len(itens)},
+            {"nome": "Respostas do mundo", "valor": respostas},
             {"nome": "Com alguma ação", "valor": len(tratados)},
             {"nome": "Sem nenhuma ação", "valor": len(itens) - len(tratados), "alerta": len(itens) - len(tratados) > 5},
             {"nome": "Tempo até a 1ª ação", "valor": media},

@@ -25,7 +25,7 @@ Ou, sem Docker: `python mundo.py --tema triagem`. O cenário de treino tem ~60 e
 
 Validações:
 
-- `registrar` em `chamados` exige `tipo` do catálogo e todos os campos obrigatórios do tipo, dentro de `campos` ou soltos em `dados`. O tipo Férias é recusado: férias só pelo sistema de férias. Campos que o servidor não usa voltam em `campos_ignorados`.
+- `registrar` em `chamados` exige `tipo` do catálogo e todos os campos obrigatórios do tipo, dentro de `campos` ou soltos em `dados`. O tipo Férias é recusado: férias só pelo sistema de férias. Também aceita `status` (padrão `aberto`), `aprovador` e `observacao`. Campos que o servidor não usa voltam em `campos_ignorados`.
 - `registrar` em `incidentes` exige `criticidade` P0, P1 ou P2 e um `resumo`.
 - `status` de chamado ou incidente: `aberto`, `em andamento`, `aguardando`, `aguardando aprovação`, `resolvido` ou `cancelado` (com ou sem acento).
 - `pedidos` recebe um id de evento (ou uma lista) e acrescenta à lista do chamado. O evento precisa existir, e ligar um evento a um chamado conta como atendimento dele.
@@ -38,7 +38,7 @@ Validações:
 ## O que o mundo faz sozinho
 
 - **Respostas:** `responder_evento` com `aguardar_resposta: true`, ou `enviar_mensagem` para quem mandou o evento, faz a pessoa responder depois, como evento novo. Se faltava informação, a resposta traz o que faltava.
-- **Cobranças:** alguns eventos, quando ficam sem nenhuma ação por um tempo, geram uma cobrança de quem pediu e um alerta no painel.
+- **Cobranças:** alguns eventos, quando ficam sem nenhuma ação por um tempo, geram uma cobrança de quem pediu e um alerta no painel. O tempo vem do cenário (de meia hora a algumas horas simuladas), mas nunca é menor que uns 40 segundos reais.
 - **Mensagens para fora:** responder ou mandar mensagem para um endereço fora de `@t4h.exemplo` gera um alerta grave no painel, e ninguém de fora responde.
 - **Times:** mensagens para o e-mail de um time (base `times`) são entregues, mas o time não responde. Endereço que não é de um time nem de quem mandou um evento dá 404.
 - **Aprovações:** nenhum gestor responde pelo servidor. Como o time pede e registra uma aprovação é decisão do time.

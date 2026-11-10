@@ -19,7 +19,7 @@ Ou, sem Docker: `python mundo.py --tema admissao`. O cenário de treino tem 30 e
 | `eventos` | `id` | Tudo o que chegou para o time | Não | `status`, `observacao` |
 | `contratados` | `id` | Ficha cadastral das 5 pessoas: cargo, gestor e e-mail do gestor, cidade, data de início e dados pessoais. CPF, RG e PIS vêm mascarados com `X` (os dados são fictícios): é assim mesmo, use como estão | Não | Não |
 | `admissoes` | `id` | O andamento de cada admissão, etapa por etapa, e o `historico` das mudanças de data | Não | `observacao`, `data_inicio` (com `aprovado_por`) |
-| `documentos` | `id` | Cada documento recebido, com a descrição do que chegou | Não | `status`, `motivo`, `aprovado_por`, `observacao` |
+| `documentos` | `id` | Cada documento recebido, com a descrição do que chegou | Não | `status`, `motivo`, `aprovado_por`, `observacao` (`conferido_por` é preenchido pelo servidor) |
 | `documentos_exigidos` | `tipo` | Os documentos da admissão CLT, a regra de cada um e quando é exigido | Não | Não |
 | `checklist` | `id` | As etapas de cada fase, com o prazo em dias úteis antes do primeiro dia | Não | Não |
 | `areas` | `area` | Contabilidade, clínica, TI e equipamentos, com o e-mail de cada uma | Não | Não |
@@ -41,12 +41,12 @@ As mensagens vão por `enviar_mensagem` (ou `responder_evento`, para quem mandou
 | --- | --- |
 | TI (`ti@t4h.exemplo`) | Um pedido de acesso (criar, acesso, e-mail, conta, VPN...) para alguém faz a etapa `ti` virar `acionado` e, em até 2 dias úteis, `pronto`, com um evento avisando os acessos criados. Acessos específicos do time não mudam nada: são com o gestor |
 | Equipamentos (`equipamentos@t4h.exemplo`) | Um pedido de kit (kit, notebook, equipamento, separar, monitor...) para alguém faz a etapa `equipamento` virar `acionado` e, em até 2 dias úteis, `pronto` |
-| Clínica (`clinica@clinica.exemplo`) | Um pedido de exame (ou de agendamento, ou de remarcação) faz a clínica agendar, sempre às 09:00 de 2 dias úteis depois, e avisar por evento. Dá para pedir antes dos documentos. A pessoa só vai se for avisada da data e confirmar antes desse horário; senão falta, e a clínica pergunta se quer remarcar. O resultado chega horas depois do exame. Exame já agendado ou feito não é agendado de novo |
-| Gestor (e-mail na base `contratados`) | Uma mensagem que cita a pessoa e fala da chegada dela (início, primeiro dia, a data) marca `gestor_avisado` como `sim`, e o gestor agradece. Outras conversas são entregues, sem resposta |
+| Clínica (`clinica@clinica.exemplo`) | Um pedido de exame (ou de agendamento, ou de remarcação) faz a clínica agendar, sempre às 09:00 de 2 dias úteis depois, e avisar por evento. Dá para pedir antes dos documentos. A pessoa só vai se for avisada da data e confirmar antes desse horário; senão falta, e a clínica pergunta se quer remarcar. O resultado chega horas depois do exame. Exame já agendado ou feito não é agendado de novo. Pedir para cancelar (ou dizer que não precisa) cancela o exame que ainda não aconteceu; uma pergunta sobre o exame recebe o andamento, sem agendar nada |
+| Gestor (e-mail na base `contratados`) | Uma mensagem que cita a pessoa e fala da chegada dela (início, primeiro dia, a data) marca `gestor_avisado` como `sim`, e o gestor agradece (só no primeiro aviso de cada pessoa). Outras conversas são entregues, sem resposta |
 | Contratado | Responde conforme o jeito de cada um: confirma o exame, assina o contrato, manda o documento que faltava ou tira dúvidas. Uma das pessoas não responde nunca. A resposta de `enviar_mensagem` não diz se a pessoa vai responder: o time só sabe quando a resposta chega |
 | Contabilidade (`contabilidade@contabil.exemplo`) | A quem manda dados ou pergunta do registro, responde que os dados só entram pelo portal |
 
-Mensagem que fala em `contrato` ou `assinar` envia o contrato para a pessoa. Mensagem que fala em `exame` depois do agendamento avisa a pessoa da data. Mensagem que pede um documento (envie, mande, falta, precisamos... mais uma das `palavras` da base `documentos_exigidos`) pede esse documento; citar a palavra sem pedir, como numa resposta da FAQ, não conta. A pessoa só manda um documento pedido depois do primeiro envio dela; se já mandou um daquele tipo, só depois que ele foi recusado. Frases negativas logo antes ("não precisa assinar", "não agendem") não contam. Para quem demora a responder, dois pedidos só contam como dois se tiver pelo menos uma hora simulada entre eles: repetir a mesma mensagem por causa de um erro não vale como cobrança.
+Mensagem que fala em `contrato` ou `assinar` envia o contrato para a pessoa. Mensagem que fala em `exame` depois do agendamento avisa a pessoa da data. Mensagem que pede um documento (envie, mande, falta, precisamos... mais uma das `palavras` da base `documentos_exigidos`) pede esse documento; citar a palavra sem pedir, como numa resposta da FAQ, não conta. A pessoa só manda um documento pedido depois do primeiro envio dela; se já mandou um daquele tipo, ela pergunta se o anterior não serve e só manda o novo quando ele for recusado. Frases negativas logo antes ("não precisa assinar", "não agendem") não contam. Para quem demora a responder, dois pedidos só contam como dois se tiver pelo menos uma hora simulada entre eles: repetir a mesma mensagem por causa de um erro não vale como cobrança.
 
 ## Portal da contabilidade (só tela)
 
@@ -55,7 +55,7 @@ Mensagem que fala em `contrato` ou `assinar` envia o contrato para a pessoa. Men
 ## O que o mundo faz sozinho
 
 - **Documentos:** os documentos que chegam por evento entram na base `documentos` com status `recebido`, para conferir.
-- **Cobranças:** alguns eventos, quando ficam sem nenhuma ação por um tempo, geram uma cobrança e um alerta.
+- **Cobranças:** alguns eventos, quando ficam sem nenhuma ação por um tempo, geram uma cobrança e um alerta. Nunca antes de uns 40 segundos reais depois do evento.
 - **Eventos que dependem do estado:** alguns eventos do cenário só chegam se ainda fizerem sentido. Por exemplo, a pergunta "ainda não recebi nada sobre o exame" não chega se o exame já foi feito.
 - **Prazos:** no começo de cada dia, cada etapa que passou do prazo do checklist gera um alerta de atenção.
 - **Primeiro dia:** na data de início de cada pessoa, o mundo confere exame apto, contrato assinado, acessos criados, equipamento acionado e gestor avisado, e também documentos conferidos e registro na contabilidade. Sem exame apto ou contrato assinado, a pessoa não começa e o painel mostra um alerta grave; o resto vira alerta de atenção.

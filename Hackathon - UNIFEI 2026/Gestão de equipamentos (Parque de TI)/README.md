@@ -28,7 +28,7 @@ Validações em `atualizar` no `inventario`:
 - `status`: `disponível`, `reservado`, `alocado`, `uso interno` ou `baixado`. `situacao`: `novo`, `usado`, `quebrado`, `danificado` ou `perdido`. Com ou sem acento.
 - `reservado` ou `alocado` exige `com_quem` (id, nome ou e-mail do colaborador; nome que bate com mais de uma pessoa dá 422) e um item `disponível` ou em `uso interno`, em situação `novo` ou `usado`, para alguém que ainda não saiu da empresa. Um item já reservado ou alocado para a mesma pessoa pode mudar de `reservado` para `alocado` ou só de `situacao` (por exemplo, quando dá defeito).
 - Um item `alocado` só volta para `disponível` ou `uso interno` depois que voltou de fato: um evento do cenário avisou a devolução ou a pessoa respondeu que devolveu. Eventos criados no painel não contam como devolução.
-- Um item `alocado` só vai direto para `baixado` se a situação for `perdido`, `quebrado` ou `danificado`. Baixa é definitiva.
+- Um item `alocado` só vai direto para `baixado` se a situação for `perdido`, `quebrado` ou `danificado`; nesse caso ele guarda em `com_quem` com quem estava. Baixa é definitiva.
 - Passar um item para outra pessoa sem registrar a devolução antes dá 409.
 - Não existe status de empréstimo: um empréstimo é um item `alocado` com a data de volta na `observacao` (até 2.000 caracteres).
 
@@ -42,6 +42,7 @@ Validações em `atualizar` no `inventario`:
 - **Primeiro dia:** no dia de entrada de cada pessoa, o mundo confere se o kit dela está reservado ou alocado. Os reservados passam a alocados, e o que faltar vira alerta (grave se faltar notebook).
 - **Devoluções:** uma mensagem para um colaborador que fale em devolução gera resposta horas depois, como evento novo. Quem já saiu devolve (ou não); quem ainda trabalha estranha a cobrança. Outras mensagens são entregues, mas ninguém responde.
 - **Respostas a eventos:** neste tema, ninguém responde de volta a `responder_evento`. Aprovações também não vêm do servidor: como o time pede e registra uma aprovação é decisão do time.
-- **Saídas:** quem saiu durante o cenário e continua com itens gera alerta depois de 5 e de 10 dias úteis.
+- **Saídas:** quem saiu durante o cenário e continua com itens gera alerta quando passam os prazos de 5 e de 10 dias úteis (no começo do dia seguinte ao prazo).
+- **Pedidos repetidos:** um reenvio ("não tive resposta") só chega se o pedido original ficou sem nenhuma ação, e uma réplica a uma resposta do time só chega se o time respondeu.
 - **Limite de compra:** compra acima do limite gera um alerta informativo no painel.
 - **Mensagens para fora:** qualquer mensagem para um endereço fora de `@t4h.exemplo` gera um alerta grave.

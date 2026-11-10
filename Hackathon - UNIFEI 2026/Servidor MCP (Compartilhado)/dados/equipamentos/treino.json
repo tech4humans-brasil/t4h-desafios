@@ -87,6 +87,7 @@
     },
     {
       "id": "PED-010",
+      "se_sem_acao": "PED-005",
       "dia": 3,
       "hora": "15:30",
       "de": "juliana.rocha@t4h.exemplo",
@@ -246,6 +247,7 @@
     },
     {
       "id": "PED-027",
+      "se_com_acao": "PED-009",
       "dia": 8,
       "hora": "10:40",
       "de": "mariana.castro@t4h.exemplo",

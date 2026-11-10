@@ -113,10 +113,10 @@ class Equipamentos(TemaBase):
                 if saida < self.mundo.relogio.inicio:
                     continue  # quem saiu antes do cenário não gera aviso: achar isso é trabalho do agente
                 for limite, nivel in ((self.regras["devolucao_dias_uteis"], "atencao"), (self.regras["escalar_devolucao_dias_uteis"], "grave")):
-                    if somar_dias_uteis(saida, limite) == hoje:
+                    if somar_dias_uteis(saida, limite + 1) == hoje:  # o prazo vence no fim do dia 'limite'
                         pendentes = [i["patrimonio"] for i in self.itens_de(c["id"])]
                         if pendentes:
-                            self.mundo.alerta(nivel, f"{c['nome']} saiu há {limite} dias úteis e ainda está com {', '.join(pendentes)}.")
+                            self.mundo.alerta(nivel, f"{c['nome']} passou do prazo de {limite} dias úteis para devolver e ainda está com {', '.join(pendentes)}.")
 
     def _primeiro_dia(self, c: dict) -> None:
         tem = {i["tipo"] for i in self.itens_de(c["id"])}
@@ -219,14 +219,17 @@ class Equipamentos(TemaBase):
                     if nova_situacao not in USAVEIS:
                         raise ErroFerramenta(422, f"{item['patrimonio']} está {nova_situacao} e não pode ser entregue.")
                 dados.update(com_quem=pessoa["id"], desde=dados.get("desde") or (item["desde"] if mesmo_dono else "") or self.hoje())
+                if not mesmo_dono:
+                    self.devolvidos.discard(item["patrimonio"])  # a devolução anterior já foi usada
             elif dados.get("com_quem") and atual in ("reservado", "alocado") and dados["com_quem"] != item["com_quem"]:
                 raise ErroFerramenta(409, f"{item['patrimonio']} está com {item['com_quem']}. Registre a devolução antes de passar para outra pessoa.")
             if atual == "alocado" and novo_status == "baixado" and nova_situacao not in SAIDA_SEM_VOLTA:
                 raise ErroFerramenta(422, f"Item alocado só é baixado direto se estiver {', '.join(SAIDA_SEM_VOLTA)}. Senão, registre a devolução antes.")
             if atual == "alocado" and novo_status in ("disponível", "uso interno") and not self.voltou_fisicamente(item):
                 raise ErroFerramenta(409, f"{item['patrimonio']} ainda não voltou fisicamente. Fale com a pessoa antes de registrar a devolução.")
-            if novo_status in ("disponível", "uso interno", "baixado"):
+            if novo_status in ("disponível", "uso interno") or (novo_status == "baixado" and atual != "alocado"):
                 dados.update(com_quem="", desde="")
+            # item alocado baixado direto (perdido, quebrado, danificado) guarda com quem estava, para o registro
             for campo, valor in dados.items():
                 item[campo] = str(valor)
             return item
@@ -343,7 +346,7 @@ class Equipamentos(TemaBase):
             v = self.tokens.pop(str(form.get("token", "")), None)
             if v is None:
                 self.mundo.registrar_tela("fornecedor", "?", {"token": str(form.get("token", ""))[:40]}, {"erro": "revisão inválida ou já confirmada"}, ok=False)
-                return inicio(erro="Esse pedido já foi confirmado ou a revisão expirou. Comece de novo.", status=409)
+                return inicio(erro="Esse pedido já foi confirmado ou a revisão não é válida. Comece de novo.", status=409)
             item, erro = validar(v)
             if erro:
                 self.mundo.registrar_tela("fornecedor", v["agente"] or "?", v, {"erro": erro}, ok=False)

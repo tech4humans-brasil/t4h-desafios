@@ -75,7 +75,7 @@ class Triagem(TemaBase):
     def ao_receber(self, item: dict) -> None:
         cobranca = item["_original"].get("cobranca")
         if cobranca:
-            self.mundo.agendar_em_horas(float(cobranca["apos_horas"]), lambda: self._cobrar(item, cobranca))
+            self.mundo.agendar_cobranca(float(cobranca["apos_horas"]), lambda: self._cobrar(item, cobranca))
 
     def _cobrar(self, item: dict, cobranca: dict) -> None:
         if item["acoes"]:
@@ -144,11 +144,14 @@ class Triagem(TemaBase):
                 "solicitante": evento["de"] if evento else texto_limitado(dados.get("solicitante"), "solicitante", 200),
                 "resumo": texto_limitado(dados.get("resumo") or (evento["assunto"] if evento else ""), "resumo"),
                 "campos": campos,
-                "status": "aberto",
+                "status": normalizar_status(dados["status"], STATUS_CHAMADO) if dados.get("status") else "aberto",
                 "aberto_em": self.mundo.agora(),
                 "aberto_por": agente,
                 "pedidos": [evento["id"]] if evento else [],
             }
+            for campo in ("observacao", "aprovador"):
+                if dados.get(campo):
+                    chamado[campo] = texto_limitado(dados[campo], campo, LIMITE_TEXTO if campo == "observacao" else 200)
             self.chamados.append(chamado)
             return chamado
 
@@ -216,6 +219,9 @@ class Triagem(TemaBase):
                     "campos": "obrigatório: objeto com os campos_obrigatorios do tipo (também aceita os campos soltos em dados)",
                     "resumo": "opcional: frase curta (padrão: o assunto do evento)",
                     "solicitante": "opcional: e-mail de quem pediu (padrão: quem mandou o evento)",
+                    "status": "opcional: status inicial (padrão: aberto), por exemplo 'aguardando aprovação'",
+                    "aprovador": "opcional: quem precisa aprovar (ou aprovou)",
+                    "observacao": "opcional: texto livre",
                 },
                 exemplo_registro={"tipo": "Acesso a sistema", "campos": {"sistema": "CRM", "nivel_de_acesso": "leitura", "justificativa": "..."}, "resumo": "..."},
                 atualizar=atualizar_chamado,

@@ -89,14 +89,14 @@ As reações do mundo não vêm na hora: chegam minutos depois, no relógio simu
 - Também podem ser criados por uma pessoa no painel, pelo botão **+ Novo evento** (ids `MAN-...`). Com `--sem-cenario`, só chegam os do painel.
 - Cada evento tem `origem`: `cenario`, `painel` ou `mundo` (resposta de alguém).
 - `status` começa em `novo`, vira `lido` quando um agente pega o evento com `proximo_evento` e `respondido` depois de `responder_evento`. O time pode gravar outro status ou uma `observacao` com `atualizar` na base `eventos`.
-- **Conta como atendimento** do evento (aparece em `acoes` e nos indicadores): `responder_evento`, e `enviar_mensagem`, `registrar`, `atualizar` ou uma tela quando recebem o `evento_id`. Mudar só o status do evento não conta.
+- **Conta como atendimento** do evento (aparece em `acoes` e nos indicadores): `responder_evento`, e `enviar_mensagem`, `registrar`, `atualizar` ou uma tela quando recebem o `evento_id`. Mudar só o status do evento não conta: se o time decidir não fazer nada, registrar o motivo na `observacao` deixa a decisão visível, mas o evento continua contado como sem ação.
 
 ## O relógio
 
-- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, uma rodada completa leva uns 20 minutos em todos os temas: 5 dias no Tema 1 (4 min por dia), 10 dias no Tema 2 (2 min por dia) e 22 dias no Tema 3 (55 s por dia). `--segundos-por-dia` (ou `SEGUNDOS_POR_DIA`) muda isso: mais alto dá mais tempo para o agente pensar, o que ajuda enquanto o time ainda está desenvolvendo. Com o relógio padrão, uma hora simulada passa em 10 a 24 segundos: um agente que demora minutos entre uma rodada e outra vai acumular eventos e receber cobranças.
+- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, uma rodada completa leva uns 20 minutos em todos os temas: 5 dias no Tema 1 (4 min por dia), 10 dias no Tema 2 (2 min por dia) e 22 dias no Tema 3 (55 s por dia). `--segundos-por-dia` (ou `SEGUNDOS_POR_DIA`) muda isso: mais alto dá mais tempo para o agente pensar, o que ajuda enquanto o time ainda está desenvolvendo. Com o relógio padrão, uma hora simulada passa em 24 segundos no Tema 1, 12 no Tema 2 e 5,5 no Tema 3: um agente que demora minutos entre uma rodada e outra vai acumular eventos e, nos Temas 1 e 2, receber cobranças. Uma cobrança nunca chega antes de uns 40 segundos reais depois do evento, em qualquer velocidade.
 - O relógio começa na primeira chamada de qualquer agente, por MCP ou por uma tela.
 - Toda resposta traz a hora simulada em `agora`.
-- Quando o cenário acaba, as consultas continuam funcionando e as ações (`registrar`, `atualizar`, `responder_evento`, `enviar_mensagem`) passam a dar erro 410.
+- Quando o cenário acaba, as consultas continuam funcionando, `proximo_evento` não entrega mais nada e as ações (`registrar`, `atualizar`, `responder_evento`, `enviar_mensagem`) passam a dar erro 410. As telas continuam abrindo, mas recusam envios com 410.
 - Reiniciar o servidor começa tudo de novo, do zero. O cliente MCP do agente precisa reconectar.
 
 ## As ferramentas
