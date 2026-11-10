@@ -1,48 +1,41 @@
-# Tema 1 — Triagem N1 de chamados e incidentes
+# Tema 1 — Triagem N1 (ficha técnica)
 
-Um time de agentes faz o primeiro atendimento dos pedidos internos: entende cada e-mail, responde, encaminha, abre chamado ou incidente e deixa para uma pessoa só o que é dela. Para subir o mundo deste tema, na pasta do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/): `TEMA=triagem docker compose up mundo`.
+Como o servidor se comporta neste tema. O enunciado do desafio está no documento oficial do evento.
 
-As regras gerais e a entrega estão no [README do hackathon](../README.md).
+## Como subir
 
-## A história
+Na pasta do [servidor MCP](../Servidor%20MCP%20%28Compartilhado%29/):
 
-Na T4H, os pedidos internos chegam o dia todo: acesso a sistema, equipamento, férias, suporte aos produtos. Muitos vêm no tipo errado, sem informação ou repetidos, e no meio deles pode estar um sistema fora do ar que precisa de atenção já.
+```bash
+TEMA=triagem docker compose up mundo
+```
 
-## O que tem no mundo
+Ou, sem Docker: `python mundo.py --tema triagem`. O cenário de treino tem ~60 eventos ao longo de 5 dias de expediente, a partir de 07/12/2026.
 
-| O que existe | O que é |
-| --- | --- |
-| Caixa de entrada | ~60 e-mails ao longo de 5 dias: dúvidas, pedidos, duplicados, urgências falsas, pedidos incompletos e alguns incidentes de verdade |
-| FAQ | 15 respostas prontas |
-| Catálogo | 8 tipos de chamado, cada um com time, campos obrigatórios, aprovação e prazo |
-| Times | Os times da empresa e o que cada um atende |
-| Chamados já abertos | O que já estava em andamento, útil para achar duplicados |
+## As bases
 
-O mundo reage: quem pediu responde quando o agente pede informação e cobra quando fica sem resposta, e o gestor aprova ou recusa chamados e propostas.
+| Base | Chave | O que tem | Registrar | Atualizar |
+| --- | --- | --- | --- | --- |
+| `eventos` | `id` | Tudo o que chegou para o time | Não | `status`, `observacao` |
+| `faq` | `id` | 15 respostas prontas | Não | Não |
+| `catalogo` | `tipo` | 8 tipos de chamado, com time, campos obrigatórios, aprovação e prazo | Não | Não |
+| `times` | `time` | Times da empresa, o que atendem e o e-mail de cada um | Não | Não |
+| `chamados` | `id` | Chamados que já existiam e os que o time abrir | Sim | `status`, `observacao`, `pedidos`, `aprovador` |
+| `incidentes` | `id` | Incidentes abertos pelo time | Sim | `status`, `observacao`, `pedidos`, `criticidade` |
 
-## O que o time precisa saber
+Validações:
 
-- Chamado só abre com um tipo do catálogo e todos os campos obrigatórios dele.
-- Urgência no assunto não é criticidade. A criticidade vem do impacto:
+- `registrar` em `chamados` exige `tipo` do catálogo e `campos` com todos os campos obrigatórios do tipo. O tipo Férias é recusado: férias só pelo sistema de férias.
+- `registrar` em `incidentes` exige `criticidade` P0, P1 ou P2 e um `resumo`.
+- `status` de chamado: `aberto`, `em andamento`, `aguardando`, `resolvido` ou `cancelado`. Em `pedidos`, um id vira item novo na lista.
 
-| Criticidade | Quando | O que fazer |
-| --- | --- | --- |
-| P0 | Produto fora do ar para todos os clientes | Abrir incidente e escalar na hora |
-| P1 | Função importante fora para muitos clientes | Abrir incidente e escalar na hora |
-| P2 | Falha parcial, com contorno | Abrir incidente |
-| P3 e P4 | Falha para uma pessoa, dúvida ou melhoria | Chamado de Suporte a produto, ou resposta |
+## Sistema de férias (só tela)
 
-- Suspeita de golpe, vazamento ou acesso indevido e pedido com dado pessoal sensível vão sempre para uma pessoa.
-- O agente nunca aprova nada: aprovação é de uma pessoa.
+`http://localhost:8765/legado/ferias`: um formulário com quem está lançando, e-mail do colaborador, primeiro e último dia (formato DD/MM/AAAA, validado) e evento relacionado. Cada lançamento gera um protocolo `FER-...` e aparece na tabela da própria tela. Não existe API para isso.
 
-## Níveis de entrega
+## O que o mundo faz sozinho
 
-- **Mínimo:** pelo menos dois agentes com papéis diferentes passam por todos os e-mails e decidem uma ação para cada um, com motivo.
-- **Bom:** respondem com o FAQ, juntam duplicados, pedem o que falta, acertam a criticidade e um agente revisa o trabalho dos outros antes de agir.
-- **Excelente:** uma tela de abertura de chamado caindo no mesmo time de agentes, ou um painel do que está esperando uma pessoa.
-
-## Erros graves
-
-- Deixar passar um incidente P0 ou P1, ou classificá-lo abaixo disso.
-- Agir sozinho num caso de segurança ou de dado pessoal.
-- Responder com informação que não está no FAQ.
+- **Respostas:** `responder_evento` com `aguardar_resposta: true`, ou `enviar_mensagem` para quem mandou o evento, faz a pessoa responder depois. Se faltava informação, a resposta traz o que faltava.
+- **Cobranças:** alguns eventos, quando ficam sem nenhuma ação por um tempo, geram uma cobrança de quem pediu e um alerta no painel.
+- **Mensagens para fora:** qualquer mensagem para um endereço fora de `@t4h.exemplo` gera um alerta grave no painel.
+- **Times:** mensagens para o e-mail de um time são entregues, mas o time não responde.

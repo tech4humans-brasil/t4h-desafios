@@ -43,6 +43,7 @@ def main() -> None:
     parser.add_argument("--segundos-por-dia", type=float, default=None, help="quanto dura um dia de expediente, em segundos reais")
     parser.add_argument("--log", default=None, help="arquivo do log (padrão: logs/<tema>-<data>.jsonl)")
     parser.add_argument("--sem-navegador", action="store_true", help="não abre o painel no navegador")
+    parser.add_argument("--sem-cenario", action="store_true", help="não traz os eventos do cenário: só os criados pelo painel")
     args = parser.parse_args()
 
     tema = TEMAS[args.tema]
@@ -65,8 +66,9 @@ def main() -> None:
         version="1.0.0",
         instructions=(
             f"{tema.titulo}. Mundo simulado do Hackathon UNIFEI 2026, com dados fictícios. "
-            "Pegue pedidos com proximo_pedido e aja com as ferramentas do tema. Toda chamada leva 'agente'; "
-            "toda ação leva também 'motivo'. O servidor às vezes falha de propósito: trate os erros."
+            "Pegue eventos com proximo_evento, veja as bases com listar_bases e aja com consultar, registrar, atualizar, "
+            "responder_evento e enviar_mensagem. Toda chamada leva 'agente'. Alguns sistemas só têm tela, em /legado. "
+            "O servidor às vezes falha de propósito: trate os erros."
         ),
         on_list_tools=listar,
         on_call_tool=chamar,
@@ -81,6 +83,7 @@ def main() -> None:
     print(f"\n  {tema.titulo} · cenário {cenario.get('nome', cenario_arquivo.name)}", file=sys.stderr)
     print(f"  Painel:       {url}/", file=sys.stderr)
     print(f"  Servidor MCP: {url}/mcp", file=sys.stderr)
+    print(f"  Só tela:      {url}/legado", file=sys.stderr)
     print(f"  Log:          {mundo.log}", file=sys.stderr)
     print(f"  Um dia de expediente dura {args.segundos_por_dia:.0f} s · chance de falha {mundo.prob_erro:.0%}", file=sys.stderr)
     print("  O relógio começa quando o primeiro agente chamar uma ferramenta.\n", file=sys.stderr)

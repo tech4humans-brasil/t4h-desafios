@@ -1,86 +1,16 @@
 # Servidor MCP
 
-O servidor MCP é a empresa simulada de cada tema. Os agentes de vocês se conectam a ele, pegam os pedidos e agem pelas ferramentas que ele oferece. Ele guarda os dados, reage ao que os agentes fazem e mostra tudo num painel no navegador. É o mesmo para todos os temas.
-
-Tudo aqui é fictício: pessoas, e-mails, produtos e equipamentos.
-
-## O que é MCP
-
-MCP (Model Context Protocol) é um padrão aberto para agentes de IA usarem ferramentas. Um servidor MCP publica uma lista de ferramentas, cada uma com nome, descrição e parâmetros. O agente lê essa lista, escolhe a ferramenta certa e a chama, como um programa chamaria uma função. Os principais clientes e frameworks de agentes já falam MCP, então o time não precisa escrever integração nenhuma: basta apontar o agente para o endereço do servidor.
-
-## Quem chama quem
-
-O servidor nunca chama o agente. É o agente que chama o servidor, o tempo todo, como alguém que confere a caixa de entrada.
-
-```mermaid
-flowchart LR
-  P1["1. Pega um pedido<br/>proximo_pedido<br/>(nada novo? espera)"] --> P2["2. Consulta<br/>catálogo, FAQ,<br/>estoque, pessoas"]
-  P2 --> P3["3. Combina<br/>os agentes conversam<br/>e um revisa o outro"]
-  P3 --> P4["4. Age<br/>abre, reserva,<br/>propõe ou escala"]
-  P4 -- chama a ferramenta --> P5["5. O mundo reage<br/>respostas, decisões<br/>e compras chegam"]
-  P5 -- a reação chega na caixa de entrada como pedido novo --> P1
-```
-
-O passo 5 é o que deixa o mundo vivo: quando o agente pede uma informação, propõe uma compra ou cobra uma devolução, a resposta não vem na hora. Ela chega minutos depois, no relógio simulado, como um pedido novo na mesma caixa (com id do tipo `PED-017-R1` ou `MSG-003`), e o ciclo recomeça.
-
-## O relógio
-
-- O expediente é simulado: vai das 08:00 às 18:00, só em dias úteis. No Tema 1, 5 dias passam em 20 minutos; no Tema 3, 22 dias passam em 22 minutos.
-- O relógio começa na primeira chamada de qualquer agente. Antes disso, o mundo fica parado esperando.
-- Os pedidos chegam na hora marcada do cenário, não todos de uma vez. Toda resposta traz a hora simulada no campo `agora`.
-
-## As ferramentas
-
-A lista completa, com os parâmetros de cada uma, vem do próprio servidor quando o agente se conecta. Em resumo:
-
-**Em todos os temas**
-
-| Ferramenta | Para quê |
-| --- | --- |
-| `proximo_pedido` | Pega o próximo pedido novo da caixa de entrada |
-| `listar_pedidos`, `ler_pedido` | Vê a caixa de entrada e o que já foi feito em cada pedido |
-| `responder_pedido` | Responde a quem pediu |
-| `escalar` | Passa o caso para uma pessoa, com um resumo |
-| `propor`, `consultar_proposta` | Pede o OK de uma pessoa e acompanha a decisão |
-| `registrar_conversa` | Deixa no log uma conversa entre dois agentes do time |
-
-**Tema 1 — Triagem N1**
-
-| Ferramenta | Para quê |
-| --- | --- |
-| `consultar_faq`, `consultar_catalogo`, `listar_times`, `buscar_chamados` | Consultas: respostas prontas, tipos de chamado, times e chamados que já existem |
-| `abrir_chamado` | Abre um chamado do catálogo; recusa se faltar campo obrigatório |
-| `pedir_informacao` | Pede a quem enviou o que falta; a resposta chega depois na caixa |
-| `juntar_duplicado`, `encaminhar` | Liga a um chamado que já existe ou manda ao time certo |
-| `abrir_incidente` | Abre um incidente P0, P1 ou P2 |
-| `cancelar_chamado`, `trocar_aprovador` | Só com uma proposta aprovada |
-
-**Tema 3 — Equipamentos**
-
-| Ferramenta | Para quê |
-| --- | --- |
-| `consultar_estoque`, `buscar_itens`, `consultar_colaborador`, `consultar_catalogo_compra`, `consultar_regras` | Consultas: estoque, inventário, pessoas, preços e regras |
-| `reservar`, `alocar` | Separa e entrega um item; recusa se o item já estiver com alguém |
-| `cobrar_devolucao`, `registrar_devolucao` | Cobra quem está com o item e registra quando ele volta |
-| `abrir_compra` | Compra itens; acima de R$ 500, só com uma proposta aprovada |
-| `corrigir_inventario`, `baixar` | Só com uma proposta aprovada |
-
-## Regras de toda chamada
-
-- Toda chamada leva o campo `agente`, com o nome do agente do time que está agindo.
-- Toda ação, ou seja, tudo o que muda o mundo, leva também o campo `motivo`.
-- Ações que precisam do OK de uma pessoa pedem o id de uma proposta aprovada: primeiro o agente chama `propor`, e a decisão chega depois na caixa de entrada.
-- A resposta é sempre um JSON com `status` (`ok` ou `erro`) e `agora`. Quando o pedido do agente está errado, o erro diz o motivo: 400 (faltou campo), 403 (precisa de proposta), 404 (não existe), 409 (o item mudou ou já está com alguém), 410 (cenário encerrado) ou 422 (valor inválido).
+Simula uma empresa fictícia para os agentes trabalharem. Entrega eventos ao longo de um expediente simulado, guarda as bases de dados do tema, valida o que os agentes registram, reage ao que eles fazem e mostra tudo num painel ao vivo. O mesmo servidor atende todos os temas.
 
 ## Como rodar
 
-Com Docker é o jeito mais simples: não precisa instalar Python. Dentro desta pasta:
+Com Docker, dentro desta pasta:
 
 ```bash
 TEMA=triagem docker compose up mundo
 ```
 
-Para o Tema 3, troque por `TEMA=equipamentos`. No Windows (PowerShell), rode antes `$env:TEMA="triagem"` e depois `docker compose up mundo`.
+Para o Tema 3, use `TEMA=equipamentos`. No Windows (PowerShell), rode antes `$env:TEMA="triagem"` e depois `docker compose up mundo`.
 
 Sem Docker, com Python 3.11 ou mais novo:
 
@@ -96,51 +26,91 @@ Com o servidor no ar:
 | O quê | Endereço |
 | --- | --- |
 | Painel ao vivo | `http://localhost:8765` |
-| Servidor MCP | `http://localhost:8765/mcp` |
+| Servidor MCP (Streamable HTTP) | `http://localhost:8765/mcp` |
+| Sistemas só com tela | `http://localhost:8765/legado` |
 
-Para conferir se está tudo certo, rode o agente de exemplo num segundo terminal: `docker compose run --rm --no-deps exemplo` ou `python agente_exemplo.py`. Ele escala tudo para uma pessoa e não usa IA. Funciona, só que mal.
+Para testar, rode o agente de exemplo num segundo terminal: `docker compose run --rm --no-deps exemplo` ou `python agente_exemplo.py`. Ele pega cada evento e só responde que recebeu.
 
-## Como conectar o seu agente
+## Quem chama quem
 
-Qualquer cliente MCP que fale Streamable HTTP funciona. Dois exemplos:
+O servidor nunca chama o agente. O agente chama o servidor, o tempo todo:
 
-```python
-from mcp import Client
-
-async with Client("http://localhost:8765/mcp") as cliente:
-    ferramentas = await cliente.list_tools()
-    pedido = await cliente.call_tool("proximo_pedido", {"agente": "triador"})
+```mermaid
+flowchart LR
+  P1["1. Pega um evento<br/>proximo_evento<br/>(nada novo? espera)"] --> P2["2. Consulta<br/>as bases do tema<br/>e a própria memória"]
+  P2 --> P3["3. Combina<br/>os agentes conversam<br/>e um revisa o outro"]
+  P3 --> P4["4. Age<br/>registra, atualiza,<br/>responde ou usa a tela"]
+  P4 -- chama a ferramenta --> P5["5. O mundo reage<br/>respostas e entregas<br/>viram eventos novos"]
+  P5 -- a reação chega na caixa de entrada como evento novo --> P1
 ```
 
-```bash
-claude mcp add --transport http hackathon http://localhost:8765/mcp
-```
+As reações não vêm na hora: chegam minutos depois, no relógio simulado, como eventos novos na mesma caixa (ids do tipo `PED-017-R1` ou `MSG-003`).
 
-Todos os agentes do time apontam para o mesmo servidor e veem o mesmo mundo. O [`agente_exemplo.py`](agente_exemplo.py) mostra o laço completo em poucas linhas: conectar, pegar pedido, agir e tratar as falhas.
+## Os eventos
+
+- Chegam sozinhos, na hora marcada do cenário de treino (`dados/<tema>/treino.json`).
+- Também podem ser criados por uma pessoa no painel, pelo botão **+ Novo evento** (ids `MAN-...`). Com `--sem-cenario`, só chegam os do painel.
+- Cada evento tem `origem`: `cenario`, `painel` ou `mundo` (resposta de alguém).
+
+## O relógio
+
+- O expediente é simulado, das 08:00 às 18:00, só em dias úteis. Por padrão, 5 dias em 20 minutos no Tema 1 e 22 dias em 22 minutos no Tema 3 (`--segundos-por-dia` muda isso).
+- O relógio começa na primeira chamada de qualquer agente.
+- Toda resposta traz a hora simulada em `agora`.
+
+## As ferramentas
+
+São as mesmas em todos os temas. As bases de cada tema aparecem com `listar_bases`.
+
+| Ferramenta | O que faz |
+| --- | --- |
+| `proximo_evento` | Pega o próximo evento novo e marca como lido |
+| `listar_eventos`, `ler_evento` | Lista os eventos (filtro por status) e lê um evento com o que já foi feito nele |
+| `responder_evento` | Responde a quem mandou; com `aguardar_resposta: true`, a pessoa pode responder de volta |
+| `enviar_mensagem` | Manda uma mensagem para qualquer pessoa ou time do mundo, pelo e-mail |
+| `listar_bases` | Lista as bases: descrição, campos, chave, se aceita registro novo e quais campos podem ser alterados |
+| `consultar` | Busca numa base: `filtro` compara campo a campo (contém, sem acento) e `busca` procura palavras em qualquer campo |
+| `registrar` | Cria um registro numa base que aceite; o mundo valida as regras do tema |
+| `atualizar` | Altera campos de um registro pela chave; o mundo valida as regras do tema |
+| `registrar_conversa` | Deixa no painel e no log uma conversa entre dois agentes |
+
+Todas recebem `agente` (obrigatório: é assim que o painel mostra quem chamou cada ferramenta) e `motivo` (opcional, aparece no painel). `registrar`, `atualizar` e `enviar_mensagem` aceitam `evento_id` para ligar a ação a um evento.
+
+Memória, escalação e aprovação não existem no servidor: ficam com os times.
+
+A resposta é sempre um JSON com `status` (`ok` ou `erro`) e `agora`. Erros de regra: 400 (faltou campo), 404 (não existe), 405 (a base não aceita isso), 409 (o item mudou ou já está com alguém) e 422 (valor inválido ou regra do tema).
+
+## Sistemas só com tela
+
+Alguns sistemas não têm API: só uma tela HTML em `/legado`. Para usá-los, o agente precisa operar a tela (computer use ou automação de navegador). Cada formulário pede o nome do agente, e o que for feito pela tela aparece no painel e no log com `via: "tela"`. Os sistemas de cada tema estão na ficha técnica do tema.
 
 ## As falhas
 
-Por padrão, 15% das chamadas falham ou demoram de propósito, como num sistema de verdade. Tratar isso faz parte do desafio.
+Por padrão, 15% das chamadas MCP falham ou demoram de propósito (`--erros` muda a chance):
 
-| Falha | O que o agente precisa fazer |
+| Falha | O que acontece |
 | --- | --- |
-| Erro 503 | Tentar de novo depois de alguns segundos |
-| Resposta lenta | Esperar: a resposta chega certa, só que demora |
-| Erro 504 | Conferir antes de repetir, porque a ação pode ter sido feita ou não |
-| Erro 409 | Consultar de novo antes de agir |
+| Erro 503 | Indisponível; tentar de novo costuma resolver |
+| Lenta | Responde certo depois de alguns segundos |
+| Erro 504 | Demorou demais; a ação pode ou não ter sido feita |
+| Erro 409 | Conflito momentâneo; consultar de novo antes de agir |
 
 ## O painel e o log
 
-- **Painel** (`http://localhost:8765`): a caixa de entrada com o status de cada pedido, as chamadas e conversas dos agentes ao vivo e o que o mundo fez, com alertas quando algo dá errado.
-- **Log**: cada rodada grava tudo em `logs/<tema>-<data>.jsonl`. Para ler o mais recente: `python ver_log.py`.
+- **Painel** (`http://localhost:8765`): caixa de entrada com status e origem de cada evento, chamadas e conversas ao vivo com filtro por agente, quem está chamando o quê, indicadores e alertas do mundo, e o botão **+ Novo evento**.
+- **Log**: cada rodada grava tudo em `logs/<tema>-<data>.jsonl`. Para resumir o mais recente: `python ver_log.py` (ou `--agente <nome>`, `--erros`).
 
-## Opções úteis
+## Opções
 
 | Opção | Para quê |
 | --- | --- |
-| `--erros 0` | Desliga as falhas, para testar a lógica primeiro |
-| `--segundos-por-dia 60` | Acelera ou desacelera o relógio |
+| `--tema triagem` ou `--tema equipamentos` | Escolhe o tema |
+| `--erros 0` | Desliga as falhas simuladas (padrão `0.15`) |
+| `--sem-cenario` | Só chegam os eventos criados no painel |
+| `--segundos-por-dia 60` | Muda a velocidade do relógio |
 | `--seed 42` | Repete os mesmos sorteios a cada rodada |
 | `--porta 9000` | Muda a porta |
+| `--cenario arquivo.json`, `--dados pasta/` | Usa outro cenário ou outras bases |
+| `--sem-navegador` | Não abre o painel sozinho |
 
 No Docker, as opções vão depois do nome do serviço: `docker compose run --rm --service-ports mundo --tema triagem --erros 0`.

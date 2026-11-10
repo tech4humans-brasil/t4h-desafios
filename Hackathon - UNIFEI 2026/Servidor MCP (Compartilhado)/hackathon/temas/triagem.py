@@ -5,25 +5,45 @@ from __future__ import annotations
 import json
 import pathlib
 import re
+from datetime import datetime
 
-from ..nucleo import ErroFerramenta, Ferramenta, TemaBase, sem_acento, texto
+from starlette.requests import Request
+from starlette.routing import Route
 
-CRITICIDADES_INCIDENTE = ("P0", "P1", "P2")
+from .. import legado
+from ..nucleo import Base, ErroFerramenta, TemaBase, sem_acento
+
+CRITICIDADES = ("P0", "P1", "P2")
+STATUS_CHAMADO = ("aberto", "em andamento", "aguardando", "resolvido", "cancelado")
+DOMINIO = "@t4h.exemplo"
 
 
 class Triagem(TemaBase):
     titulo = "Tema 1 — Triagem N1 de chamados e incidentes"
     segundos_por_dia_padrao = 240  # 5 dias de expediente em 20 minutos
+    legado = [{"nome": "Sistema de férias", "caminho": "/legado/ferias", "descricao": "Lançamento de férias. Só tela, sem API."}]
 
     def __init__(self, mundo, dados: pathlib.Path, cenario: dict) -> None:
         super().__init__(mundo, dados, cenario)
         ler = lambda nome: json.loads((dados / nome).read_text(encoding="utf-8"))
-        self.catalogo = {c["tipo"]: c for c in ler("catalogo.json")}
-        self.times = {t["time"]: t for t in ler("times.json")}
+        self.catalogo = ler("catalogo.json")
+        self.times = ler("times.json")
         self.faq = ler("faq.json")
-        self.chamados = {c["id"]: dict(c, pedidos=[]) for c in ler("chamados_abertos.json")}
-        self.incidentes: dict[str, dict] = {}
+        self.chamados = [dict(c, pedidos=[]) for c in ler("chamados_abertos.json")]
+        self.incidentes: list[dict] = []
+        self.ferias: list[dict] = []
         self.cobrancas = 0
+
+    # ---------- apoio ----------
+    def tipo(self, nome: str) -> dict:
+        for c in self.catalogo:
+            if sem_acento(c["tipo"]) == sem_acento(nome):
+                return c
+        raise ErroFerramenta(422, f"Tipo '{nome}' não existe no catálogo.", tipos=[c["tipo"] for c in self.catalogo])
+
+    def avisar_se_externo(self, para: str) -> None:
+        if not para.lower().endswith(DOMINIO):
+            self.mundo.alerta("grave", f"Mensagem enviada para fora da empresa: {para}.")
 
     # ---------- reações do mundo ----------
     def ao_receber(self, item: dict) -> None:
@@ -35,223 +55,207 @@ class Triagem(TemaBase):
         if item["acoes"]:
             return
         self.cobrancas += 1
-        self.mundo.mensagem(item["de"], item["nome"], cobranca["assunto"], cobranca["corpo"], responde_a=item["id"])
-        self.mundo.alerta("atencao", f"{item['id']} ficou sem ação e {item['nome'] or item['de']} cobrou.", pedido_id=item["id"])
+        self.mundo.mensagem_do_mundo(item["de"], item["nome"], cobranca["assunto"], cobranca["corpo"], responde_a=item["id"])
+        self.mundo.alerta("atencao", f"{item['id']} ficou sem ação e {item['nome'] or item['de']} cobrou.")
 
-    def _aprovar_chamado(self, chamado: dict) -> None:
-        if chamado["status"] == "aguardando aprovação":
-            chamado["status"] = "aprovado"
-            self.mundo.emitir("mundo", mensagem=f"{chamado['id']} aprovado pelo gestor e enviado ao time {chamado['time']}.")
+    def _responder_de_volta(self, item: dict) -> None:
+        complemento = item["_original"].get("complemento")
+        if complemento and not item.get("_complemento_agendado"):
+            item["_complemento_agendado"] = True
+            corpo = complemento["corpo"]
+            horas = float(complemento["apos_horas"])
+        else:
+            corpo = "Oi! Acho que já mandei tudo no primeiro e-mail. O que exatamente você precisa?"
+            horas = self.mundo.sorteio.uniform(0.5, 2)
+        self.mundo.agendar_em_horas(
+            horas, lambda: self.mundo.mensagem_do_mundo(item["de"], item["nome"], "RE: " + item["assunto"], corpo, responde_a=item["id"])
+        )
 
-    # ---------- ferramentas ----------
-    def ferramentas(self) -> list[Ferramenta]:
-        m = self.mundo
+    def ao_responder(self, item: dict, mensagem: str, aguardar: bool) -> None:
+        self.avisar_se_externo(item["de"])
+        if aguardar and item["origem"] != "mundo":
+            self._responder_de_volta(item)
 
-        def consultar_faq(args, agente, motivo):
-            termos = set(re.findall(r"\w+", sem_acento(args["busca"]))) - {"de", "do", "da", "o", "a", "e", "como", "que", "um", "uma", "para", "no", "na"}
-            pontuados = []
-            for item in self.faq:
-                base = set(re.findall(r"\w+", sem_acento(item["pergunta"] + " " + " ".join(item.get("palavras_chave", [])))))
-                pontos = len(termos & base)
-                if pontos:
-                    pontuados.append((pontos, item))
-            pontuados.sort(key=lambda x: -x[0])
-            achados = [{"id": i["id"], "pergunta": i["pergunta"], "resposta": i["resposta"]} for _, i in pontuados[:3]]
-            return {"resultados": achados, "mensagem": None if achados else "Nada no FAQ para essa busca."}
+    def ao_mensagem(self, registro: dict) -> str | None:
+        para = registro["para"].lower()
+        if "@" not in para:
+            return None
+        self.avisar_se_externo(para)
+        for t in self.times:
+            if t["email"] == para:
+                return f"time {t['time']}"
+        for item in self.mundo.caixa.values():
+            if item["de"].lower() == para:
+                if item["origem"] != "mundo":
+                    self._responder_de_volta(item)
+                return item["nome"] or item["de"]
+        return para
 
-        def consultar_catalogo(args, agente, motivo):
-            return {"tipos": list(self.catalogo.values())}
-
-        def listar_times(args, agente, motivo):
-            return {"times": list(self.times.values())}
-
-        def buscar_chamados(args, agente, motivo):
-            busca = sem_acento(args.get("texto", ""))
-            solicitante = sem_acento(args.get("solicitante", ""))
-            achados = []
-            for c in list(self.chamados.values()) + list(self.incidentes.values()):
-                alvo = sem_acento(json.dumps(c, ensure_ascii=False))
-                if (not busca or all(t in alvo for t in busca.split())) and (not solicitante or solicitante in sem_acento(c.get("solicitante", ""))):
-                    achados.append(c)
-            return {"chamados": achados[:20]}
-
-        def abrir_chamado(args, agente, motivo):
-            item = m.pedido(args["pedido_id"])
-            tipo = args["tipo"]
-            if tipo not in self.catalogo:
-                raise ErroFerramenta(422, f"Tipo '{tipo}' não existe no catálogo.", tipos=list(self.catalogo))
-            campos = args.get("campos") or {}
+    # ---------- bases ----------
+    def bases(self) -> list[Base]:
+        def registrar_chamado(dados: dict, agente: str) -> dict:
+            info = self.tipo(str(dados.get("tipo", "")))
+            if info["tipo"] == "Férias":
+                raise ErroFerramenta(
+                    422,
+                    f"Férias não entram por aqui: são lançadas no sistema de férias, que só tem tela ({self.mundo.url('/legado/ferias')}).",
+                )
+            campos = dados.get("campos") or {}
             if not isinstance(campos, dict):
                 raise ErroFerramenta(422, "'campos' precisa ser um objeto com os campos obrigatórios do tipo.")
-            faltam = [c for c in self.catalogo[tipo]["campos_obrigatorios"] if not str(campos.get(c, "")).strip()]
+            faltam = [c for c in info["campos_obrigatorios"] if not str(campos.get(c, "")).strip()]
             if faltam:
-                raise ErroFerramenta(422, "Faltam campos obrigatórios: " + ", ".join(faltam), campos_obrigatorios=self.catalogo[tipo]["campos_obrigatorios"])
-            cid = m.novo_id("CH", 1001, 4)
-            info = self.catalogo[tipo]
+                raise ErroFerramenta(422, "Faltam campos obrigatórios: " + ", ".join(faltam), campos_obrigatorios=info["campos_obrigatorios"])
+            evento = self.mundo.caixa.get(str(dados.get("evento_id", "")))
             chamado = {
-                "id": cid,
-                "tipo": tipo,
+                "id": self.mundo.novo_id("CH", 1001, 4),
+                "tipo": info["tipo"],
                 "time": info["time"],
-                "solicitante": item["de"],
-                "resumo": item["assunto"],
+                "solicitante": evento["de"] if evento else str(dados.get("solicitante", "")),
+                "resumo": str(dados.get("resumo") or (evento["assunto"] if evento else "")),
                 "campos": campos,
-                "status": "aguardando aprovação" if info["aprovacao"] else "aberto",
-                "aberto_em": m.agora(),
-                "pedidos": [item["id"]],
-            }
-            self.chamados[cid] = chamado
-            item["status"] = "chamado aberto"
-            if info["aprovacao"]:
-                m.agendar_em_horas(m.sorteio.uniform(1, 4), lambda: self._aprovar_chamado(chamado))
-            return {"chamado": chamado}
-
-        def pedir_informacao(args, agente, motivo):
-            item = m.pedido(args["pedido_id"])
-            item["status"] = "aguardando informação"
-            original = item["_original"]
-            complemento = original.get("complemento")
-            if complemento and not item.get("_complemento_agendado"):
-                item["_complemento_agendado"] = True
-                m.agendar_em_horas(
-                    float(complemento["apos_horas"]),
-                    lambda: m.mensagem(item["de"], item["nome"], "RE: " + item["assunto"], complemento["corpo"], responde_a=item["id"]),
-                )
-            elif not complemento:
-                m.agendar_em_horas(
-                    m.sorteio.uniform(0.5, 2),
-                    lambda: m.mensagem(
-                        item["de"],
-                        item["nome"],
-                        "RE: " + item["assunto"],
-                        "Oi! Acho que já mandei tudo no primeiro e-mail. O que exatamente está faltando?",
-                        responde_a=item["id"],
-                    ),
-                )
-            return {"mensagem": f"Pedido de informação enviado para {item['de']}."}
-
-        def juntar_duplicado(args, agente, motivo):
-            item = m.pedido(args["pedido_id"])
-            alvo = self.chamados.get(args["chamado_id"]) or self.incidentes.get(args["chamado_id"])
-            if not alvo:
-                raise ErroFerramenta(404, f"Chamado ou incidente {args['chamado_id']} não encontrado.")
-            alvo.setdefault("pedidos", []).append(item["id"])
-            item["status"] = "duplicado"
-            return {"mensagem": f"{item['id']} ligado a {alvo['id']}.", "chamado": alvo}
-
-        def encaminhar(args, agente, motivo):
-            item = m.pedido(args["pedido_id"])
-            if args["time"] not in self.times:
-                raise ErroFerramenta(422, f"Time '{args['time']}' não existe.", times=list(self.times))
-            item["status"] = "encaminhado"
-            item["encaminhado_para"] = args["time"]
-            return {"mensagem": f"{item['id']} encaminhado ao time {args['time']}."}
-
-        def abrir_incidente(args, agente, motivo):
-            item = m.pedido(args["pedido_id"])
-            criticidade = str(args["criticidade"]).upper()
-            if criticidade not in CRITICIDADES_INCIDENTE:
-                raise ErroFerramenta(422, "Incidente é P0, P1 ou P2. P3 e P4 viram chamado de Suporte a produto.")
-            iid = m.novo_id("INC")
-            incidente = {
-                "id": iid,
-                "criticidade": criticidade,
-                "produto": args.get("produto", ""),
-                "resumo": args["resumo"],
-                "solicitante": item["de"],
-                "aberto_em": m.agora(),
-                "pedidos": [item["id"]],
                 "status": "aberto",
+                "aberto_em": self.mundo.agora(),
+                "aberto_por": agente,
+                "pedidos": [evento["id"]] if evento else [],
             }
-            self.incidentes[iid] = incidente
-            item["status"] = "incidente aberto"
+            self.chamados.append(chamado)
+            return chamado
+
+        def atualizar_chamado(registro: dict, dados: dict, agente: str) -> dict:
+            if "status" in dados and dados["status"] not in STATUS_CHAMADO:
+                raise ErroFerramenta(422, "Status inválido.", opcoes=list(STATUS_CHAMADO))
+            for k, v in dados.items():
+                if k == "pedidos":
+                    novos = v if isinstance(v, list) else [v]
+                    registro.setdefault("pedidos", []).extend(str(x) for x in novos if str(x) not in registro["pedidos"])
+                else:
+                    registro[k] = v
+            return registro
+
+        def registrar_incidente(dados: dict, agente: str) -> dict:
+            criticidade = str(dados.get("criticidade", "")).upper()
+            if criticidade not in CRITICIDADES:
+                raise ErroFerramenta(422, "Incidente é P0, P1 ou P2. P3 e P4 viram chamado de Suporte a produto.")
+            if not str(dados.get("resumo", "")).strip():
+                raise ErroFerramenta(422, "Todo incidente precisa de um 'resumo'.")
+            evento = self.mundo.caixa.get(str(dados.get("evento_id", "")))
+            incidente = {
+                "id": self.mundo.novo_id("INC"),
+                "criticidade": criticidade,
+                "produto": str(dados.get("produto", "")),
+                "resumo": str(dados["resumo"]),
+                "status": "aberto",
+                "aberto_em": self.mundo.agora(),
+                "aberto_por": agente,
+                "pedidos": [evento["id"]] if evento else [],
+            }
+            self.incidentes.append(incidente)
             nivel = "atencao" if criticidade in ("P0", "P1") else "info"
-            m.alerta(nivel, f"{iid} {criticidade} aberto por {agente}: {args['resumo']}", pedido_id=item["id"])
-            return {"incidente": incidente}
+            self.mundo.alerta(nivel, f"{incidente['id']} {criticidade} aberto por {agente}: {incidente['resumo']}")
+            return incidente
 
-        def cancelar_chamado(args, agente, motivo):
-            chamado = self.chamados.get(args["chamado_id"])
-            if not chamado:
-                raise ErroFerramenta(404, f"Chamado {args['chamado_id']} não encontrado.")
-            m.exigir_proposta(args.get("proposta_id"), "cancelar_chamado", chamado["id"])
-            chamado["status"] = "cancelado"
-            return {"chamado": chamado}
+        def atualizar_incidente(registro: dict, dados: dict, agente: str) -> dict:
+            if "criticidade" in dados:
+                criticidade = str(dados["criticidade"]).upper()
+                if criticidade not in CRITICIDADES:
+                    raise ErroFerramenta(422, "Criticidade de incidente é P0, P1 ou P2.")
+                dados = dict(dados, criticidade=criticidade)
+            return atualizar_chamado(registro, dados, agente)
 
-        def trocar_aprovador(args, agente, motivo):
-            chamado = self.chamados.get(args["chamado_id"])
-            if not chamado:
-                raise ErroFerramenta(404, f"Chamado {args['chamado_id']} não encontrado.")
-            m.exigir_proposta(args.get("proposta_id"), "trocar_aprovador", chamado["id"])
-            chamado["aprovador"] = args["aprovador"]
-            return {"chamado": chamado}
-
-        pid = {"pedido_id": texto("Id do pedido")}
         return [
-            Ferramenta("consultar_faq", "Busca respostas prontas no FAQ da empresa.", consultar_faq, {"busca": texto("Palavras da dúvida")}, ["busca"], acao=False),
-            Ferramenta("consultar_catalogo", "Lista os tipos de chamado, com time, campos obrigatórios, aprovação e prazo.", consultar_catalogo, acao=False),
-            Ferramenta("listar_times", "Lista os times da empresa e o que cada um atende.", listar_times, acao=False),
-            Ferramenta(
-                "buscar_chamados",
-                "Procura chamados e incidentes já abertos, para achar duplicados.",
-                buscar_chamados,
-                {"texto": texto("Palavras para buscar (opcional)"), "solicitante": texto("E-mail ou parte do e-mail (opcional)")},
-                acao=False,
+            Base("faq", "Respostas prontas para as dúvidas mais comuns.", lambda: self.faq),
+            Base("catalogo", "Tipos de chamado, com time, campos obrigatórios, aprovação e prazo.", lambda: self.catalogo, chave="tipo"),
+            Base("times", "Times da empresa, o que cada um atende e o e-mail de cada um.", lambda: self.times, chave="time"),
+            Base(
+                "chamados",
+                "Chamados abertos, os que já existiam e os que o time abrir. Registrar valida o tipo e os campos obrigatórios.",
+                lambda: self.chamados,
+                registrar=registrar_chamado,
+                atualizar=atualizar_chamado,
+                campos_atualizaveis=("status", "observacao", "pedidos", "aprovador"),
             ),
-            Ferramenta(
-                "abrir_chamado",
-                "Abre um chamado do catálogo. Recusa se o tipo não existir ou faltar campo obrigatório.",
-                abrir_chamado,
-                {**pid, "tipo": texto("Tipo do catálogo"), "campos": {"type": "object", "description": "Campos obrigatórios do tipo"}},
-                ["pedido_id", "tipo", "campos"],
-            ),
-            Ferramenta(
-                "pedir_informacao",
-                "Pede a quem fez o pedido as informações que faltam. A resposta chega depois na caixa de entrada.",
-                pedir_informacao,
-                {**pid, "campos": {"type": "array", "items": {"type": "string"}, "description": "O que falta"}, "mensagem": texto("Texto para a pessoa")},
-                ["pedido_id", "mensagem"],
-            ),
-            Ferramenta(
-                "juntar_duplicado",
-                "Liga um pedido a um chamado ou incidente que já existe.",
-                juntar_duplicado,
-                {**pid, "chamado_id": texto("Id do chamado (CH-...) ou incidente (INC-...)")},
-                ["pedido_id", "chamado_id"],
-            ),
-            Ferramenta(
-                "encaminhar",
-                "Encaminha ao time certo um pedido que não é chamado do catálogo.",
-                encaminhar,
-                {**pid, "time": texto("Nome do time"), "resumo": texto("Resumo para o time")},
-                ["pedido_id", "time"],
-            ),
-            Ferramenta(
-                "abrir_incidente",
-                "Abre um incidente P0, P1 ou P2.",
-                abrir_incidente,
-                {**pid, "criticidade": texto("P0, P1 ou P2"), "produto": texto("Produto afetado"), "resumo": texto("O que está acontecendo")},
-                ["pedido_id", "criticidade", "resumo"],
-            ),
-            Ferramenta(
-                "cancelar_chamado",
-                "Cancela um chamado. Precisa de uma proposta aprovada (acao='cancelar_chamado', alvo=<id do chamado>).",
-                cancelar_chamado,
-                {"chamado_id": texto("Id do chamado"), "proposta_id": texto("Id da proposta aprovada")},
-                ["chamado_id", "proposta_id"],
-            ),
-            Ferramenta(
-                "trocar_aprovador",
-                "Troca o aprovador de um chamado. Precisa de uma proposta aprovada (acao='trocar_aprovador', alvo=<id do chamado>).",
-                trocar_aprovador,
-                {"chamado_id": texto("Id do chamado"), "aprovador": texto("E-mail do novo aprovador"), "proposta_id": texto("Id da proposta aprovada")},
-                ["chamado_id", "aprovador", "proposta_id"],
+            Base(
+                "incidentes",
+                "Incidentes P0, P1 e P2 abertos pelo time.",
+                lambda: self.incidentes,
+                registrar=registrar_incidente,
+                atualizar=atualizar_incidente,
+                campos_atualizaveis=("status", "observacao", "pedidos", "criticidade"),
             ),
         ]
 
+    # ---------- sistema de férias (só tela) ----------
+    def rotas_legado(self) -> list[Route]:
+        def tela(erro: str = "", ok: str = "", valores: dict | None = None):
+            v = valores or {}
+            linhas = "".join(
+                f"<tr><td>{f['protocolo']}</td><td>{f['email']}</td><td>{f['inicio']}</td><td>{f['fim']}</td><td>{f['lancado_por']}</td></tr>"
+                for f in self.ferias[-15:]
+            ) or "<tr><td colspan='5'>Nenhum lançamento ainda.</td></tr>"
+            corpo = (
+                legado.mensagem(erro, "erro")
+                + legado.mensagem(ok, "ok")
+                + "<p>Preencha todos os campos. Datas no formato DD/MM/AAAA.</p>"
+                + "<form method='post' action='/legado/ferias'>"
+                + legado.campo("agente", "Quem está lançando (nome do agente)", v.get("agente", ""))
+                + legado.campo("email", "E-mail do colaborador", v.get("email", ""))
+                + legado.campo("inicio", "Primeiro dia de férias (DD/MM/AAAA)", v.get("inicio", ""))
+                + legado.campo("fim", "Último dia de férias (DD/MM/AAAA)", v.get("fim", ""))
+                + legado.campo("evento", "Evento relacionado (opcional)", v.get("evento", ""))
+                + "<br><button type='submit'>Lançar férias</button></form>"
+                + f"<h3>Últimos lançamentos</h3><table><tr><th>Protocolo</th><th>Colaborador</th><th>Início</th><th>Fim</th><th>Lançado por</th></tr>{linhas}</table>"
+                + "<div class='rodape'>SisFérias v2.3 · sistema antigo, sem integração</div>"
+            )
+            return legado.pagina("Sistema de férias", corpo)
+
+        async def get_ferias(request: Request):
+            return tela()
+
+        async def post_ferias(request: Request):
+            form = await request.form()
+            v = {k: str(form.get(k, "")).strip() for k in ("agente", "email", "inicio", "fim", "evento")}
+            erro = ""
+            datas = {}
+            if not v["agente"]:
+                erro = "Informe quem está lançando."
+            elif not v["email"].lower().endswith(DOMINIO):
+                erro = "E-mail inválido: use o e-mail do colaborador na empresa."
+            else:
+                for k in ("inicio", "fim"):
+                    if not re.fullmatch(r"\d{2}/\d{2}/\d{4}", v[k]):
+                        erro = "Data fora do formato DD/MM/AAAA."
+                        break
+                    try:
+                        datas[k] = datetime.strptime(v[k], "%d/%m/%Y").date()
+                    except ValueError:
+                        erro = "Data inexistente."
+                        break
+                if not erro and datas["fim"] < datas["inicio"]:
+                    erro = "O último dia não pode ser antes do primeiro."
+            if erro:
+                self.mundo.registrar_tela("ferias", v["agente"], v, {"erro": erro}, ok=False)
+                return tela(erro=erro, valores=v)
+            registro = {
+                "protocolo": self.mundo.novo_id("FER"),
+                "email": v["email"],
+                "inicio": v["inicio"],
+                "fim": v["fim"],
+                "lancado_por": v["agente"],
+                "lancado_em": self.mundo.agora(),
+            }
+            self.ferias.append(registro)
+            self.mundo.marcar_acao(v["evento"], "tela/ferias", v["agente"])
+            self.mundo.registrar_tela("ferias", v["agente"], v, registro, ok=True)
+            return tela(ok=f"Férias lançadas. Protocolo {registro['protocolo']}.")
+
+        return [Route("/legado/ferias", get_ferias, methods=["GET"]), Route("/legado/ferias", post_ferias, methods=["POST"])]
+
     def indicadores(self) -> list[dict]:
-        novos = [c for c in self.chamados.values() if c["id"] >= "CH-1001"]
+        novos = [c for c in self.chamados if c.get("aberto_por")]
         return self.indicadores_caixa() + [
             {"nome": "Chamados abertos", "valor": len(novos)},
             {"nome": "Incidentes", "valor": len(self.incidentes)},
-            {"nome": "Propostas", "valor": len(self.mundo.propostas)},
+            {"nome": "Férias pela tela", "valor": len(self.ferias)},
             {"nome": "Cobranças recebidas", "valor": self.cobrancas, "alerta": self.cobrancas > 0},
         ]
