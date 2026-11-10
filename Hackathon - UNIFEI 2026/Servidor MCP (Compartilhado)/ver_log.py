@@ -71,7 +71,9 @@ def main() -> None:
 
     todas = chamadas
     filtro = " (filtradas)" if args.agente or args.erros else ""
-    print(f"\n{len(todas)} chamadas{filtro}, {sum(e.get('resultado') == 'erro' for e in todas)} com erro")
+    conversas = sum(e["tipo"] == "conversa" for e in eventos) if not (args.agente or args.erros) else 0
+    extra = f" (mais {conversas} conversas registradas, que o painel conta junto)" if conversas else ""
+    print(f"\n{len(todas)} chamadas{filtro}, {sum(e.get('resultado') == 'erro' for e in todas)} com erro{extra}")
     print("Por agente: " + ", ".join(f"{k or '-'} {v}" for k, v in Counter(e.get("agente") for e in todas).most_common()))
     print("Por ferramenta: " + ", ".join(f"{k} {v}" for k, v in Counter(e.get("ferramenta") for e in todas).most_common()))
     alertas = Counter(e.get("nivel") for e in eventos if e["tipo"] == "alerta")

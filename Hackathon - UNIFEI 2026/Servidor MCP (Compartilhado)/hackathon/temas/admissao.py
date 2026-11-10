@@ -50,6 +50,21 @@ def fala_de(texto_sem_acento: str, *raizes: str) -> bool:
     return False
 
 
+NEGA = r"\b(nao|nem|sem|cancel\w*|desmarc\w*)\b(?!\s+(esquec|deix|falta))"
+CANCELA = re.compile(r"\b(cancel\w*|desmarc\w*)\b|\bnao\s+(precis\w*|e\s+preciso|ha\s+(necessidade|novo))\b")
+PEDIDO_CLINICA = re.compile(
+    r"\b(agend(ar|em|e|a|ando)|marc(ar|em|ue|quem)|remarc\w*|solicit\w*|precis\w*|pedi\w*|pod(e|em|eria|eriam)|favor|gostaria\w*|quer(o|emos)|vaga|horario)\b"
+)
+
+
+def pede_a_clinica(t: str) -> bool:
+    """Alguma frase pede exame sem negar ("não precisa remarcar o exame" não pede)."""
+    for frase in re.split(r"[.;!?\n]+", t):
+        if re.search(r"\b(exame|agend|remarc|marc|consulta|admissional)", frase) and PEDIDO_CLINICA.search(frase) and not re.search(NEGA, frase):
+            return True
+    return False
+
+
 PEDIDO = ("envi", "mand", "falt", "precis", "reenvi", "encaminh", "anex", "pendent", "solicit", "pedimos", "pedir", "pode me")
 PEDIDO_AREA = {
     "ti": ("acess", "cri", "e-mail", "email", "conta", "login", "vpn", "senha", "permiss", "usuario", "liber"),
@@ -164,6 +179,18 @@ class Admissao(TemaBase):
                     self.depois(self.mundo.sorteio.uniform(1, 3), c["email"], c["nome"].split()[0], re_assunto, f"Segue também: {regra['nome']}.", ev, documentos=[spec])
             a["_antecipados"] = {}
 
+    def _enviar_apos_recusa(self, doc: dict) -> None:
+        """Um documento pedido antes da recusa do anterior chega quando a recusa sai."""
+        a = self.adm[doc["admissao"]]
+        pendente = a.get("_apos_recusa", {}).pop(doc["tipo"], None)
+        if not pendente or pendente[0]["arquivo"] in a["_enviados"]:
+            return
+        spec, re_assunto, ev = pendente
+        a["_enviados"].add(spec["arquivo"])
+        c = self.contratados[doc["admissao"]]
+        regra = next(x for x in self.exigidos if x["tipo"] == spec["tipo"])
+        self.depois(self.mundo.sorteio.uniform(2, 6), c["email"], c["nome"].split()[0], re_assunto, f"Segue: {regra['nome']}.", ev, documentos=[spec])
+
     def checar_vazamento(self, para: str, texto: str) -> None:
         t = sem_acento(texto)
         codigos = {so_codigo(x) for x in re.findall(r"[0-9][0-9xX.\-/ ]{5,}[0-9xX]", texto)}
@@ -202,7 +229,7 @@ class Admissao(TemaBase):
             self.receber_docs(c["id"], original["documentos"], item["id"])
         cobranca = original.get("cobranca")
         if cobranca:
-            self.mundo.agendar_em_horas(float(cobranca["apos_horas"]), lambda: self._cobrar(item, cobranca))
+            self.mundo.agendar_cobranca(float(cobranca["apos_horas"]), lambda: self._cobrar(item, cobranca))
 
     def _cobrar(self, item: dict, cobranca: dict) -> None:
         if item["acoes"]:
@@ -254,6 +281,9 @@ class Admissao(TemaBase):
             ]
             if not alvo:  # conversa com o gestor que não é o aviso da chegada de alguém
                 return {"entregue_para": f"{gestores[0]['gestor']} (gestor)", "vai_responder": False}
+            alvo = [x for x in alvo if self.adm[x["id"]]["gestor_avisado"] != "sim"]
+            if not alvo:  # já avisado: o gestor não agradece de novo
+                return {"entregue_para": f"{gestores[0]['gestor']} (gestor)", "vai_responder": False}
             for x in alvo:
                 self.adm[x["id"]]["gestor_avisado"] = "sim"
             nomes = ", ".join(x["nome"].split()[0] for x in alvo)
@@ -292,20 +322,40 @@ class Admissao(TemaBase):
 
     def _clinica(self, texto, evento_id, re_assunto) -> dict:
         alvo = self.citados(texto)
-        if not fala_de(sem_acento(texto), "exame", "agend", "remarc", "marc", "consulta", "admissional"):  # agradecimento ou conversa
-            return {"entregue_para": "Clínica", "vai_responder": False}
+        t = sem_acento(texto)
+        if CANCELA.search(t) and alvo:  # cancelar ou dispensar um exame: nada é agendado
+            cancelados = []
+            for c in alvo:
+                a = self.adm[c["id"]]
+                if a["exame"] in ("solicitado", "agendado"):
+                    a["exame"], a["exame_data"] = "pendente", ""
+                    cancelados.append(c["nome"])
+            if cancelados:
+                self.depois(1, CLINICA, "Clínica", re_assunto, f"Combinado, cancelamos o exame de {', '.join(cancelados)}.", evento_id)
+            return {"entregue_para": "Clínica", "vai_responder": bool(cancelados)}
+        if not pede_a_clinica(t):
+            if "?" in texto and alvo and fala_de(t, "exame", "agend", "consulta", "admissional"):  # pergunta sobre o andamento
+                for c in alvo:
+                    a = self.adm[c["id"]]
+                    situacao = f"agendado para {br(a['exame_data'])} às 09:00" if a["exame"] == "agendado" and a["exame_data"] else a["exame"]
+                    texto_resp = "Não temos pedido de exame" if situacao == "pendente" else f"O exame está {situacao}"
+                    self.depois(1, CLINICA, "Clínica", re_assunto, f"{texto_resp} para {c['nome']}.", evento_id)
+                return {"entregue_para": "Clínica", "vai_responder": True}
+            return {"entregue_para": "Clínica", "vai_responder": False}  # agradecimento, conversa ou frase negativa
         if not alvo:
             self.depois(1, CLINICA, "Clínica", re_assunto, "Para quem é o exame? Precisamos do nome completo e do cargo.", evento_id)
             return {"entregue_para": "Clínica", "vai_responder": True}
         for c in alvo:
             a = self.adm[c["id"]]
+            if a["status"] != "em andamento":  # admissão encerrada: a clínica não agenda mais nada
+                continue
             if a["exame"] in ("agendado", "apto", "solicitado", "realizado"):
                 self.depois(1, CLINICA, "Clínica", re_assunto, f"O exame de {c['nome']} já está {a['exame']}" + (f" para {br(a['exame_data'])} às 09:00." if a["exame_data"] and a["exame"] == "agendado" else "."), evento_id)
                 continue
             a["exame"], a["_confirmou_exame"], a["_pedidos_exame"] = "solicitado", False, 0
 
             def agendar(a=a, c=c):
-                if a["exame"] != "solicitado":
+                if a["exame"] != "solicitado" or a["status"] != "em andamento":
                     return
                 dia = somar_dias_uteis(self.mundo.relogio.data(), 2)
                 a["exame"], a["exame_data"] = "agendado", dia.isoformat()
@@ -317,7 +367,7 @@ class Admissao(TemaBase):
         return {"entregue_para": "Clínica", "vai_responder": True}
 
     def _fazer_exame(self, a: dict, c: dict) -> None:
-        if a["exame"] != "agendado":
+        if a["exame"] != "agendado" or a["status"] != "em andamento":
             return
         if not a["_confirmou_exame"]:
             a["exame"] = "faltou"
@@ -384,6 +434,9 @@ class Admissao(TemaBase):
                     vai = True
                 elif not meus:  # pediram antes do primeiro envio: ela manda junto, logo depois dele
                     a.setdefault("_antecipados", {})[spec["arquivo"]] = (spec, re_assunto, evento_id)
+                elif spec["tipo"] not in a.setdefault("_apos_recusa", {}):  # já mandou um desse tipo, ainda não recusado
+                    a["_apos_recusa"][spec["tipo"]] = (spec, re_assunto, evento_id)  # manda quando a recusa sair
+                    respostas.append(f"Eu já mandei um documento para {regra['nome']}. Ele não serve? Se não servir, me avisem que eu mando outro.")
         for chave, resposta in comp.get("responde_sobre", {}).items():
             if meus and fala_de(t, chave) and not a.get(f"_respondeu_{chave}"):
                 a[f"_respondeu_{chave}"] = True
@@ -404,22 +457,25 @@ class Admissao(TemaBase):
             if a["status"] != "em andamento":
                 continue
             inicio = self.dia_de(a["data_inicio"])
-            etapas = [
-                ("TI acionada", 1, a["ti"] != "pendente"),
-                ("Equipamentos acionados", 1, a["equipamento"] != "pendente"),
-                ("Documentos completos e conferidos", inicio - 7, not self.faltando(a["id"])),
-                ("Dados enviados à contabilidade", inicio - 6, a["contabilidade"] in ("enviado", "registrado")),
-                ("Exame agendado", inicio - 5, a["exame"] in ("agendado", "realizado", "apto")),
-                ("Gestor avisado", inicio - 3, a["gestor_avisado"] == "sim"),
-                ("Exame realizado (apto)", inicio - 2, a["exame"] == "apto"),
-                ("Contrato assinado", inicio - 2, a["contrato"] == "assinado"),
-            ]
-            for nome, limite, feito in etapas:
+            for nome, limite, feito in self._etapas(a):
                 if dia > limite and not feito and (a["id"], nome) not in self.prazos_avisados and dia < inicio:
                     self.prazos_avisados.add((a["id"], nome))
                     self.mundo.alerta("atencao", f"Prazo vencido: {nome} de {a['nome']} (começa {br(a['data_inicio'])}).")
             if a["data_inicio"] == hoje.isoformat():
                 self._primeiro_dia(a)
+
+    def _etapas(self, a: dict) -> list[tuple[str, int, bool]]:
+        inicio = self.dia_de(a["data_inicio"])
+        return [
+            ("TI acionada", 1, a["ti"] != "pendente"),
+            ("Equipamentos acionados", 1, a["equipamento"] != "pendente"),
+            ("Documentos completos e conferidos", inicio - 7, not self.faltando(a["id"])),
+            ("Dados enviados à contabilidade", inicio - 6, a["contabilidade"] in ("enviado", "registrado")),
+            ("Exame agendado", inicio - 5, a["exame"] in ("agendado", "realizado", "apto")),
+            ("Gestor avisado", inicio - 3, a["gestor_avisado"] == "sim"),
+            ("Exame realizado (apto)", inicio - 2, a["exame"] == "apto"),
+            ("Contrato assinado", inicio - 2, a["contrato"] == "assinado"),
+        ]
 
     def _primeiro_dia(self, a: dict) -> None:
         bloqueios = [n for n, ok in (("exame apto", a["exame"] == "apto"), ("contrato assinado", a["contrato"] == "assinado")) if not ok]
@@ -472,7 +528,11 @@ class Admissao(TemaBase):
                     if a["contabilidade"] in ("enviado", "registrado"):
                         a["contabilidade"] = "desatualizado"  # o registro foi feito com a data antiga: precisa reenviar
                     a["historico"].append(f"{self.mundo.agora()}: data de início de {br(antiga)} para {br(nova)}, OK de {aprovado}, registrado por {agente}")
-                    self.prazos_avisados = {x for x in self.prazos_avisados if x[0] != a["id"]}
+                    # prazos que a data nova já nasce vencida não viram alerta: a mudança teve OK de uma pessoa
+                    hoje_dia = self.mundo.relogio.dia()
+                    self.prazos_avisados = {x for x in self.prazos_avisados if x[0] != a["id"]} | {
+                        (a["id"], nome) for nome, limite, feito in self._etapas(a) if hoje_dia >= limite and not feito
+                    }
                     self.mundo.alerta("info", f"Data de início de {a['nome']} mudou de {br(antiga)} para {br(nova)}, com OK de {aprovado} (registrado por {agente}).")
             return self.publico_adm(a)
 
@@ -486,6 +546,8 @@ class Admissao(TemaBase):
                 aprovado = texto_limitado(dados.get("aprovado_por", d["aprovado_por"]), "aprovado_por", 200).strip()
                 ja_aceito = d["status"] in ("aceito", "aceito com ressalva")
                 d.update(status=status, motivo=motivo, conferido_por=agente, aprovado_por=aprovado)
+                if status == "recusado":
+                    self._enviar_apos_recusa(d)
                 nome = self.contratados[d["admissao"]]["nome"]
                 aceito = status in ("aceito", "aceito com ressalva")
                 if aceito and not ja_aceito and not d["_valido"]:
@@ -507,7 +569,7 @@ class Admissao(TemaBase):
                  atualizar=atualizar_adm, campos_atualizaveis=("observacao", "data_inicio", "aprovado_por")),
             Base("documentos", "Documentos recebidos dos contratados, para conferir: aceitar, aceitar com ressalva ou recusar com motivo.",
                  lambda: [{k: d[k] for k in CAMPOS_DOC} for d in self.docs], campos=CAMPOS_DOC,
-                 atualizar=atualizar_doc, campos_atualizaveis=("status", "motivo", "aprovado_por", "observacao")),
+                 atualizar=atualizar_doc, campos_atualizaveis=("status", "motivo", "aprovado_por", "observacao"), campos_automaticos=("conferido_por",)),
             Base("documentos_exigidos", "Documentos da admissão CLT, com a regra de cada um e quando é exigido.", lambda: self.exigidos, chave="tipo",
                  campos=("tipo", "nome", "regra", "exigido", "palavras")),
             Base("checklist", "Etapas de cada fase, com o prazo em dias úteis antes do primeiro dia.", lambda: self.checklist,
