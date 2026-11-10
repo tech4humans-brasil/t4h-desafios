@@ -19,7 +19,6 @@ Hackathon - UNIFEI 2026/
 │   ├── README.md                              # como rodar e como funciona
 │   ├── compose.yaml e Dockerfile              # para rodar com Docker
 │   ├── mundo.py                               # sobe o servidor MCP, o painel e as telas
-│   ├── agente_exemplo.py                      # agente mínimo, para testar a conexão
 │   ├── ver_log.py                             # resume o log de uma rodada
 │   ├── hackathon/                             # o motor, o painel, as telas e os temas
 │   └── dados/                                 # as bases fictícias de cada tema
@@ -34,7 +33,6 @@ Hackathon - UNIFEI 2026/
 - `README.md`: como rodar com Docker ou sem, quem chama quem, as ferramentas, os eventos, as telas sem API, as falhas e o log
 - `compose.yaml` e `Dockerfile`: sobem o servidor sem instalar Python
 - `mundo.py`: sobe o servidor do tema escolhido
-- `agente_exemplo.py`: conecta, pega eventos e responde que recebeu, sem IA
 - `ver_log.py`: resume o log de uma rodada
 - `hackathon/` e `dados/`: o código do mundo e as bases fictícias
 
@@ -50,7 +48,7 @@ Hackathon - UNIFEI 2026/
 
 1. Clone o repositório: `git clone https://github.com/tech4humans-brasil/t4h-desafios.git`
 2. Entre em `Hackathon - UNIFEI 2026/Servidor MCP (Compartilhado)` e siga o README para subir o servidor
-3. Abra o painel em `http://localhost:8765` e rode o agente de exemplo para testar
+3. Abra o painel em `http://localhost:8765` para conferir que o servidor está no ar
 4. Leia a ficha técnica do tema escolhido
 
 ## Observações Importantes

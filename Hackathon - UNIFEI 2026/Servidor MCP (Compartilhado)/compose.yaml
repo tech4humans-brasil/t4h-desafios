@@ -2,13 +2,15 @@ services:
   mundo:
     build: .
     image: hackathon-unifei-mundo
-    command: ["--tema", "${TEMA:-triagem}"]
+    environment:
+      TEMA: ${TEMA:-triagem}
+      ERROS: ${ERROS:-}
+      SEED: ${SEED:-}
+      SEGUNDOS_POR_DIA: ${SEGUNDOS_POR_DIA:-}
+      SEM_CENARIO: ${SEM_CENARIO:-}
+      PORTA_PUBLICA: ${PORTA:-8765}
+      TZ: America/Sao_Paulo
     ports:
-      - "8765:8765"
+      - "${PORTA:-8765}:8765"
     volumes:
       - ./logs:/app/logs
-
-  exemplo:
-    image: hackathon-unifei-mundo
-    entrypoint: ["python", "agente_exemplo.py", "http://mundo:8765/mcp"]
-    profiles: ["exemplo"]

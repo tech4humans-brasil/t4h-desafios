@@ -119,7 +119,13 @@
       "de": "andre.monteiro@t4h.exemplo",
       "nome": "André Monteiro",
       "assunto": "Devolução",
-      "corpo": "Oi, deixei o notebook EQ-0002 e o headset EQ-0051 na recepção agora com a Jéssica. Hoje é meu último dia. Obrigado por tudo!"
+      "corpo": "Oi, deixei o notebook EQ-0002 e o headset EQ-0051 na recepção agora com a Jéssica. Hoje é meu último dia. Obrigado por tudo!",
+      "devolve": {
+        "patrimonios": [
+          "EQ-0002",
+          "EQ-0051"
+        ]
+      }
     },
     {
       "id": "PED-014",
@@ -254,7 +260,12 @@
       "de": "simone.araujo@t4h.exemplo",
       "nome": "Simone Araújo",
       "assunto": "Devolução dos headsets do treinamento",
-      "corpo": "O treinamento acabou mais cedo. Deixei os dois headsets emprestados na recepção hoje de manhã. Obrigada!"
+      "corpo": "O treinamento acabou mais cedo. Deixei os dois headsets emprestados na recepção hoje de manhã. Obrigada!",
+      "devolve": {
+        "colaborador": "C-026",
+        "tipo": "headset",
+        "quantidade": 2
+      }
     },
     {
       "id": "PED-029",
@@ -326,7 +337,12 @@
       "de": "simone.araujo@t4h.exemplo",
       "nome": "Simone Araújo",
       "assunto": "Henrique",
-      "corpo": "O Henrique deixou o headset EQ-0116 na recepção ontem, no último dia dele. O notebook e o teclado ele disse que entrega até sexta que vem, ficou com o notebook pra terminar de passar umas coisas."
+      "corpo": "O Henrique deixou o headset EQ-0116 na recepção ontem, no último dia dele. O notebook e o teclado ele disse que entrega até sexta que vem, ficou com o notebook pra terminar de passar umas coisas.",
+      "devolve": {
+        "patrimonios": [
+          "EQ-0116"
+        ]
+      }
     },
     {
       "id": "PED-037",
@@ -380,7 +396,14 @@
       "de": "camila.teixeira@t4h.exemplo",
       "nome": "Camila Teixeira",
       "assunto": "Devolução",
-      "corpo": "Deixei na recepção o notebook EQ-0080, o monitor EQ-0082 e o kit de teclado e mouse EQ-0074. O headset ainda tá comigo, esperando a resposta de ontem."
+      "corpo": "Deixei na recepção o notebook EQ-0080, o monitor EQ-0082 e o kit de teclado e mouse EQ-0074. O headset ainda tá comigo, esperando a resposta de ontem.",
+      "devolve": {
+        "patrimonios": [
+          "EQ-0080",
+          "EQ-0082",
+          "EQ-0074"
+        ]
+      }
     },
     {
       "id": "PED-043",
@@ -398,7 +421,12 @@
       "de": "ricardo.azevedo@t4h.exemplo",
       "nome": "Ricardo Azevedo",
       "assunto": "Notebook da feira",
-      "corpo": "Deixei o notebook da feira na recepção agora. Desculpa o atraso, a desmontagem do estande atrasou."
+      "corpo": "Deixei o notebook da feira na recepção agora. Desculpa o atraso, a desmontagem do estande atrasou.",
+      "devolve": {
+        "colaborador": "C-017",
+        "tipo": "notebook",
+        "quantidade": 1
+      }
     },
     {
       "id": "PED-045",
@@ -434,7 +462,12 @@
       "de": "eduardo.farias@t4h.exemplo",
       "nome": "Eduardo Farias",
       "assunto": "Devolução do carregador",
-      "corpo": "Devolvi o carregador emprestado, deixei com a Jéssica na recepção."
+      "corpo": "Devolvi o carregador emprestado, deixei com a Jéssica na recepção.",
+      "devolve": {
+        "colaborador": "C-015",
+        "tipo": "carregador",
+        "quantidade": 1
+      }
     },
     {
       "id": "PED-049",
