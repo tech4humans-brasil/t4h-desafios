@@ -22,6 +22,11 @@ Hackathon - UNIFEI 2026/
 │   ├── ver_log.py                             # resume o log de uma rodada
 │   ├── hackathon/                             # o motor, o painel, as telas e os temas
 │   └── dados/                                 # as bases fictícias de cada tema
+├── Agente de exemplo (LangGraph)/             # agente mínimo que conecta e diz oi
+│   ├── README.md                              # como rodar e como funciona
+│   ├── agente.py                              # o agente: conexão MCP, modelo e grafo
+│   ├── requirements.txt                       # dependências do agente
+│   └── .env.example                           # modelo do .env (gateway LiteLLM e configuração)
 ├── Triagem N1 (Chamados e incidentes)/
 │   └── README.md                              # ficha técnica do Tema 1
 ├── Admissão (Onboarding CLT)/
@@ -37,6 +42,12 @@ Hackathon - UNIFEI 2026/
 - `mundo.py`: sobe o servidor do tema escolhido
 - `ver_log.py`: resume o log de uma rodada
 - `hackathon/` e `dados/`: o código do mundo e as bases fictícias
+
+### [Agente de exemplo (LangGraph)](Agente%20de%20exemplo%20%28LangGraph%29/)
+
+- `README.md`: como rodar, a configuração e como o agente funciona
+- `agente.py`: agente LangGraph mínimo que conecta no servidor MCP, carrega as ferramentas e responde a um "oi" com o `gpt-4o-mini` pelo gateway LiteLLM
+- `requirements.txt` e `.env.example`: dependências e configuração (gateway LiteLLM, modelo, endereço do servidor, nome do agente)
 
 ### 1. [Triagem N1 (Chamados e incidentes)](Triagem%20N1%20%28Chamados%20e%20incidentes%29/)
 
@@ -55,7 +66,8 @@ Hackathon - UNIFEI 2026/
 1. Clone o repositório: `git clone https://github.com/tech4humans-brasil/t4h-desafios.git`
 2. Entre em `Hackathon - UNIFEI 2026/Servidor MCP (Compartilhado)` e siga o README para subir o servidor
 3. Abra o painel em `http://localhost:8765` para conferir que o servidor está no ar
-4. Leia a ficha técnica do tema escolhido
+4. Se quiser um ponto de partida, rode o agente de exemplo em `Agente de exemplo (LangGraph)`
+5. Leia a ficha técnica do tema escolhido
 
 ## Observações Importantes
 
