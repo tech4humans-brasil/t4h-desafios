@@ -100,10 +100,10 @@ awk -F',' '
     if (unidade == "GiB") return numero * 1024
     if (unidade == "KiB") return numero / 1024
     if (unidade == "B")   return numero / 1048576
-    return numero
+    return numero + 0
   }
   NR > 1 {
-    nome = $2; cpu = $3; gsub(/%/, "", cpu)
+    nome = $2; cpu = $3; gsub(/%/, "", cpu); cpu += 0
     split($4, partes, " / "); memoria = mib(partes[1])
     amostras[nome]++; soma_cpu[nome] += cpu; soma_mem[nome] += memoria
     if (cpu > max_cpu[nome]) max_cpu[nome] = cpu
